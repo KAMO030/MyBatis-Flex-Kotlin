@@ -29,7 +29,6 @@
 ```kotlin
 dependencies {
     implementation("com.mybatis-flex:mybatis-flex-kotlin:1.5.7")
-    compileOnly("com.mybatis-flex:mybatis-flex-processor:1.5.7")
 }
 ```
 
@@ -73,11 +72,12 @@ class Account {
 ```kotlin
 fun main() {
         //加载数据源(为了方便演示这里使用了演示源码中的内嵌数据源)
-        val dataSource: DataSource = EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .addScript("schema.sql")
-                .addScript("data-kt.sql")
-                .build()
+        val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
+            setType(EmbeddedDatabaseType.H2)
+            addScript("schema.sql")
+            addScript("data-kt.sql")
+            build()
+        }
         //启动并配入数据源
         buildBootstrap { +dataSource }.start()
         //条件过滤查询并打印

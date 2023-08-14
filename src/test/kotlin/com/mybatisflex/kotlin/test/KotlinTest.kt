@@ -37,11 +37,12 @@ import kotlin.streams.toList
 open class KotlinTest {
     @Test
     fun testDb() {
-        val dataSource: DataSource = EmbeddedDatabaseBuilder()
-            .setType(EmbeddedDatabaseType.H2)
-            .addScript("schema.sql")
-            .addScript("data-kt.sql")
-            .build()
+        val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
+            setType(EmbeddedDatabaseType.H2)
+            addScript("schema.sql")
+            addScript("data-kt.sql")
+            build()
+        }
 
         AuditManager.setAuditEnable(true)
         AuditManager.setMessageCollector(ConsoleMessageCollector())
@@ -62,7 +63,7 @@ open class KotlinTest {
 
 //            配置多dataSource
 //            1.通过of（中缀）的方式
-            FlexConsts.NAME of dataSource
+//            FlexConsts.NAME of dataSource
 //            "dataSource1" of dataSource
 //            "dataSource2" of dataSource
 //            2.通过dsl（中缀）的方式
@@ -83,14 +84,14 @@ open class KotlinTest {
 //      filter:
         filter<Account> {
             ACCOUNT.ID `=` 1 and
-                    (ACCOUNT.AGE `in` (17..19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")) )
+                    (ACCOUNT.AGE `in` (17..19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")))
         }.forEach(::println)
 
 //       query:
-        query <Account> {
+        query<Account> {
             from(Account)
             where(Account) {
-                (AGE `in` (17..19) or (BIRTHDAY between ("2020-01-10" .. "2020-01-12")) )
+                (AGE `in` (17..19) or (BIRTHDAY between ("2020-01-10".."2020-01-12")))
             } orderBy -Account.ID
         }.forEach(::println)
 
@@ -111,13 +112,13 @@ open class KotlinTest {
 
         println("保存后————————")
 //      获得mapper实例通过自定义的默认方法查，并将查到的删除
-        mapper<AccountMapper>().findByAge(18, 1, 2).stream().peek { println(it) }.forEach{it.removeById()}
+        mapper<AccountMapper>().findByAge(18, 1, 2).stream().peek { println(it) }.forEach { it.removeById() }
 
         println("删除后————————")
         Account.all<Account>().stream().peek { println(it) }.map {
             it.userName = "kamo"
             it
-        }.forEach{it.updateById()}
+        }.forEach { it.updateById() }
         println("更新后————————")
 
         ACCOUNT.all<Account>().stream().peek { println(it) }.map {
