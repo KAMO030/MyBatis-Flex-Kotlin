@@ -13,7 +13,7 @@
 - 熟悉 关系型 数据库，比如 MySQL
 - 熟悉 Kotlin 构建工具，比如 Gradle、Maven
 
-> 当前章节涉及到的 [演示源码](https://gitee.com/mybatis-flex/mybatis-flex/tree/main/mybatis-flex-test/mybatis-flex-spring-kotlin-test) 已经全部上传
+> 当前章节涉及到的 [演示源码](https://gitee.com/mybatis-flex/mybatis-flex-kotlin/tree/main/src/test/kotlin/com/mybatisflex/kotlin/test) 已经全部上传
 >
 > 在开始之前，您也可以先下载到本地，导入到 idea 开发工具后，在继续看文档。
 
@@ -45,7 +45,7 @@ dependencies {
 
 **第 2 步：创建数据库表与配置数据源**
 
-> 请参考 [快速开始](../intro/getting-started.md) 创建数据库表与配置数据源，
+> 请参考 [源项目快速开始](https://mybatis-flex.com/zh/intro/getting-started.html) 创建数据库表与配置数据源，
 > 或者使用演示源码中的内嵌数据库快速体验
 
 **第 3 步：编写实体类**
@@ -100,9 +100,9 @@ Account(id=1, userName=张三, age=18, birthday=Sat Jan 11 00:00:00 CST 2020)
 ```
 
 > 以上的示例中， `ACCOUNT` 为 MyBatis-Flex 通过 APT
-> 自动生成，只需通过静态导入即可，无需手动编码。更多查看 [在Kotlin中使用注解处理器](../others/kapt.md)
+> 自动生成，只需通过静态导入即可，无需手动编码。更多查看 [在Kotlin中使用注解处理器](https://mybatis-flex.com/zh/others/kapt.html)
 >
-> 若觉得 APT 使用不习惯，也可以使用代码生成器来生成。点击 [代码生成器文档](../others/codegen.md) 了解。
+> 若觉得 APT 使用不习惯，也可以使用代码生成器来生成。点击 [代码生成器文档](https://mybatis-flex.com/zh/others/codegen.html) 了解。
 
 [comment]: <> (## 更多使用)
 
