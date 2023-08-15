@@ -2,7 +2,7 @@
 
 ## 特点
 
-- 本模块基于 Mybatis-Flex 核心库 ，只做扩展不做改变
+- 本模块基于 [Mybatis-Flex](https://mybatis-flex.com) 核心库 ，只做扩展不做改变
 - 结合 Kotlin 特性、DSL让数据库操作更简单
 
 ## 快速开始
@@ -13,22 +13,23 @@
 - 熟悉 关系型 数据库，比如 MySQL
 - 熟悉 Kotlin 构建工具，比如 Gradle、Maven
 
-> 当前章节涉及到的 [演示源码](https://gitee.com/mybatis-flex/mybatis-flex-kotlin/tree/main/src/test/kotlin/com/mybatisflex/kotlin/test) 已经全部上传
->
+> 本文档涉及到的 [演示源码](https://gitee.com/mybatis-flex/mybatis-flex-kotlin/tree/main/src/test/kotlin/com/mybatisflex/kotlin/test) 已经全部上传
 > 在开始之前，您也可以先下载到本地，导入到 idea 开发工具后，在继续看文档。
+> 
+> 在 [Mybatis-Flex源项目](https://mybatis-flex.com) 中所介绍的功能本文档不再过多赘述建议，本文档只对 Mybatis-Flex 在 Kotlin 中特有的用法进行介绍
 
 ### Hello World 文档
 
 **第 1 步：创建 Kotlin 项目，并添加 Kotlin 的扩展依赖**
 
->如何创建 Kotlin 项目可参考 [官方文档](https://www.kotlincn.net/docs/tutorials/jvm-get-started.html)
+>如何创建 Kotlin 项目可参考 [Kotlin官方文档](https://www.kotlincn.net/docs/tutorials/jvm-get-started.html)
 
 需要添加的主要依赖：
 
 **【Kotlin】**
 ```kotlin
 dependencies {
-    implementation("com.mybatis-flex:mybatis-flex-kotlin:1.5.7")
+    implementation("com.mybatis-flex:mybatis-flex-kotlin:$version")
 }
 ```
 
@@ -38,7 +39,7 @@ dependencies {
 <dependency>
     <groupId>com.mybatis-flex</groupId>
     <artifactId>mybatis-flex-kotlin</artifactId>
-    <version>${mybatis-flex.version}</version>
+    <version>${mybatis-flex-kotlin.version}</version>
 </dependency>
 ```
 
@@ -83,7 +84,7 @@ fun main() {
         //条件过滤查询并打印
         filter<Account> {
             ACCOUNT.ID `=` 1 and
-                  (ACCOUNT.AGE `in` listOf(18,19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")) )
+                    (ACCOUNT.AGE `in` (17..19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")))
         }.forEach(::println)
         //查询全部数据并打印
         //ACCOUNT.all<Account>().forEach(::println)
@@ -91,7 +92,7 @@ fun main() {
 ```
 执行的SQL：
 ```sql
-SELECT * FROM `tb_account` WHERE`id` = 1 AND (`age` IN (18, 19) OR `birthday`BETWEEN  '2020-01-10' AND '2020-01-12' )
+SELECT * FROM `tb_account` WHERE `id` = 1 AND (`age` IN (17, 18, 19) OR `birthday` BETWEEN  '2020-01-10' AND '2020-01-12' )
 ```
 控制台输出：
 
