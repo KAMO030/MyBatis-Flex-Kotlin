@@ -14,7 +14,7 @@
 - 熟悉 Kotlin 构建工具，比如 Gradle、Maven
 
 > 本文档涉及到的 [演示源码](https://gitee.com/mybatis-flex/mybatis-flex-kotlin/tree/main/src/test/kotlin/com/mybatisflex/kotlin/test) 已经全部上传
-> 在开始之前，您也可以先下载到本地，导入到 idea 开发工具后，在继续看文档。
+> 在开始之前，您也可以先下载到本地，导入到 idea 开发工具后，再继续看文档。
 > 
 > 在 [Mybatis-Flex源项目](https://mybatis-flex.com) 中所介绍的功能本文档不再过多赘述建议，本文档只对 Mybatis-Flex 在 Kotlin 中特有的用法进行介绍
 
