@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
     implementation("com.mybatis-flex:mybatis-flex-core:1.5.7")
-
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation(kotlin("test"))
     testImplementation("com.h2database:h2:2.1.214")
     testImplementation("com.mybatis-flex:mybatis-flex-spring:1.5.7")

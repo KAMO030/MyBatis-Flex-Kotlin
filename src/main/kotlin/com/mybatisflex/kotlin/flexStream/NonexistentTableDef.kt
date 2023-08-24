@@ -1,0 +1,3 @@
+package com.mybatisflex.kotlin.flexStream
+
+object NonexistentTableDef
