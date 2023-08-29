@@ -253,22 +253,22 @@ object QueryFunctions {
     /**
      * 详情请见[QueryMethods.substring]
      */
-    @JvmStatic
-    fun substring(
-        column0: String,
-        column1: String,
-        column2: String,
-    ): QueryColumn = QueryMethods.substring(column0, column1, column2)
+//    @JvmStatic
+//    fun substring(
+//        column0: String,
+//        column1: String,
+//        column2: String,
+//    ): QueryColumn = QueryMethods.substring(column0, column1, column2)
 
     /**
      * 详情请见[QueryMethods.substring]
      */
-    @JvmStatic
-    fun substring(
-        column0: QueryColumn,
-        column1: QueryColumn,
-        column2: QueryColumn,
-    ): QueryColumn = QueryMethods.substring(column0, column1, column2)
+//    @JvmStatic
+//    fun substring(
+//        column0: QueryColumn,
+//        column1: QueryColumn,
+//        column2: QueryColumn,
+//    ): QueryColumn = QueryMethods.substring(column0, column1, column2)
 
     /**
      * 详情请见[QueryMethods.replace]
@@ -557,12 +557,12 @@ object QueryFunctions {
     fun distinct(vararg column0: QueryColumn): DistinctQueryColumn =
         QueryMethods.distinct(*column0)
 
-    /**
-     * 详情请见[QueryMethods.left]
-     */
-    @JvmStatic
-    fun left(column0: QueryColumn, column1: QueryColumn): QueryColumn =
-        QueryMethods.left(column0, column1)
+//    /**
+//     * 详情请见[QueryMethods.left]
+//     */
+//    @JvmStatic
+//    fun left(column0: QueryColumn, column1: QueryColumn): QueryColumn =
+//        QueryMethods.left(column0, column1)
 
     /**
      * 详情请见[QueryMethods.left]
@@ -580,23 +580,23 @@ object QueryFunctions {
     /**
      * 详情请见[QueryMethods.left]
      */
-    @JvmStatic
-    fun left(column0: String, column1: String): QueryColumn = QueryMethods.left(column0,
-        column1)
+//    @JvmStatic
+//    fun left(column0: String, column1: String): QueryColumn = QueryMethods.left(column0,
+//        column1)
+//
+//    /**
+//     * 详情请见[QueryMethods.right]
+//     */
+//    @JvmStatic
+//    fun right(column0: String, column1: String): QueryColumn = QueryMethods.right(column0,
+//        column1)
 
     /**
      * 详情请见[QueryMethods.right]
      */
-    @JvmStatic
-    fun right(column0: String, column1: String): QueryColumn = QueryMethods.right(column0,
-        column1)
-
-    /**
-     * 详情请见[QueryMethods.right]
-     */
-    @JvmStatic
-    fun right(column0: QueryColumn, column1: QueryColumn): QueryColumn =
-        QueryMethods.right(column0, column1)
+//    @JvmStatic
+//    fun right(column0: QueryColumn, column1: QueryColumn): QueryColumn =
+//        QueryMethods.right(column0, column1)
 
     /**
      * 详情请见[QueryMethods.right]
