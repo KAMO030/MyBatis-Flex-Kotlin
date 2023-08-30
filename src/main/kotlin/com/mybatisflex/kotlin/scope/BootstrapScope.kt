@@ -47,10 +47,9 @@ class DataSourceScope(private val bootstrap: MybatisFlexBootstrap) {
 inline fun buildBootstrap(
     instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance(),
     scope: BootstrapScope.(MybatisFlexBootstrap) -> Unit
-): MybatisFlexBootstrap {
-    BootstrapScope(instant).apply { scope(instant) }
-    return instant
-}
+): MybatisFlexBootstrap =
+    instant.also { BootstrapScope(it).apply { scope(it) } }
+
 
 
 
