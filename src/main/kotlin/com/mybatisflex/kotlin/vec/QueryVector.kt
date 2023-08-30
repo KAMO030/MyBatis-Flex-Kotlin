@@ -3,8 +3,6 @@ package com.mybatisflex.kotlin.vec
 import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.core.row.Db
-import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableDef
 import com.mybatisflex.core.table.TableDefs
 import com.mybatisflex.core.table.TableInfo
@@ -31,22 +29,15 @@ open class QueryVector<E : Any>(
     val sql: String get() = wrapper.toSQL()
 
     val tableDef: TableDef
-        get() = if (entityInstance is Row?) {
-            data.table
-        } else {
-            TableDefs.getTableDef(entityClass, tableInfo.tableNameWithSchema)
-                ?: throw NoSuchElementException("The TableDef corresponding to class $entityClass could not be found")
-        }
+        get() = TableDefs.getTableDef(entityClass, tableInfo.tableNameWithSchema)
+            ?: throw NoSuchElementException("The TableDef corresponding to class $entityClass could not be found")
+
 
     val tableInfo: TableInfo
-        get() = if (entityInstance is Row?) {
-            TableInfoFactory.ofTableName(tableDef.tableName)
-        } else {
-            TableInfoFactory.ofEntityClass(entityClass)
-                ?: throw NoSuchElementException("The TableInfo corresponding to class $entityClass could not be found")
-        }
+        get() = TableInfoFactory.ofEntityClass(entityClass)
+            ?: throw NoSuchElementException("The TableInfo corresponding to class $entityClass could not be found")
 
-    val size: Long get() = Db.selectCountByQuery(wrapper)
+    val size: Long get() = mapper.selectCountByQuery(wrapper)
 
     val mapper: BaseMapper<E> get() = Mappers.ofEntityClass(entityClass)
 

@@ -1,7 +1,9 @@
 package com.mybatisflex.kotlin.vec
 
+import com.mybatisflex.core.query.CPI
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
+import com.mybatisflex.core.query.QueryMethods
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Row
@@ -16,23 +18,13 @@ import kotlin.contracts.contract
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
-@Suppress("UNCHECKED_CAST")
-inline fun <reified E : Any> QueryVector<E>.toList(): List<E> = if (isRow<E>()) {
-    Db.selectListByQuery(wrapper) as List<E>
-} else {
-    mapper.selectListByQuery(wrapper)
-}
+fun <E : Any> QueryVector<E>.toList(): List<E> = mapper.selectListByQuery(wrapper)
 
-@Suppress("UNCHECKED_CAST")
-inline fun <reified E : Any> QueryVector<E>.toRows(): List<Row> = if (isRow<E>()) {
-    Db.selectListByQuery(wrapper)
-} else {
-    mapper.selectRowsByQuery(wrapper)
-}
+fun <E : Any> QueryVector<E>.toRows(): List<Row> = mapper.selectRowsByQuery(wrapper)
 
-inline val <reified T : Row> QueryVector<T>.values: List<Any> get() = toList().flatMap { it.values }
+inline val <E : Any> QueryVector<E>.values: List<Any> get() = toRows().flatMap { it.values }
 
-inline val <reified T : Row> QueryVector<T>.keys: Set<String> get() = toList().flatMapTo(HashSet()) { it.keys }
+inline val <E : Any> QueryVector<E>.keys: Set<String> get() = toRows().flatMapTo(HashSet()) { it.keys }
 
 @OptIn(ExperimentalContracts::class)
 inline fun <reified E : Any, reified R : Comparable<R>> QueryVector<E>.maxOf(selector: (E) -> KProperty<R?>): R {
@@ -51,10 +43,7 @@ inline fun <reified E : Any, reified R : Comparable<R>> QueryVector<E>.maxBy(sel
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
     val column = selector(entity).toQueryColumn()
-    val maxValue = QueryWrapper().select(
-        if (data.distinct) QueryFunctions.distinct(QueryFunctions.max(column))
-        else QueryFunctions.max(column)
-    ).from(tableDef)
+    val maxValue = QueryWrapper().select(QueryFunctions.max(column)).from(tableDef)
     return find { column.eq(maxValue) }
 }
 
@@ -75,10 +64,7 @@ inline fun <reified E : Any, reified R : Comparable<R>> QueryVector<E>.minBy(sel
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
     val column = selector(entity).toQueryColumn()
-    val minValue = QueryWrapper().select(
-        if (data.distinct) QueryFunctions.distinct(QueryFunctions.min(column))
-        else QueryFunctions.min(column)
-    ).from(tableDef)
+    val minValue = QueryWrapper().select(QueryFunctions.min(column)).from(tableDef)
     return find { column.eq(minValue) }
 }
 
@@ -88,15 +74,10 @@ inline fun <reified E : Any, reified R : Number> QueryVector<E>.avgOf(selector: 
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
     val column = selector(entity).toQueryColumn()
-    require(data.columns.isEmpty()) {
-        "The columns must be empty."
-    }
-    val wrapper = wrapper.select(QueryFunctions.avg(column))
-    return if (isRow<E>()) {
-        ConvertUtil.toBigDecimal(Db.selectObject(wrapper))
-    } else {
-        mapper.selectObjectByQueryAs(wrapper, BigDecimal::class.java)
-    }
+    val wrapper = wrapper
+    CPI.setSelectColumns(wrapper, mutableListOf())
+    wrapper.select(QueryMethods.avg(column))
+    return mapper.selectObjectByQueryAs(wrapper, BigDecimal::class.java)
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -105,15 +86,10 @@ inline fun <reified E : Any, reified R : Number> QueryVector<E>.sumOf(selector: 
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
     val column = selector(entity).toQueryColumn()
-    require(data.columns.isEmpty()) {
-        "The columns must be empty."
-    }
-    val wrapper = wrapper.select(QueryFunctions.sum(column))
-    return if (isRow<E>()) {
-        ConvertUtil.toBigDecimal(Db.selectObject(wrapper))
-    } else {
-        mapper.selectObjectByQueryAs(wrapper, BigDecimal::class.java)
-    }
+    val wrapper = wrapper
+    CPI.setSelectColumns(wrapper, mutableListOf())
+    wrapper.select(QueryMethods.sum(column))
+    return mapper.selectObjectByQueryAs(wrapper, BigDecimal::class.java)
 }
 
 fun <E : Any> QueryVector<E>.count() = mapper.selectCountByQuery(QueryWrapper().from(wrapper).`as`(data.tableAlias))
@@ -158,15 +134,10 @@ inline fun <reified E : Any, reified R : Any> QueryVector<E>.funOf(
     contract {
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
-    require(data.columns.isEmpty()) {
-        "The columns must be empty."
-    }
-    val wrapper = wrapper.select(QueryFunctions.selector(column.toQueryColumn()))
-    return if (isRow<E>()) {
-        ConvertUtil.convert(Db.selectObject(wrapper), R::class.java) as R
-    } else {
-        mapper.selectObjectByQueryAs(wrapper, R::class.java)
-    }
+    val wrapper = wrapper
+    CPI.setSelectColumns(wrapper, mutableListOf())
+    wrapper.select(QueryFunctions.selector(column.toQueryColumn()))
+    return mapper.selectObjectByQueryAs(wrapper, R::class.java)
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -232,12 +203,7 @@ inline fun <reified E : Any> QueryVector<E>.elementAt(index: Long): E? {
     val idx = data.offset + index
     val wrapper = wrapper.limit(idx, 1)
     return try {
-        if (isRow<E>()) {
-            @Suppress("UNCHECKED_CAST")
-            Db.selectOneByQuery(wrapper) as? E?
-        } else {
-            mapper.selectOneByQuery(wrapper)
-        }
+        mapper.selectOneByQuery(wrapper)
     } catch (_: Throwable) {
         null
     }
@@ -267,7 +233,7 @@ inline fun <reified E : Any> QueryVector<E>.push(entity: E, vararg columns: KPro
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <reified E: Any> QueryVector<E>.removeIf(predicate: (E) -> QueryCondition): Int {
+inline fun <reified E : Any> QueryVector<E>.removeIf(predicate: (E) -> QueryCondition): Int {
     contract {
         callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
     }

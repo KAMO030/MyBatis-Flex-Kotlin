@@ -3,7 +3,6 @@ package com.mybatisflex.kotlin.vec
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.core.row.Row
 import com.mybatisflex.kotlin.flexStream.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -27,7 +26,7 @@ inline fun <E : Any> QueryVector<E>.filterNot(predicate: (E) -> QueryCondition):
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <E: Any> QueryVector<E>.filterColumn(predicate: (E) -> KProperty<*>): QueryVector<E> {
+inline fun <E: Any> QueryVector<E>.filterProperty(predicate: (E) -> KProperty<*>): QueryVector<E> {
     contract {
         callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
     }
@@ -35,7 +34,7 @@ inline fun <E: Any> QueryVector<E>.filterColumn(predicate: (E) -> KProperty<*>):
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <E: Any> QueryVector<E>.filterColumns(predicate: (E) -> Iterable<KProperty<*>>): QueryVector<E> {
+inline fun <E: Any> QueryVector<E>.filterProperties(predicate: (E) -> Iterable<KProperty<*>>): QueryVector<E> {
     contract {
         callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
     }
@@ -103,17 +102,17 @@ fun <E: Any> QueryVector<E>.distinct(): QueryVector<E> {
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <E: Any> QueryVector<E>.aggregation(aggregateFun: QueryFunctions.(E) -> QueryColumn): QueryVector<Row> {
+inline fun <E: Any> QueryVector<E>.filterColumn(aggregateFun: QueryFunctions.(E) -> QueryColumn): QueryVector<E> {
     contract {
         callsInPlace(aggregateFun, InvocationKind.EXACTLY_ONCE)
     }
-    return QueryVector(Row::class.java, data = data.copy(columns = data.columns + QueryFunctions.aggregateFun(entity)))
+    return copy(data = data.copy(columns = data.columns + QueryFunctions.aggregateFun(entity)))
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <E: Any> QueryVector<E>.aggregationByIter(aggregateFun: QueryFunctions.(E) -> Iterable<QueryColumn>): QueryVector<Row> {
+inline fun <E: Any> QueryVector<E>.filterColumns(aggregateFun: QueryFunctions.(E) -> Iterable<QueryColumn>): QueryVector<E> {
     contract {
         callsInPlace(aggregateFun, InvocationKind.EXACTLY_ONCE)
     }
-    return QueryVector(Row::class.java, data = data.copy(columns = data.columns + QueryFunctions.aggregateFun(entity)))
+    return copy(data = data.copy(columns = data.columns + QueryFunctions.aggregateFun(entity)))
 }
