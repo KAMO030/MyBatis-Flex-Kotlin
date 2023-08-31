@@ -2,6 +2,7 @@ package com.mybatisflex.kotlin.vec
 
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
+import com.mybatisflex.core.query.QueryOrderBy
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.kotlin.flexStream.*
 import kotlin.contracts.ExperimentalContracts
@@ -66,11 +67,11 @@ inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(order: Order = Ord
 }
 
 @OptIn(ExperimentalContracts::class)
-inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedByIter(order: Order = Order.ASC, sortedBy: (E) -> Iterable<KProperty<V?>>): QueryVector<E> {
+inline fun <E: Any> QueryVector<E>.sortedByIter(sortedBy: (E) -> Iterable<QueryOrderBy>): QueryVector<E> {
     contract {
         callsInPlace(sortedBy, InvocationKind.EXACTLY_ONCE)
     }
-    return copy(data = data.copy(orderBy = data.orderBy + sortedBy(entity).map { it.toQueryColumn().toOrd(order) }))
+    return copy(data = data.copy(orderBy = data.orderBy + sortedBy(entity)))
 }
 
 fun <E: Any> QueryVector<E>.drop(index: Long): QueryVector<E> {
@@ -81,8 +82,8 @@ fun <E: Any> QueryVector<E>.take(index: Long): QueryVector<E> {
     return copy(data = data.copy(rows = index))
 }
 
-fun <E: Any> QueryVector<E>.limit(range: IntRange): QueryVector<E> {
-    return copy(data = data.copy(offset = range.first.toLong(), rows = (range.last + 1).toLong()))
+fun <E: Any> QueryVector<E>.limit(offset: Long, rows: Long): QueryVector<E> {
+    return copy(data = data.copy(offset = offset, rows = rows))
 }
 
 /**

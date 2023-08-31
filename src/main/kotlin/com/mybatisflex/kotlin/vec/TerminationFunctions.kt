@@ -211,7 +211,7 @@ inline fun <reified E : Any> QueryVector<E>.elementAt(index: Long): E? {
 
 inline operator fun <reified E : Any> QueryVector<E>.get(index: Long): E = requireNotNull(elementAt(index))
 
-inline operator fun <reified E : Any> QueryVector<E>.get(range: IntRange): List<E> = limit(range).toList()
+inline operator fun <reified E : Any> QueryVector<E>.get(range: IntRange): List<E> = limit(range.first.toLong(), (range.last + 1).toLong()).toList()
 
 fun <E : Any> QueryVector<E>.isEmpty(): Boolean = count() == 0L
 

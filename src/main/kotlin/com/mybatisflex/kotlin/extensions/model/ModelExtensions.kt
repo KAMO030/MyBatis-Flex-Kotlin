@@ -71,9 +71,5 @@ inline fun<reified E:Model<E>> List<E>.batchInsert() = Mappers.ofEntityClass(E::
 
 fun< E:Model<E>> List<E>.batchUpdateById(): Boolean = all(Model<E>::updateById)
 
-inline fun<reified E:Model<E>> List<E>. batchDeleteById(): Boolean {
-    //拿到集合中所有实体的主键
-    val primaryValues = this.map { it.pkValues() }.flatMap(Array<*>::toMutableList).map { it as Serializable }
-    return SqlUtil.toBool(Mappers.ofEntityClass(E::class.java).deleteBatchByIds(primaryValues))
-}
+
 

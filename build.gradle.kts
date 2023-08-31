@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.mybatis-flex:mybatis-flex-core:1.5.7")
+    compileOnly("com.mybatis-flex:mybatis-flex-core:1.6.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation(kotlin("test"))
     testImplementation("com.h2database:h2:2.1.214")
@@ -16,10 +16,8 @@ dependencies {
     testImplementation("org.springframework:spring-test:5.3.27")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testImplementation("com.mysql:mysql-connector-j:8.0.33")
-    testImplementation("org.ktorm:ktorm-core:3.6.0")
-    testImplementation("org.ktorm:ktorm-support-mysql:3.6.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
-    kaptTest("com.mybatis-flex:mybatis-flex-processor:1.5.7")
+    kaptTest("com.mybatis-flex:mybatis-flex-processor:1.6.1")
 }
 
 tasks.test {

@@ -5,7 +5,6 @@ import com.mybatisflex.core.query.OperatorQueryCondition
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
-import com.mybatisflex.core.table.TableDefs
 import com.mybatisflex.core.table.TableInfoFactory
 import java.lang.reflect.Field
 import kotlin.reflect.KProperty
@@ -24,7 +23,9 @@ fun Field.toQueryColumn(): QueryColumn {
     )
 }
 
-fun QueryColumn.toOrd(order: Order): QueryOrderBy = when (order) {
+fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = toQueryColumn().toOrd(order)
+
+fun QueryColumn.toOrd(order: Order = Order.ASC): QueryOrderBy = when (order) {
     Order.ASC -> asc()
     Order.DESC -> desc()
 }
