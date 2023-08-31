@@ -48,7 +48,7 @@ inline fun buildBootstrap(
     instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance(),
     scope: BootstrapScope.(MybatisFlexBootstrap) -> Unit
 ): MybatisFlexBootstrap =
-    instant.also { BootstrapScope(it).apply { scope(it) } }
+    instant.also { BootstrapScope(it).scope(it) }
 
 
 
