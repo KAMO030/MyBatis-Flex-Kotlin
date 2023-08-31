@@ -1,6 +1,5 @@
-package com.mybatisflex.kotlin.scope
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex (fuhai999@gmail.com).
+ *  Copyright (c) 2022-2023, Mybatis-Flex-Kotlin (837080904@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,6 +13,7 @@ package com.mybatisflex.kotlin.scope
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.MybatisFlexBootstrap
 import javax.sql.DataSource
@@ -44,13 +44,12 @@ class DataSourceScope(private val bootstrap: MybatisFlexBootstrap) {
 }
 
 
-fun buildBootstrap(
+inline fun buildBootstrap(
     instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance(),
     scope: BootstrapScope.(MybatisFlexBootstrap) -> Unit
-): MybatisFlexBootstrap {
-    scope(BootstrapScope(instant), instant)
-    return instant
-}
+): MybatisFlexBootstrap =
+    instant.also { BootstrapScope(it).scope(it) }
+
 
 
 

@@ -28,10 +28,10 @@ import java.util.*
  */
 @Table(value = "tb_account", onUpdate = [NoneListener::class], onSet = [AccountOnSetListener::class])
 data class Account(
-    @Id var id: Int,
-    var userName: String?,
-    var age: Int?,
-    var birthday: Date?,
+    @Id var id: Int = -1,
+    var userName: String? = null,
+    var age: Int? = null,
+    var birthday: Date? = null,
 ) : Model<Account>(){
    companion object : AccountTableDef()
 
