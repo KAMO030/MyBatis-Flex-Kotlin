@@ -965,13 +965,6 @@ object QueryFunctions {
      * 详情请见[QueryMethods.dateFormat]
      */
     @JvmStatic
-    fun dateFormat(column0: QueryColumn, column1: QueryColumn): QueryColumn =
-        QueryMethods.dateFormat(column0, column1)
-
-    /**
-     * 详情请见[QueryMethods.dateFormat]
-     */
-    @JvmStatic
     fun dateFormat(column0: String, column1: String): QueryColumn =
         QueryMethods.dateFormat(column0, column1)
 
