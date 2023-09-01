@@ -4,6 +4,9 @@ import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.kotlin.extensions.sql.not
+import com.mybatisflex.kotlin.extensions.sql.toOrd
+import com.mybatisflex.kotlin.extensions.sql.toQueryColumn
 import com.mybatisflex.kotlin.flexStream.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind

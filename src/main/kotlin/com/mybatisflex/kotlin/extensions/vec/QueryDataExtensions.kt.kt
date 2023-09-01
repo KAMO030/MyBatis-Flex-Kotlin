@@ -1,11 +1,11 @@
-package com.mybatisflex.kotlin.vec
+package com.mybatisflex.kotlin.extensions.vec
 
 import com.mybatisflex.core.query.CPI
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableDefs
 import com.mybatisflex.core.util.MapperUtil
-import com.mybatisflex.kotlin.vec.JoinTypes.*
+import com.mybatisflex.kotlin.vec.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -51,13 +51,10 @@ inline fun <reified T : Any> QueryWrapper.toQueryData() = QueryData(
 )
 
 
-fun main() {
-    println(JoinTypes.valueOf("LEFT"))
-}
 
-inline fun <reified E : Any> vecOf(tableAlias: String? = null) = QueryVector<E>(tableAlias)
+ inline fun < reified E : Any> vecOf(tableAlias: String? = null) = QueryVector<E>(tableAlias)
 
-inline fun <reified T : Any> isRow(): Boolean = Row::class.java.isAssignableFrom(T::class.java)
+inline fun <reified T > isRow(): Boolean = Row::class.java.isAssignableFrom(T::class.java)
 
 @OptIn(ExperimentalContracts::class)
 fun isRow(entity: Any?): Boolean {

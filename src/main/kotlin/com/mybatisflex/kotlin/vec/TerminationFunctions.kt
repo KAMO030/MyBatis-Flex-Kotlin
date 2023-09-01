@@ -7,10 +7,10 @@ import com.mybatisflex.core.query.QueryMethods
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Row
-import com.mybatisflex.core.util.ConvertUtil
+import com.mybatisflex.kotlin.extensions.vec.isRow
 import com.mybatisflex.kotlin.flexStream.QueryFunctions
-import com.mybatisflex.kotlin.flexStream.not
-import com.mybatisflex.kotlin.flexStream.toQueryColumn
+import com.mybatisflex.kotlin.extensions.sql.not
+import com.mybatisflex.kotlin.extensions.sql.toQueryColumn
 import java.math.BigDecimal
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind

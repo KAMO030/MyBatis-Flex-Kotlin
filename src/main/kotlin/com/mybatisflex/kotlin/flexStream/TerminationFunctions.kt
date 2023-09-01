@@ -6,9 +6,10 @@ import com.mybatisflex.annotation.Table
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Row
+import com.mybatisflex.kotlin.extensions.sql.not
+import com.mybatisflex.kotlin.extensions.sql.toQueryColumn
 import com.mybatisflex.kotlin.flexStream.*
 import java.math.BigDecimal
-import java.util.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -123,7 +124,6 @@ fun <T, O : Any> FS<T, O>.toList(): List<O> =
     else queryChain.list() as List<O>
 
 @ExperimentalFlexStream
-@Suppress("UNCHECKED_CAST")
 fun <T, O : Any, R> FS<T, O>.toList(asType: Class<R>): List<R> = queryChain.listAs(asType)
 
 @ExperimentalFlexStream

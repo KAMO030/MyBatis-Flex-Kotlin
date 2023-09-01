@@ -1,4 +1,4 @@
-package com.mybatisflex.kotlin.flexStream
+package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.constant.SqlConsts
 import com.mybatisflex.core.query.OperatorQueryCondition
@@ -6,6 +6,7 @@ import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.kotlin.flexStream.Order
 import java.lang.reflect.Field
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0

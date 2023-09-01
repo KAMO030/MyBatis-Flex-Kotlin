@@ -19,17 +19,18 @@ import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
+
 /*
  * 映射器操作扩展
- * @author 卡莫sama(yuanjiashuai)
+ * @author 卡莫sama
  */
-fun <T> BaseMapper<*>.queryList(init: (QueryScope.() -> Unit)?): List<T> =
-    this.selectListByQuery(queryScope(init = init)) as List<T>
+fun <T> BaseMapper<T>.queryList(init: (QueryScope.() -> Unit)?): List<T> =
+    queryScope(init = init).let(this::selectListByQuery)
 
-fun <T> BaseMapper<T>.update(entity: T, init: () -> QueryCondition): Int =
+fun <T> BaseMapper<T>.updateByCondition(entity: T, init: () -> QueryCondition): Int =
     this.updateByCondition(entity, init())
 
 fun <T> BaseMapper<T>.delete(init: (QueryScope.() -> Unit)?): Int =
-    this.deleteByQuery(queryScope(init = init))
+    queryScope(init = init).let(this::deleteByQuery)
 
 

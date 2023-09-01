@@ -24,14 +24,12 @@ import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.row.RowUtil
 import com.mybatisflex.core.table.TableDef
 import com.mybatisflex.core.table.TableInfoFactory
-import com.mybatisflex.core.util.SqlUtil
 import com.mybatisflex.kotlin.extensions.db.*
 import com.mybatisflex.kotlin.scope.QueryScope
-import java.io.Serializable
 
 /*
  * 实体操作扩展
- * @author 卡莫sama(yuanjiashuai)
+ * @author 卡莫sama
  */
 
 inline  fun <reified T> Row.toEntity(): T {

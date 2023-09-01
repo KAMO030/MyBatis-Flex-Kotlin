@@ -2,9 +2,8 @@ package com.mybatisflex.kotlin.test
 
 import com.mybatisflex.core.MybatisFlexBootstrap
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.kotlin.flexStream.alias
-import com.mybatisflex.kotlin.flexStream.eq
-import com.mybatisflex.kotlin.flexStream.ge
+import com.mybatisflex.kotlin.extensions.vec.*
+import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.entity.table.AccountTableDef

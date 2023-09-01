@@ -20,7 +20,7 @@ import java.util.function.Consumer
 
 /*
  * sql操作扩展
- * @author 卡莫sama(yuanjiashuai)
+ * @author 卡莫sama
  * @date 2023/8/7
  */
 

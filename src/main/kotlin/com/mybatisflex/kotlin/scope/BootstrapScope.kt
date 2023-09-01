@@ -18,6 +18,12 @@ package com.mybatisflex.kotlin.scope
 import com.mybatisflex.core.MybatisFlexBootstrap
 import javax.sql.DataSource
 
+
+/**
+ * Bootstrap构建配置作用域
+ * @author 卡莫sama
+ * @date 2023/8/7
+ */
 class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance()) {
 
     fun dataSources(dataSourceScope: DataSourceScope.() -> Unit) =

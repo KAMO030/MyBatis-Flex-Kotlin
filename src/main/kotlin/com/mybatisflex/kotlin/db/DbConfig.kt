@@ -21,7 +21,7 @@ import kotlin.reflect.KProperty
 
 /**
  * 数据库配置对象，暂时未启用
- * @author 卡莫sama(yuanjiashuai)
+ * @author 卡莫sama
  * @date 2023/8/7
  */
 object DbConfig {

@@ -7,8 +7,9 @@ import com.mybatisflex.core.table.TableDef
 import com.mybatisflex.core.table.TableDefs
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.kotlin.extensions.vec.wrap
 
-open class QueryVector<E : Any>(
+open class QueryVector<E>(
     open val entityClass: Class<E>,
     open val data: QueryData,
     open val entityInstance: E? = null

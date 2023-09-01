@@ -31,7 +31,7 @@ import com.mybatisflex.kotlin.scope.queryScope
 
 /*
  * 数据库简单操作扩展
- * @author 卡莫sama(yuanjiashuai)
+ * @author 卡莫sama
  */
 
 inline fun <reified M > mapper(): M = Mappers.ofMapperClass(M::class.java)

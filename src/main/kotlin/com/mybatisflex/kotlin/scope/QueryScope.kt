@@ -21,7 +21,7 @@ import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.table.TableDef
 /**
  * 查询作用域
- * @author 卡莫sama(yuanjiashuai)
+ * @author 卡莫sama
  * @date 2023/8/7
  */
 class QueryScope :QueryWrapper() {

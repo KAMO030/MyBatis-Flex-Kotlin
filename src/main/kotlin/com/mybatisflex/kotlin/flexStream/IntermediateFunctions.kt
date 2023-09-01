@@ -4,6 +4,7 @@ import com.example.springbootdemo.flexStream.FS
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableDef
+import com.mybatisflex.kotlin.extensions.sql.toQueryColumn
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
