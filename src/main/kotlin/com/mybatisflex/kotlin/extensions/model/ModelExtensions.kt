@@ -24,8 +24,10 @@ import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.row.RowUtil
 import com.mybatisflex.core.table.TableDef
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.core.util.SqlUtil
 import com.mybatisflex.kotlin.extensions.db.*
 import com.mybatisflex.kotlin.scope.QueryScope
+import java.io.Serializable
 
 /*
  * 实体操作扩展
@@ -69,5 +71,9 @@ inline fun<reified E:Model<E>> List<E>.batchInsert() = Mappers.ofEntityClass(E::
 
 fun< E:Model<E>> List<E>.batchUpdateById(): Boolean = all(Model<E>::updateById)
 
-
+inline fun<reified E:Model<E>> List<E>. batchDeleteById(): Boolean {
+    //拿到集合中所有实体的主键
+    val primaryValues = this.map { it.pkValues() }.flatMap(Array<*>::toMutableList).map { it as Serializable }
+    return SqlUtil.toBool(Mappers.ofEntityClass(E::class.java).deleteBatchByIds(primaryValues))
+}
 
