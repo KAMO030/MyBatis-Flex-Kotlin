@@ -34,8 +34,8 @@ import java.io.Serializable
  * @author 卡莫sama(yuanjiashuai)
  */
 
-infix fun <T> Row.to(entryClass: Class<T>): T {
-    return RowUtil.toEntity(this, entryClass)
+inline  fun <reified T> Row.toEntity(): T {
+    return RowUtil.toEntity(this, T::class.java)
 }
 
 inline fun <reified E, T : TableDef> T.filter(
@@ -65,7 +65,7 @@ inline fun <reified E> TableDef.query(
 
 inline fun <reified E> TableDef.all(): List<E> = selectAll(schema, tableName).toEntities<E>()
 
-inline fun <reified E> Collection<Row>.toEntities() = map { it to E::class.java }.toList()
+inline fun <reified E> Collection<Row>.toEntities() = map { it.toEntity<E>() }.toList()
 
 inline fun<reified E:Model<E>> List<E>.batchInsert() = Mappers.ofEntityClass(E::class.java).insertBatch(this)
 

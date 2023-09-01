@@ -15,7 +15,6 @@
  */
 package com.mybatisflex.test
 
-import com.mybatisflex.core.FlexConsts
 import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
