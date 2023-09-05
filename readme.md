@@ -93,10 +93,12 @@ fun main() {
         }
         //启动并配入数据源
         buildBootstrap { +dataSource }.start()
+        val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
+        val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
         //条件过滤查询并打印
         filter<Account> {
-            ACCOUNT.ID `=` 1 and
-                    (ACCOUNT.AGE `in` (17..19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")))
+            Account::id eq 1 and
+                    (Account::age `in` (17..19) or (Account::birthday between (start to end)))
         }.forEach(::println)
         //查询全部数据并打印
         //all<Account>().forEach(::println)
@@ -104,18 +106,13 @@ fun main() {
 ```
 执行的SQL：
 ```sql
-SELECT * FROM `tb_account` WHERE `id` = 1 AND (`age` IN (17, 18, 19) OR `birthday` BETWEEN  '2020-01-10' AND '2020-01-12' )
+SELECT * FROM `tb_account` WHERE `id` = 1 AND (`age` IN (17, 18, 19) OR `birthday` BETWEEN  '2020-01-10 08:00:00' AND '2020-01-12 08:00:00' )
 ```
 控制台输出：
 
 ```txt
-Account(id=1, userName=张三, age=18, birthday=Sat Jan 11 00:00:00 CST 2020)
+Account(id=1, userName=张三, birthday=2020-01-11 00:00:00.0, age=18)
 ```
-
-> 以上的示例中， `ACCOUNT` 为 MyBatis-Flex 通过 APT
-> 自动生成，只需通过静态导入即可，无需手动编码。更多查看 [在Kotlin中使用注解处理器](https://mybatis-flex.com/zh/others/kapt.html)
->
-> 若觉得 APT 使用不习惯，也可以使用代码生成器来生成。点击 [代码生成器文档](https://mybatis-flex.com/zh/others/codegen.html) 了解。
 
 ## 更多使用
 

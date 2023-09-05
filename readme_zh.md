@@ -15,7 +15,7 @@
 
 > 本文档涉及到的 [演示源码](https://gitee.com/mybatis-flex/mybatis-flex-kotlin/tree/main/src/test/kotlin/com/mybatisflex/kotlin/test) 已经全部上传
 > 在开始之前，您也可以先下载到本地，导入到 idea 开发工具后，在继续看文档。
-> 
+>
 > 在 [Mybatis-Flex源项目](https://mybatis-flex.com) 中所介绍的功能本文档不再过多赘述建议，本文档只对 Mybatis-Flex 在 Kotlin 中特有的用法进行介绍
 
 ### Hello World 文档
@@ -29,18 +29,30 @@
 **【Kotlin】**
 ```kotlin
 dependencies {
+    //kt扩展库
     implementation("com.mybatis-flex:mybatis-flex-kotlin:$version")
+    //核心库
+    implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
 ```
 
 **【Maven】**
 
 ```xml
-<dependency>
-    <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-kotlin</artifactId>
-    <version>${mybatis-flex-kotlin.version}</version>
-</dependency>
+<dependencies>
+    <!--kt扩展库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-kotlin</artifactId>
+        <version>${mybatis-flex-kotlin.version}</version>
+    </dependency>
+    <!--核心库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-core</artifactId>
+        <version>${mybatis-flex-core.version}</version>
+    </dependency>
+</dependencies>
 ```
 
 **第 2 步：创建数据库表与配置数据源**
@@ -81,40 +93,31 @@ fun main() {
         }
         //启动并配入数据源
         buildBootstrap { +dataSource }.start()
+        val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
+        val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
         //条件过滤查询并打印
         filter<Account> {
-            ACCOUNT.ID `=` 1 and
-                    (ACCOUNT.AGE `in` (17..19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")))
+            Account::id eq 1 and
+                    (Account::age `in` (17..19) or (Account::birthday between (start to end)))
         }.forEach(::println)
         //查询全部数据并打印
-        //ACCOUNT.all<Account>().forEach(::println)
+        //all<Account>().forEach(::println)
 }
 ```
 执行的SQL：
 ```sql
-SELECT * FROM `tb_account` WHERE `id` = 1 AND (`age` IN (17, 18, 19) OR `birthday` BETWEEN  '2020-01-10' AND '2020-01-12' )
+SELECT * FROM `tb_account` WHERE `id` = 1 AND (`age` IN (17, 18, 19) OR `birthday` BETWEEN  '2020-01-10 08:00:00' AND '2020-01-12 08:00:00' )
 ```
 控制台输出：
 
 ```txt
-Account(id=1, userName=张三, age=18, birthday=Sat Jan 11 00:00:00 CST 2020)
+Account(id=1, userName=张三, birthday=2020-01-11 00:00:00.0, age=18)
 ```
 
-> 以上的示例中， `ACCOUNT` 为 MyBatis-Flex 通过 APT
-> 自动生成，只需通过静态导入即可，无需手动编码。更多查看 [在Kotlin中使用注解处理器](https://mybatis-flex.com/zh/others/kapt.html)
->
-> 若觉得 APT 使用不习惯，也可以使用代码生成器来生成。点击 [代码生成器文档](https://mybatis-flex.com/zh/others/codegen.html) 了解。
+## 更多使用
 
-[comment]: <> (## 更多使用)
-
-[comment]: <> (- 功能 1：[Bootstrap简化配置]&#40;&#41;)
-
-[comment]: <> (- 功能 2：[简单查询]&#40;&#41;)
-
-[comment]: <> (- 功能 3：[表实体扩展]&#40;&#41;)
-
-[comment]: <> (- 功能 4：[SQL扩展/中缀]&#40;&#41;)
-
-[comment]: <> (- 功能 5：[Mapper扩展]&#40;&#41;)
+- 功能 1：[Bootstrap简化配置](docs/bootstrapExt.md)
+- 功能 2：[简单查询与扩展]()
+- 功能 3：[矢量查询](docs/vecSimple.md)
 
 [comment]: <> (###### TODO ...)

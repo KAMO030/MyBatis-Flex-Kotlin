@@ -15,6 +15,8 @@
  */
 package com.mybatisflex.kotlin.vec
 
+import com.mybatisflex.core.constant.SqlConsts
+
 enum class Order(val description: String) {
-    DESC("desc"), ASC("asc")
+    DESC(SqlConsts.DESC), ASC(SqlConsts.ASC)
 }

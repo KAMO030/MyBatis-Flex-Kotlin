@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.*
  * @author 卡莫sama(yuanjiashuai)
  * @date 2023/8/7
  */
-@Table(value = "tb_account", onUpdate = [NoneListener::class], onSet = [AccountOnSetListener::class])
+@Table(value = "tb_account")
 data class Account(
     @Id var id: Int = -1,
     var userName: String? = null,
