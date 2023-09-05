@@ -1,7 +1,21 @@
-package com.mybatisflex.kotlin.flexStream
+/*
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  <p>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  <p>
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  <p>
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package com.mybatisflex.kotlin.vec
 
 import com.mybatisflex.core.query.*
-import kotlin.reflect.KProperty0
 
 @Suppress("unused", "FunctionName")
 object QueryFunctions {
@@ -130,8 +144,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.pow]
      */
     @JvmStatic
-    fun pow(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.pow(column0,
-        column1)
+    fun pow(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.pow(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.exp]
@@ -226,8 +242,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.decode]
      */
     @JvmStatic
-    fun decode(column0: String, column1: String): QueryColumn = QueryMethods.decode(column0,
-        column1)
+    fun decode(column0: String, column1: String): QueryColumn = QueryMethods.decode(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.decode]
@@ -240,8 +258,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.encode]
      */
     @JvmStatic
-    fun encode(column0: String, column1: String): QueryColumn = QueryMethods.encode(column0,
-        column1)
+    fun encode(column0: String, column1: String): QueryColumn = QueryMethods.encode(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.encode]
@@ -300,15 +320,19 @@ object QueryFunctions {
      * 详情请见[QueryMethods.repeat]
      */
     @JvmStatic
-    fun repeat(column0: String, column1: Int): QueryColumn = QueryMethods.repeat(column0,
-        column1)
+    fun repeat(column0: String, column1: Int): QueryColumn = QueryMethods.repeat(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.repeat]
      */
     @JvmStatic
-    fun repeat(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.repeat(column0,
-        column1)
+    fun repeat(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.repeat(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.repeat]
@@ -321,15 +345,19 @@ object QueryFunctions {
      * 详情请见[QueryMethods.repeat]
      */
     @JvmStatic
-    fun repeat(column0: String, column1: String): QueryColumn = QueryMethods.repeat(column0,
-        column1)
+    fun repeat(column0: String, column1: String): QueryColumn = QueryMethods.repeat(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.format]
      */
     @JvmStatic
-    fun format(column0: String, column1: String): QueryColumn = QueryMethods.format(column0,
-        column1)
+    fun format(column0: String, column1: String): QueryColumn = QueryMethods.format(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.format]
@@ -443,8 +471,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.addTime]
      */
     @JvmStatic
-    fun addTime(column0: String, column1: String): QueryColumn = QueryMethods.addTime(column0,
-        column1)
+    fun addTime(column0: String, column1: String): QueryColumn = QueryMethods.addTime(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.hex]
@@ -475,8 +505,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.mod]
      */
     @JvmStatic
-    fun mod(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.mod(column0,
-        column1)
+    fun mod(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.mod(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.mod]
@@ -574,8 +606,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.left]
      */
     @JvmStatic
-    fun left(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.left(column0,
-        column1)
+    fun left(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.left(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.left]
@@ -602,15 +636,19 @@ object QueryFunctions {
      * 详情请见[QueryMethods.right]
      */
     @JvmStatic
-    fun right(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.right(column0,
-        column1)
+    fun right(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.right(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.right]
      */
     @JvmStatic
-    fun right(column0: String, column1: Int): QueryColumn = QueryMethods.right(column0,
-        column1)
+    fun right(column0: String, column1: Int): QueryColumn = QueryMethods.right(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.asin]
@@ -652,15 +690,19 @@ object QueryFunctions {
      * 详情请见[QueryMethods.round]
      */
     @JvmStatic
-    fun round(column0: String, column1: String): QueryColumn = QueryMethods.round(column0,
-        column1)
+    fun round(column0: String, column1: String): QueryColumn = QueryMethods.round(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.round]
      */
     @JvmStatic
-    fun round(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.round(column0,
-        column1)
+    fun round(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.round(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.round]
@@ -672,8 +714,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.round]
      */
     @JvmStatic
-    fun round(column0: String, column1: Int): QueryColumn = QueryMethods.round(column0,
-        column1)
+    fun round(column0: String, column1: Int): QueryColumn = QueryMethods.round(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.round]
@@ -710,8 +754,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.raw]
      */
     @JvmStatic
-    fun raw(column0: String, vararg column1: Any): QueryCondition = QueryMethods.raw(column0,
-        *column1)
+    fun raw(column0: String, vararg column1: Any): QueryCondition = QueryMethods.raw(
+        column0,
+        *column1
+    )
 
     /**
      * 详情请见[QueryMethods.number]
@@ -1005,8 +1051,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.addDate]
      */
     @JvmStatic
-    fun addDate(column0: String, column1: String): QueryColumn = QueryMethods.addDate(column0,
-        column1)
+    fun addDate(column0: String, column1: String): QueryColumn = QueryMethods.addDate(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.avg]
@@ -1056,8 +1104,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.column]
      */
     @JvmStatic
-    fun column(column0: String, column1: String): QueryColumn = QueryMethods.column(column0,
-        column1)
+    fun column(column0: String, column1: String): QueryColumn = QueryMethods.column(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.column]
@@ -1353,8 +1403,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.strcmp]
      */
     @JvmStatic
-    fun strcmp(column0: String, column1: String): QueryColumn = QueryMethods.strcmp(column0,
-        column1)
+    fun strcmp(column0: String, column1: String): QueryColumn = QueryMethods.strcmp(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.strcmp]
@@ -1448,8 +1500,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.subTime]
      */
     @JvmStatic
-    fun subTime(column0: String, column1: String): QueryColumn = QueryMethods.subTime(column0,
-        column1)
+    fun subTime(column0: String, column1: String): QueryColumn = QueryMethods.subTime(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.lastInsertId]
@@ -1506,8 +1560,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.subDate]
      */
     @JvmStatic
-    fun subDate(column0: String, column1: String): QueryColumn = QueryMethods.subDate(column0,
-        column1)
+    fun subDate(column0: String, column1: String): QueryColumn = QueryMethods.subDate(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.subDate]
@@ -1612,8 +1668,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.ifNull]
      */
     @JvmStatic
-    fun ifNull(column0: String, column1: String): QueryColumn = QueryMethods.ifNull(column0,
-        column1)
+    fun ifNull(column0: String, column1: String): QueryColumn = QueryMethods.ifNull(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.if_]
@@ -1646,8 +1704,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.truncate]
      */
     @JvmStatic
-    fun truncate(column0: String, column1: Int): QueryColumn = QueryMethods.truncate(column0,
-        column1)
+    fun truncate(column0: String, column1: Int): QueryColumn = QueryMethods.truncate(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.truncate]
@@ -1667,22 +1727,28 @@ object QueryFunctions {
      * 详情请见[QueryMethods.power]
      */
     @JvmStatic
-    fun power(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.power(column0,
-        column1)
+    fun power(column0: QueryColumn, column1: Int): QueryColumn = QueryMethods.power(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.power]
      */
     @JvmStatic
-    fun power(column0: String, column1: Int): QueryColumn = QueryMethods.power(column0,
-        column1)
+    fun power(column0: String, column1: Int): QueryColumn = QueryMethods.power(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.power]
      */
     @JvmStatic
-    fun power(column0: String, column1: String): QueryColumn = QueryMethods.power(column0,
-        column1)
+    fun power(column0: String, column1: String): QueryColumn = QueryMethods.power(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.power]
@@ -1695,8 +1761,10 @@ object QueryFunctions {
      * 详情请见[QueryMethods.instr]
      */
     @JvmStatic
-    fun instr(column0: String, column1: String): QueryColumn = QueryMethods.instr(column0,
-        column1)
+    fun instr(column0: String, column1: String): QueryColumn = QueryMethods.instr(
+        column0,
+        column1
+    )
 
     /**
      * 详情请见[QueryMethods.instr]

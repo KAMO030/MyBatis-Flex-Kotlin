@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,18 +15,20 @@
  */
 package com.mybatisflex.kotlin.extensions.db
 
+import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
+import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.row.Db.selectListByQuery
 import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
-import com.mybatisflex.core.table.TableDef
+import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
-import com.mybatisflex.kotlin.extensions.model.filter
 import com.mybatisflex.kotlin.extensions.model.toEntities
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
+import kotlin.reflect.KClass
 
 
 /*
@@ -34,7 +36,30 @@ import com.mybatisflex.kotlin.scope.queryScope
  * @author 卡莫sama
  */
 
+/**
+ * 把泛型类型当作mapper类型拿到mapper实例
+ * @author 卡莫sama
+ */
 inline fun <reified M > mapper(): M = Mappers.ofMapperClass(M::class.java)
+/**
+ * 把泛型类型当作mapper类型拿到tableInfo实例
+ * @author 卡莫sama
+ */
+inline fun <reified M > tableInfo(): TableInfo = TableInfoFactory.ofMapperClass(M::class.java)
+/**
+ * 把泛型类型当作实体类型拿到tableInfo实例
+ * @author 卡莫sama
+ */
+val <E : Any> KClass<E>.tableInfo: TableInfo
+    get() = TableInfoFactory.ofEntityClass(java)
+/**
+ * 把泛型类型当作实体类型拿到mapper实例
+ * @author 卡莫sama
+ */
+val <E : Any> KClass<E>.mapper: BaseMapper<E>
+    get() = Mappers.ofEntityClass(java)
+
+
 
 inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
@@ -59,12 +84,12 @@ fun queryRow(
 
 inline fun <reified T> query(
     vararg columns: QueryColumn?,
-    schema: String? = null,
-    tableName: String? = null,
     noinline init: QueryScope.() -> Unit
-): List<T> =
+): List<T> =TableInfoFactory.ofEntityClass(T::class.java).run {
     queryRows(schema = schema, tableName = tableName, columns = columns, init = init)
         .toEntities<T>()
+}
+
 
 fun queryRows(
     vararg columns: QueryColumn?,
@@ -84,14 +109,14 @@ inline fun <reified E> filter(
 ): List<E> = selectListByQuery(
     schema,
     tableName,
-    queryScope(*columns).where(queryCondition)
+    QueryWrapper().select(*columns).where(queryCondition)
 ).toEntities<E>()
 
-inline fun <reified E > filter(
+inline fun <reified E:Any > filter(
     vararg columns: QueryColumn?,
     init: () -> QueryCondition
 ): List<E> {
-    val tableInfo = TableInfoFactory.ofEntityClass(E::class.java)
+    val tableInfo = E::class.tableInfo
     return filter<E>(
         columns = columns,
         schema = tableInfo.schema,
@@ -100,11 +125,6 @@ inline fun <reified E > filter(
     )
 }
 
-inline fun <reified E, T : TableDef> filter(
-    tableDef: T,
-    vararg columns: QueryColumn?,
-    init: T.() -> QueryCondition
-): List<E> = tableDef.filter(columns = columns, init = init)
 
 
 

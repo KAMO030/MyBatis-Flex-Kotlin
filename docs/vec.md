@@ -53,7 +53,9 @@ FROM `emp`
 WHERE `dept_id` = ?
 ````
 
-我们来看看查询矢量 `QueryVector` 的类定义：
+> 为了演示方便，在下面的例子中若我们的查询中包括了所有列，那么将直接使用 * 来替代。
+
+我们来看看查询矢量 `QueryVector` 的类中的部分成员：
 
 ```kotlin
 open class QueryVector<E : Any>(
@@ -61,47 +63,18 @@ open class QueryVector<E : Any>(
     open val data: QueryData,
     open val entityInstance: E? = null
 ) {
-    companion object {
-        inline operator fun <reified E : Any> invoke(tableAlias: String? = null): QueryVector<E> {
-            val clazz = E::class.java
-            val tableDef = TableDefs.getTableDef(clazz, TableInfoFactory.ofEntityClass(clazz).tableNameWithSchema)
-                ?: throw IllegalArgumentException("QueryVector cannot be initialized by class $clazz, which does not have a corresponding TableDef.")
-            return QueryVector(clazz, QueryData(table = tableDef, tableAlias = tableAlias ?: tableDef.tableName))
-        }
-    }
+    val wrapper: QueryWrapper
 
-    val entity: E get() = entityInstance ?: entityClass.getDeclaredConstructor().newInstance()
-
-    val wrapper: QueryWrapper get() = data.wrap()
-
-    val sql: String get() = wrapper.toSQL()
-
-    val tableDef: TableDef
-        get() = TableDefs.getTableDef(entityClass, tableInfo.tableNameWithSchema)
-            ?: throw NoSuchElementException("The TableDef corresponding to class $entityClass could not be found")
-
-
-    val tableInfo: TableInfo
-        get() = TableInfoFactory.ofEntityClass(entityClass)
-            ?: throw NoSuchElementException("The TableInfo corresponding to class $entityClass could not be found")
-
-    val size: Long get() = mapper.selectCountByQuery(wrapper)
-
-    val mapper: BaseMapper<E> get() = Mappers.ofEntityClass(entityClass)
-
-    fun copy(
-        data: QueryData = this.data,
-        entityClass: Class<E> = this.entityClass
-    ) = QueryVector(entityClass, data)
+    val mapper: BaseMapper<E>
 }
 ```
 
-可以看出，每个查询矢量中都包含了一个`QueryWrapper`和`mapper`，而我们的查询正是基于`QueryWrapper`和`mapper`来共同完成。
+可以看出，查询矢量中包含了一个`QueryWrapper`和`mapper`，而我们的查询正是基于`QueryWrapper`和`mapper`来共同完成。
 
 查询矢量中的大部分功能都是以扩展函数的方式实现的，这些扩展函数大致可以分为两类，中间操作和终止操作，它们对应的意思就和flex中 QueryWrapper 对应的操作一样：
 
-- **中间操作：**这类函数在执行过后仍然可以继续链式地调用扩展函数来完成功能。它们并不会立即执行查询，而是将数据保存起来，并且在调用时重新返回一个携带着新数据的矢量，比如`filter`, `distinct`, `groupBy`等。
-- **终止操作：**这类函数的返回值通常是一个集合或者是某个计算的结果，他们会马上执行一个查询，然后获取它的结果并执行一定的运算，比如 `toList`、`funOf` 等。
+- **中间操作：** 这类函数在执行过后仍然可以继续链式地调用扩展函数来完成功能。它们并不会立即执行查询，而是将数据保存起来，并且在调用时重新返回一个携带着新数据的矢量，比如`filter`, `distinct`, `groupBy`等。
+- **终止操作：** 这类函数的返回值通常是一个集合或者是某个计算的结果，他们会马上执行一个查询，然后获取它的结果并执行一定的运算，比如 `toList`、`funOf` 等。
 
 ## 中间操作
 
@@ -129,27 +102,16 @@ val emp = vec.filter { it::deptId eq 1 }.toList()
 
 ```kotlin
 val vec = vecOf<Emp>()
-val emp = vec.filter {
-    it::deptId eq 1
-}.filter {
-    it::name startsWith "张"
-}.toList()
+val emp = vec
+    .filter { it::deptId eq 1 }
+    .filter { it::name startsWith "张" }
+    .toList()
 ```
 
 生成的 SQL 如下：
 
 ````sql
-SELECT `id`,
-       `username`,
-       `password`,
-       `name`,
-       `gender`,
-       `image`,
-       `job`,
-       `entrydate`,
-       `dept_id`,
-       `create_time`,
-       `update_time`
+SELECT *
 FROM `emp`
 WHERE `dept_id` = ?
   AND `name` LIKE ?
@@ -179,19 +141,17 @@ inline fun <E: Any> QueryVector<E>.filterProperties(predicate: (E) -> Iterable<K
 ```
 
 查询矢量默认会查询实体类对象的所有列。如果我们不需要查询所有的列，我们可以用这四个方法来指定我们想要的列。其中，闭包返回值为Iterable的函数可以一次性指定多个列，
-而`filterColumn`可以让我们使用flex官方`QueryMethods`中提供的静态方法来进行更方便地查询。
+而`filterColumn`可以让我们使用flex官方`QueryMethods`中提供的静态方法，或是我们自己定义的一些方法来进行更方便地查询。
 
 下面是一个稍复杂的过滤的例子：
 
 ```kotlin
 val vec = vecOf<Emp>()
-val emp = vec.filterProperty {
-    it::id
-}.filterColumn {
-    it::deptId + 1
-}.filterColumn {
-    QueryMethods.length(it::name.toQueryColumn())
-}.toRows()
+val emp = vec
+    .filterProperty { it::id }
+    .filterColumn { it::deptId + 1 }
+    .filterColumn { QueryMethods.length(it::name.toQueryColumn()) }
+    .toRows()
 ```
 
 在上面的例子中，我们使用`filterProperty`来选择类中的对应列，
@@ -235,17 +195,7 @@ vec.sortedBy(Order.DESC) { it::id }.toList()
 生成的 SQL 如下：
 
 ````sql
-SELECT `id`,
-       `username`,
-       `password`,
-       `name`,
-       `gender`,
-       `image`,
-       `job`,
-       `entrydate`,
-       `dept_id`,
-       `create_time`,
-       `update_time`
+SELECT *
 FROM `emp`
 ORDER BY `id` DESC
 ````
@@ -268,17 +218,7 @@ vec.sortedByIter {
 生成的 SQL 如下：
 
 ````sql
-SELECT `id`,
-       `username`,
-       `password`,
-       `name`,
-       `gender`,
-       `image`,
-       `job`,
-       `entrydate`,
-       `dept_id`,
-       `create_time`,
-       `update_time`
+SELECT *
 FROM `emp`
 ORDER BY `id` DESC, `create_time` ASC, `update_time` ASC
 ````
@@ -311,17 +251,7 @@ vec.drop(1).take(1).toList()
 如果我们使用 MySQL 数据库，会生成如下 SQL ：
 
 ````mysql
-SELECT `id`,
-       `username`,
-       `password`,
-       `name`,
-       `gender`,
-       `image`,
-       `job`,
-       `entrydate`,
-       `dept_id`,
-       `create_time`,
-       `update_time`
+SELECT *
 FROM `emp`
 LIMIT 1, 1
 ````
@@ -344,9 +274,9 @@ vec.limit(1, 1).toList()
 
 如同`kotlin.sequence`一样，`QueryVector`同样支持去重操作。函数`distinct`正是用于完成去重操作的。
 
-> 注意：该功能目前是实验性的。如果你需要使用，你需要在使用处函数上添加上`@OptIn(ExperimentalDistinct::class)`来使用，否则在编译时会报异常。我们目前并不能保证它一定会去重。
+> 注意：该功能目前是实验性的。如果你需要使用，你需要在使用处添加上`@OptIn(ExperimentalDistinct::class)`来使用，或添加上`@ExperimentalDistinct`注解将其传播，否则无法通过编译。
 
-> 截至此文档编写前，flex官方（版本1.6.1）并未提供统一的去重实现，而是在`QueryMethods`提供了一个用于去重的函数`distinct`。
+> 截至此文档编写前，flex官方（版本1.6.3）并未提供统一的去重实现，而是在`QueryMethods`提供了一个用于去重的函数`distinct`。
 > 这个函数并不能满足我们的需求，因此我们编写了一个`DistinctQueryWrapper`来实现我们的功能。
 
 ```kotlin
@@ -366,11 +296,11 @@ vec.distinct().toList()
 SELECT DISTINCT `emp`.* FROM `emp`
 ```
 
-你会发现，之前在 SELECT 中的一大串的列变成了一个通配符`*`。这是我们设计上的妥协，关于`DistinctQueryWrapper`是如何工作的，请直接查阅此类的注释，此处不再赘述。
+你会发现，之前在 SELECT 中的一大串的列变成了一个通配符`*`。这是我们设计上的妥协，关于`DistinctQueryWrapper`是如何工作的，请直接查阅此类的注释，这里便不再赘述。
 
 ## 终止操作
 
-查询矢量的终止操作会立刻计算结果，将内部封装的`QueryData`转换为`QueryWrapper`后联同mapper共同完成查询并返回。
+查询矢量的终止操作会立刻计算结果，完成查询并返回。
 
 ### toList, toRows
 
@@ -388,24 +318,22 @@ fun <E : Any> QueryVector<E>.toRows(): List<Row>
 
 ```kotlin
 val vec = vecOf<Emp>()
-val emp = vec.filter {
-    it::name startsWith "张"
-}.filter {
-    it::password eq 123456
-}.filter {
-    it::entrydate between LocalDate.of(2020, 1, 1)..LocalDate.now()
-}.distinct().limit(0, 1).toList()
+val emp = vec
+    .filter { it::name startsWith "张" }
+    .filter { it::password eq 123456 }
+    .filter { it::entrydate between LocalDate.of(2020, 1, 1)..LocalDate.now() }
+    .distinct()
+    .limit(0, 1)
+    .toList()
 ```
 
 ```kotlin
 val vec = vecOf<Emp>()
-val emp = vec.filterProperty {
-    it::id
-}.filterProperty {
-    it::job
-}.filter {
-    it::id gt 5
-}.toRows()
+val emp = vec
+    .filterProperty { it::id }
+    .filterProperty { it::job }
+    .filter { it::id gt 5 }
+    .toRows()
 ```
 
 在上面的两个例子中，第一个例子尽管使用了诸多的扩展函数，如`filter`, `distinct`, `limit`等，但 **它并没有指定我们要查询的列。换言之，它查询了所有列**。
@@ -413,7 +341,7 @@ val emp = vec.filterProperty {
 
 在第二个例子中，我们**指定了我们要查询的列。换言之，我们没有查询所有的列**。此时我们查询得到的列中**不足以为实体类中的每个属性进行装配**。
 此时如果使用`toList`进行返回，那么**实体类中没有被查询的列的属性的值将会是我们定义时的默认值**。
-这样的实体类在大多数情况下未必是我们想要的结果，而我们也仅仅需要要查询的列的结果而已。此时我们可以使用`toRows`方法来仅返回我们想要的结果。
+这样的实体类在大多数情况下未必是我们想要的结果，而我们也仅仅需要被查询的列的结果而已。此时我们可以使用`toRows`方法来仅返回我们想要的结果。
 
 也许你会疑惑：`Row`是什么？`Row`是flex官方定义的通用的用于返回查询结果的结果集，它是`java.util.LinkedHashMap`的子类，其中键的类型是`String`，而值的类型是`Any`。
 在第二个例子中，如果我们使用`println`函数输出`emp`，那么它的结果是这样的：
@@ -424,7 +352,7 @@ val emp = vec.filterProperty {
 
 我们会发现，在返回的 List 当中，最后一个 job 没有被返回。这是因为最后一条数据在 SQL 中 job 的值为`null`。因此在使用`toRows`时需要格外注意。
 
-### elementAt/first/last/find/findLast
+### elementAt/first/last/find/findLast/get
 
 这一系列函数用于获取序列中指定位置的元素，它们的用法也与 `kotlin.sequences` 的同名函数一模一样，具体可以参考 Kotlin 标准库的相关文档。
 
@@ -434,7 +362,7 @@ val emp = vec.filterProperty {
 
 ### maxOf/maxBy/minOf/minBy/sumOf/avgOf
 
-这些函数的名字非常相似，甚至有两个与max有关的函数和与min有关的函数。我们以`maxBy`和`maxOf`为例，下面这两个函数的定义：
+这些函数的名字非常相似，甚至有两个与max有关的函数和与min有关的函数。我们以`maxBy`和`maxOf`为例，讲述它们的区别。下面这两个函数的定义：
 
 ```kotlin
 inline fun <reified E : Any, reified R : Comparable<R>> QueryVector<E>.maxOf(selector: (E) -> KProperty<R?>): R
@@ -460,17 +388,7 @@ SELECT MAX(`id`) FROM `emp`
 而`maxBy`函数生成的 SQL 如下：
 
 ```sql
-SELECT `id`,
-       `username`,
-       `password`,
-       `name`,
-       `gender`,
-       `image`,
-       `job`,
-       `entrydate`,
-       `dept_id`,
-       `create_time`,
-       `update_time`
+SELECT *
 FROM `emp`
 WHERE `id` = (SELECT MAX(`id`) FROM `emp`)
 LIMIT 0, 1

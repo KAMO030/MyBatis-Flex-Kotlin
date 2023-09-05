@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.query.*
+import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumn
+import com.mybatisflex.kotlin.vec.Order
 import java.util.function.Consumer
+import kotlin.reflect.KProperty
 
 /*
  * sql操作扩展
@@ -107,3 +110,40 @@ infix fun QueryWrapper.limit(pair: Pair<Number?, Number?>): QueryWrapper = this.
 
 infix fun QueryWrapper.limit(range: IntRange): QueryWrapper = this.limit(range.first, range.last)
 
+operator fun QueryColumn.plus(other: QueryColumn): QueryColumn = add(other)
+
+operator fun QueryColumn.plus(other: Number): QueryColumn = add(other)
+
+operator fun QueryColumn.plus(other: KProperty<Number?>): QueryColumn = add(other.toQueryColumn())
+
+operator fun QueryColumn.minus(other: QueryColumn): QueryColumn = subtract(other)
+
+operator fun QueryColumn.minus(other: Number): QueryColumn = subtract(other)
+
+operator fun QueryColumn.minus(other: KProperty<Number?>): QueryColumn = subtract(other.toQueryColumn())
+
+operator fun QueryColumn.times(other: QueryColumn): QueryColumn = multiply(other)
+
+operator fun QueryColumn.times(other: Number): QueryColumn = multiply(other)
+
+operator fun QueryColumn.times(other: KProperty<Number?>): QueryColumn = multiply(other.toQueryColumn())
+
+operator fun QueryColumn.div(other: QueryColumn): QueryColumn = divide(other)
+
+operator fun QueryColumn.div(other: Number): QueryColumn = divide(other)
+
+operator fun QueryColumn.div(other: KProperty<Number?>): QueryColumn = divide(other.toQueryColumn())
+
+fun QueryColumn.toOrd(order: Order = Order.ASC): QueryOrderBy = when (order) {
+    Order.ASC -> asc()
+    Order.DESC -> desc()
+}
+
+operator fun QueryCondition.not(): QueryCondition =
+    if (this is OperatorQueryCondition) {  // 如果是OperatorQueryCondition，则需要判断是否已经反转
+        val field = OperatorQueryCondition::class.java.getDeclaredField("operator")
+        field.isAccessible = true
+        val operator = field[this] as? String?
+        if (operator !== null && "NOT" in operator.uppercase()) childCondition
+        else OperatorQueryCondition("NOT ", this)
+    } else OperatorQueryCondition("NOT ", this)

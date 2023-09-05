@@ -58,3 +58,5 @@ WHERE `name` = ? LIMIT 0, 1
 
 > 注意：在kotlin中使用mybatis-flex进行查询时，我们更推荐使用`QueryVector`来替代QueryWrapper进行查询。
 > `QueryVector`能很方便的转换为`QueryWrapper`，且它在使用时，更具有函数式的风格，具备类型限制，因此我们建议大家在kotlin中使用时优先使用。
+
+关于查询矢量更多的内容，请移步[查询矢量介绍](vec.md)

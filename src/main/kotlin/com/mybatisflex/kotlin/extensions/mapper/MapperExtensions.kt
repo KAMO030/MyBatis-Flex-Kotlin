@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,13 +24,22 @@ import com.mybatisflex.kotlin.scope.queryScope
  * 映射器操作扩展
  * @author 卡莫sama
  */
-fun <T> BaseMapper<T>.queryList(init: (QueryScope.() -> Unit)?): List<T> =
+fun <T> BaseMapper<T>.selectListByQuery(init: QueryScope.() -> Unit): List<T> =
     queryScope(init = init).let(this::selectListByQuery)
+
+fun <T> BaseMapper<T>.selectListBCondition(init: () -> QueryCondition): List<T> =
+    init().let(this::selectListByCondition)
+
+fun <T> BaseMapper<T>.updateByQuery(entity: T, init: QueryScope.() -> Unit): Int =
+    this.updateByQuery(entity, queryScope(init = init))
 
 fun <T> BaseMapper<T>.updateByCondition(entity: T, init: () -> QueryCondition): Int =
     this.updateByCondition(entity, init())
 
-fun <T> BaseMapper<T>.delete(init: (QueryScope.() -> Unit)?): Int =
+fun <T> BaseMapper<T>.deleteByQuery(init: QueryScope.() -> Unit): Int =
     queryScope(init = init).let(this::deleteByQuery)
+
+fun <T> BaseMapper<T>.deleteByCondition(init: () -> QueryCondition): Int =
+    init().let(this::deleteByCondition)
 
 

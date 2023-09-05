@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,31 +21,40 @@ import com.mybatisflex.core.audit.ConsoleMessageCollector
 import com.mybatisflex.kotlin.extensions.db.filter
 import com.mybatisflex.kotlin.extensions.db.mapper
 import com.mybatisflex.kotlin.extensions.db.query
+import com.mybatisflex.kotlin.extensions.kproperty.between
 import com.mybatisflex.kotlin.extensions.model.*
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.scope.buildBootstrap
-import com.mybatisflex.kotlin.test.mapper.AccountMapper
 import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.entity.table.AccountTableDef.ACCOUNT
+import com.mybatisflex.kotlin.test.mapper.AccountMapper
+import com.mybatisflex.kotlin.extensions.kproperty.eq
+import com.mybatisflex.kotlin.extensions.kproperty.`in`
+import com.mybatisflex.kotlin.vec.filter
+import com.mybatisflex.kotlin.vec.push
+import com.mybatisflex.kotlin.extensions.vec.vecOf
+import com.mybatisflex.kotlin.vec.findLast
+import com.mybatisflex.kotlin.vec.toList
+import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
+import java.time.Instant
+import java.util.*
 import javax.sql.DataSource
 import kotlin.streams.toList
 
+
 open class KotlinTest {
-    @Test
-    fun testDb() {
-        val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
-            setType(EmbeddedDatabaseType.H2)
-            addScript("schema.sql")
-            addScript("data-kt.sql")
-            build()
-        }
 
-        AuditManager.setAuditEnable(true)
-        AuditManager.setMessageCollector(ConsoleMessageCollector())
+    val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
+        setType(EmbeddedDatabaseType.H2)
+        addScript("schema.sql")
+        addScript("data-kt.sql")
+        build()
+    }
 
+    init {
         buildBootstrap {
 //            此方法体 it 是 MybatisFlexBootstrap 实例
 //            配置Mapper
@@ -71,21 +80,29 @@ open class KotlinTest {
 //            dataSource("dataSource1",dataSource)
 //            dataSource("dataSource2",dataSource)
             }
-//            3.通过原始的方式
-//            it.addDataSource(FlexConsts.NAME,dataSource)
-        }.start()
+//          3.通过原始的方式
+//          it.addDataSource(FlexConsts.NAME,dataSource)
+//          配置日志打印在控制台
+            it.logImpl = StdOutImpl::class.java
 
+        }.start()
+        AuditManager.setAuditEnable(true)
+        AuditManager.setMessageCollector(ConsoleMessageCollector())
+
+    }
+
+    @Test
+    fun testDb() {
 //        查询表对象对应的所有实体数据
-        ACCOUNT.all<Account>().forEach(::println)
+        Account::class.all.forEach(::println)
 //        ACCOUNT.query<Account> {}.forEach(::println)
 
 //        a and (b or c)
 //      filter:
         filter<Account> {
-            ACCOUNT.ID `=` 1 and
-                    (ACCOUNT.AGE `in` (17..19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")))
+            Account::id eq 1 and
+                    (Account::age  `in` (17..19) or (Account::birthday between (Date.from(Instant.parse("2020-01-10T16:00:00Z")) to Date.from(Instant.parse("2020-01-12T16:00:00Z")))))
         }.forEach(::println)
-
 //       query:
         query<Account> {
             from(Account)
@@ -104,30 +121,30 @@ open class KotlinTest {
 //            过滤后修改id再次保存
             .peek { it.id = it.id.plus(2) }.forEach(Model<*>::save)
 //      使用表对象filter或者DB对象有两个泛型的filter方法时方法体内this为表对象无需XXX.AA调用，直接AA
-//         ACCOUNT.filter<Account,AccountTableDef> {
-//           AGE `=` 12 or
-//                `if`(true) { ID `in` listOf(1, 2) }
-//       }.stream().peek(::println).peek { it.id = it.id.plus(6) }.forEach(Entry::save)
+        filter<Account> {
+            ACCOUNT.AGE `=` 12 or
+                    `if`(true) { ACCOUNT.ID `in` listOf(1, 2) }
+        }.stream().peek(::println).peek { it.id = it.id.plus(6) }.forEach(Model<Account>::save)
 
         println("保存后————————")
 //      获得mapper实例通过自定义的默认方法查，并将查到的删除
         mapper<AccountMapper>().findByAge(18, 1, 2).stream().peek { println(it) }.forEach { it.removeById() }
 
         println("删除后————————")
-        Account.all<Account>().stream().peek { println(it) }.map {
+        all<Account>().stream().peek { println(it) }.map {
             it.userName = "kamo"
             it
         }.forEach { it.updateById() }
         println("更新后————————")
 
-        ACCOUNT.all<Account>().stream().peek { println(it) }.map {
+        all<Account>().stream().peek { println(it) }.map {
             it.id = it.id.plus(5)
             it.userName = "akino"
             it
         }.toList().batchInsert()
 
         println("批量插入后————————")
-        ACCOUNT.all<Account>().stream().peek { println(it) }.toList().filter { it.id.rem(2) == 0 }.batchDeleteById()
+        all<Account>().stream().peek { println(it) }.toList().filter { it.id.rem(2) == 0 }.batchDeleteById()
 
         println("批量删除后————————")
         //直接使用函数查询时需指定from表
@@ -137,8 +154,7 @@ open class KotlinTest {
         }.batchUpdateById()
 
         println("批量更新后————————")
-        //使用表对象查询时无需指定from表
-        ACCOUNT.query<Account> {}.forEach(::println)
+        all<Account>().forEach(::println)
     }
 
 }

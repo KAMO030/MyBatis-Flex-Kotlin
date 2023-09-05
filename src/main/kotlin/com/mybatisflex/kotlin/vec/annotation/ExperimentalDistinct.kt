@@ -13,27 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.kotlin.test.mapper
+package com.mybatisflex.kotlin.vec.annotation
 
-import com.mybatisflex.core.BaseMapper
-import com.mybatisflex.kotlin.extensions.mapper.selectListByQuery
-import com.mybatisflex.kotlin.extensions.sql.*
-import com.mybatisflex.kotlin.test.entity.Account
-
-
-@JvmDefaultWithCompatibility
-interface AccountMapper : BaseMapper<Account> {
-
-
-    fun findByAge(age: Int, vararg ids: Int): List<Account> = selectListByQuery {
-        select(Account.ALL_COLUMNS)
-        from(Account)
-        where(Account) {
-            (AGE `=` age) and `if`(ids.isNotEmpty()) {
-                ID `in` ids.asList()
-            }
-        }
-    }
-
-}
-
+/**
+ * 去重功能目前是实验性的。我们目前并没有什么好的方案去替代。
+ */
+@RequiresOptIn(level = RequiresOptIn.Level.ERROR)
+@Retention(AnnotationRetention.BINARY)
+@MustBeDocumented
+annotation class ExperimentalDistinct

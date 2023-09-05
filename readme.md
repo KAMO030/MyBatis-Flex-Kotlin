@@ -29,18 +29,30 @@
 **【Kotlin】**
 ```kotlin
 dependencies {
+    //kt扩展库
     implementation("com.mybatis-flex:mybatis-flex-kotlin:$version")
+    //核心库
+    implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
 ```
 
 **【Maven】**
 
 ```xml
-<dependency>
-    <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-kotlin</artifactId>
-    <version>${mybatis-flex-kotlin.version}</version>
-</dependency>
+<dependencies>
+    <!--kt扩展库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-kotlin</artifactId>
+        <version>${mybatis-flex-kotlin.version}</version>
+    </dependency>
+    <!--核心库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-core</artifactId>
+        <version>${mybatis-flex-core.version}</version>
+    </dependency>
+</dependencies>
 ```
 
 **第 2 步：创建数据库表与配置数据源**
@@ -87,7 +99,7 @@ fun main() {
                     (ACCOUNT.AGE `in` (17..19) or (ACCOUNT.BIRTHDAY between ("2020-01-10" to "2020-01-12")))
         }.forEach(::println)
         //查询全部数据并打印
-        //ACCOUNT.all<Account>().forEach(::println)
+        //all<Account>().forEach(::println)
 }
 ```
 执行的SQL：
@@ -105,16 +117,10 @@ Account(id=1, userName=张三, age=18, birthday=Sat Jan 11 00:00:00 CST 2020)
 >
 > 若觉得 APT 使用不习惯，也可以使用代码生成器来生成。点击 [代码生成器文档](https://mybatis-flex.com/zh/others/codegen.html) 了解。
 
-[comment]: <> (## 更多使用)
+## 更多使用
 
-[comment]: <> (- 功能 1：[Bootstrap简化配置]&#40;&#41;)
-
-[comment]: <> (- 功能 2：[简单查询]&#40;&#41;)
-
-[comment]: <> (- 功能 3：[表实体扩展]&#40;&#41;)
-
-[comment]: <> (- 功能 4：[SQL扩展/中缀]&#40;&#41;)
-
-[comment]: <> (- 功能 5：[Mapper扩展]&#40;&#41;)
+- 功能 1：[Bootstrap简化配置](docs/bootstrapExt.md)
+- 功能 2：[简单查询与扩展]()
+- 功能 3：[矢量查询](docs/vecSimple.md)
 
 [comment]: <> (###### TODO ...)
