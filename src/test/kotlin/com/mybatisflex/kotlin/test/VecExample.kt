@@ -1,19 +1,35 @@
+/*
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  <p>
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  <p>
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  <p>
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package com.mybatisflex.kotlin.test
 
 import com.mybatisflex.core.MybatisFlexBootstrap
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.kotlin.flexStream.alias
-import com.mybatisflex.kotlin.flexStream.eq
-import com.mybatisflex.kotlin.flexStream.ge
+import com.mybatisflex.kotlin.extensions.kproperty.`as`
+import com.mybatisflex.kotlin.extensions.kproperty.eq
+import com.mybatisflex.kotlin.extensions.kproperty.ge
+import com.mybatisflex.kotlin.extensions.vec.vecOf
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.entity.table.AccountTableDef
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
-import com.mybatisflex.kotlin.test.mapper.EmpMapper
 import com.mybatisflex.kotlin.vec.*
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
-import org.springframework.jdbc.datasource.SingleConnectionDataSource
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
 import kotlin.test.assertEquals
@@ -24,14 +40,13 @@ class VecExample {
 
     init {
         buildBootstrap {
-            it.addMapper(EmpMapper::class.java)
             it.addMapper(AccountMapper::class.java)
-            it.dataSource = SingleConnectionDataSource(
-                "jdbc:mysql://localhost:3306/homo",
-                "root",
-                "123456",
-                true
-            )
+            it.dataSource = EmbeddedDatabaseBuilder().run {
+                setType(EmbeddedDatabaseType.H2)
+                addScript("schema.sql")
+                addScript("data-kt.sql")
+                build()
+            }
             it.logImpl = StdOutImpl::class.java
         }.start()
     }
@@ -60,7 +75,7 @@ class VecExample {
     @Test
     fun select(): Unit = with(AccountTableDef.ACCOUNT) {
         val vec = vecOf<Account>()
-        val filterColumn = vec.filterColumns { listOf(it::id, it::userName) }
+        val filterColumn = vec.filterProperties { listOf(it::id, it::userName) }
 
         val query = QueryWrapper()
         query.select(ID, USER_NAME).from(this)
@@ -73,7 +88,7 @@ class VecExample {
     @Test
     fun selectAs(): Unit = with(AccountTableDef.ACCOUNT) {
         val vec = vecOf<Account>("a")
-        val aggregation = vec.aggregationByIter { listOf(it::id alias "accountId", USER_NAME) }
+        val aggregation = vec.filterColumns { listOf(it::id `as`  "accountId", USER_NAME) }
         val query: QueryWrapper = QueryWrapper()
             .select(
                 ID.`as`("accountId"), USER_NAME

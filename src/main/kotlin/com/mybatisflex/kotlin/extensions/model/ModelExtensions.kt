@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,64 +16,36 @@
 package com.mybatisflex.kotlin.extensions.model
 
 import com.mybatisflex.core.activerecord.Model
-import com.mybatisflex.core.mybatis.Mappers
-import com.mybatisflex.core.query.QueryColumn
-import com.mybatisflex.core.query.QueryCondition
-import com.mybatisflex.core.row.Db.*
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.row.RowUtil
-import com.mybatisflex.core.table.TableDef
-import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.core.util.SqlUtil
 import com.mybatisflex.kotlin.extensions.db.*
-import com.mybatisflex.kotlin.scope.QueryScope
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 /*
  * 实体操作扩展
- * @author 卡莫sama(yuanjiashuai)
+ * @author 卡莫sama
  */
 
-infix fun <T> Row.to(entryClass: Class<T>): T {
-    return RowUtil.toEntity(this, entryClass)
-}
+inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
 
-inline fun <reified E, T : TableDef> T.filter(
-    vararg columns: QueryColumn?,
-    init: T.() -> QueryCondition
-): List<E> {
-    val tableInfo = TableInfoFactory.ofEntityClass(E::class.java)
-    return filter<E>(
-        columns = columns,
-        schema = tableInfo.schema,
-        tableName = tableInfo.tableName,
-        queryCondition = init()
-    )
-}
+inline fun <reified E> Collection<Row>.toEntities() = map { it.toEntity<E>() }.toList()
 
-inline fun <reified E> TableDef.query(
-    vararg columns: QueryColumn?,
-    noinline init: QueryScope.() -> Unit
-): List<E> {
-    return query<E>(
-        columns = columns,
-        schema = this.schema,
-        tableName = this.tableName,
-        init = init
-    )
-}
+inline fun <reified E : Any> all(): List<E> =
+    E::class.mapper.selectAll()
 
-inline fun <reified E> TableDef.all(): List<E> = selectAll(schema, tableName).toEntities<E>()
+val <E : Any> KClass<E>.all: List<E>
+    get() = mapper.selectAll()
 
-inline fun <reified E> Collection<Row>.toEntities() = map { it to E::class.java }.toList()
+inline fun <reified E : Model<E>> List<E>.batchInsert() = E::class.mapper.insertBatch(this)
 
-inline fun<reified E:Model<E>> List<E>.batchInsert() = Mappers.ofEntityClass(E::class.java).insertBatch(this)
+fun <E : Model<E>> List<E>.batchUpdateById(): Boolean = all(Model<E>::updateById)
 
-fun< E:Model<E>> List<E>.batchUpdateById(): Boolean = all(Model<E>::updateById)
-
-inline fun<reified E:Model<E>> List<E>. batchDeleteById(): Boolean {
+inline fun <reified E : Model<E>> List<E>.batchDeleteById(): Boolean {
+    val tableInfo = E::class.tableInfo
     //拿到集合中所有实体的主键
-    val primaryValues = this.map { it.pkValues() }.flatMap(Array<*>::toMutableList).map { it as Serializable }
-    return SqlUtil.toBool(Mappers.ofEntityClass(E::class.java).deleteBatchByIds(primaryValues))
+    val primaryValues = this.map { tableInfo.getPkValue(it) as Serializable }
+    return SqlUtil.toBool(E::class.mapper.deleteBatchByIds(primaryValues))
 }
 
