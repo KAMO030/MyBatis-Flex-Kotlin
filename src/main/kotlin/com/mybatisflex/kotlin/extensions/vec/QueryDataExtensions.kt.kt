@@ -16,10 +16,11 @@
 package com.mybatisflex.kotlin.extensions.vec
 
 import com.mybatisflex.core.query.CPI
+import com.mybatisflex.core.query.QueryTable
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.row.Row
-import com.mybatisflex.core.table.TableDefs
 import com.mybatisflex.core.util.MapperUtil
+import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.vec.DistinctQueryWrapper
 import com.mybatisflex.kotlin.vec.QueryData
 import com.mybatisflex.kotlin.vec.QueryVector
@@ -30,9 +31,10 @@ import kotlin.contracts.contract
 
 @OptIn(ExperimentalDistinct::class)
 fun QueryData.wrap(): QueryWrapper = (if (distinct) DistinctQueryWrapper() else QueryWrapper()).apply {
+    val tableInfo = this@wrap.tableInfo
     select(*columns.toTypedArray())
-    from(table)
-    if (tableAlias != table.tableName) `as`(tableAlias)
+    from(QueryTable(tableInfo.schema, tableInfo.tableName))
+    if (tableAlias != tableInfo.tableName) `as`(tableAlias)
     condition?.let {
         where(it)
     }
@@ -59,7 +61,7 @@ fun QueryData.wrap(): QueryWrapper = (if (distinct) DistinctQueryWrapper() else 
 @ExperimentalConvert
 inline fun <reified T : Any> QueryWrapper.toQueryData() = QueryData(
     columns = CPI.getSelectColumns(this),
-    table = TableDefs.getTableDef(T::class.java, CPI.getQueryTables(this).first().nameWithSchema),
+    tableInfo = T::class.tableInfo,
     condition = CPI.getWhereQueryCondition(this),
     groupBy = CPI.getGroupByColumns(this),
     having = CPI.getHavingQueryCondition(this),

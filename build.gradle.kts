@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "com.maybatisflex"
+group = "com.mybatis-flex"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -19,15 +19,14 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testImplementation("com.mysql:mysql-connector-j:8.0.33")
     testImplementation("com.mybatis-flex:mybatis-flex-spring:1.6.2")
-    kaptTest("com.mybatis-flex:mybatis-flex-processor:1.6.2")
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
-tasks.withType<KotlinCompile>{
-    kotlinOptions{
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
         freeCompilerArgs += "-Xjvm-default=all"
     }
 }
@@ -38,7 +37,6 @@ kotlin {
 
 plugins {
     kotlin("jvm") version "1.9.0"
-    kotlin("kapt") version "1.9.0"
     application
 }
 

@@ -22,6 +22,7 @@ import com.mybatisflex.core.table.TableDef
 import com.mybatisflex.core.table.TableDefs
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.vec.wrap
 
 open class QueryVector<E>(
@@ -32,9 +33,8 @@ open class QueryVector<E>(
     companion object {
         inline operator fun <reified E : Any> invoke(tableAlias: String? = null): QueryVector<E> {
             val clazz = E::class.java
-            val tableDef = TableDefs.getTableDef(clazz, TableInfoFactory.ofEntityClass(clazz).tableNameWithSchema)
-                ?: throw IllegalArgumentException("QueryVector cannot be initialized by class $clazz, which does not have a corresponding TableDef.")
-            return QueryVector(clazz, QueryData(table = tableDef, tableAlias = tableAlias ?: tableDef.tableName))
+            val tableInfo = E::class.tableInfo
+            return QueryVector(clazz, QueryData(tableInfo = tableInfo, tableAlias = tableAlias ?: tableInfo.tableName))
         }
     }
 

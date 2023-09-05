@@ -17,13 +17,11 @@ package com.mybatisflex.kotlin.test
 
 import com.mybatisflex.core.MybatisFlexBootstrap
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.kotlin.extensions.kproperty.`as`
-import com.mybatisflex.kotlin.extensions.kproperty.eq
-import com.mybatisflex.kotlin.extensions.kproperty.ge
+import com.mybatisflex.kotlin.extensions.kproperty.*
 import com.mybatisflex.kotlin.extensions.vec.vecOf
+import com.mybatisflex.kotlin.extensions.wrapper.from
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
-import com.mybatisflex.kotlin.test.entity.table.AccountTableDef
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
 import com.mybatisflex.kotlin.vec.*
 import org.apache.ibatis.logging.stdout.StdOutImpl
@@ -61,24 +59,25 @@ class VecExample {
     }
 
     @Test
-    fun filter(): Unit = with(AccountTableDef.ACCOUNT) {
+    fun filter() {
         val vec = vecOf<Account>()
         val filter = vec.filter { it::id ge 100 }
 
         val query = QueryWrapper()
-        query.where(ID.ge(100)).from(this)
+        query.where(Account::id ge 100).from(Account::class)
 
         assertEquals(filter.sql, query.toSQL())
         assertEquals(filter.toList(), accountMapper.selectListByQuery(query))
     }
 
     @Test
-    fun select(): Unit = with(AccountTableDef.ACCOUNT) {
+    fun select() {
         val vec = vecOf<Account>()
         val filterColumn = vec.filterProperties { listOf(it::id, it::userName) }
 
-        val query = QueryWrapper()
-        query.select(ID, USER_NAME).from(this)
+        val query = QueryWrapper().also {
+            it.select(Account::id.column, Account::userName.column).from(Account::class)
+        }
 
         assertEquals(filterColumn.sql, query.toSQL())
         assertEquals(filterColumn.toList(), accountMapper.selectListByQuery(query))
@@ -86,16 +85,18 @@ class VecExample {
     }
 
     @Test
-    fun selectAs(): Unit = with(AccountTableDef.ACCOUNT) {
+    fun selectAs() {
         val vec = vecOf<Account>("a")
-        val aggregation = vec.filterColumns { listOf(it::id `as`  "accountId", USER_NAME) }
+        val aggregation = vec.filterColumns { listOf(it::id `as` "accountId", it::userName.column) }
         val query: QueryWrapper = QueryWrapper()
             .select(
-                ID.`as`("accountId"), USER_NAME
+                Account::id.`as`("accountId"), Account::userName.column
             )
-            .from(`as`("a"))
+            .from(Account::class).`as`("a")
 
         assertEquals(aggregation.sql, query.toSQL())
 
     }
 }
+
+

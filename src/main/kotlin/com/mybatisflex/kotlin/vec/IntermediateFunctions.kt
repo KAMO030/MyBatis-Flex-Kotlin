@@ -19,10 +19,10 @@ import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.sql.not
 import com.mybatisflex.kotlin.extensions.sql.toOrd
 import com.mybatisflex.kotlin.vec.annotation.ExperimentalDistinct
-import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumn
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -49,7 +49,7 @@ inline fun <E: Any> QueryVector<E>.filterProperty(predicate: (E) -> KProperty<*>
     contract {
         callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
     }
-    return copy(data = data.copy(columns = data.columns + predicate(entity).toQueryColumn()))
+    return copy(data = data.copy(columns = data.columns + predicate(entity).column))
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -57,7 +57,7 @@ inline fun <E: Any> QueryVector<E>.filterProperties(predicate: (E) -> Iterable<K
     contract {
         callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
     }
-    return copy(data = data.copy(columns = data.columns + predicate(entity).map { it.toQueryColumn() }))
+    return copy(data = data.copy(columns = data.columns + predicate(entity).map { it.column }))
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -65,7 +65,7 @@ inline fun <E: Any> QueryVector<E>.groupBy(groupBy: (E) -> KProperty<*>): QueryV
     contract {
         callsInPlace(groupBy, InvocationKind.EXACTLY_ONCE)
     }
-    return copy(data = data.copy(groupBy = data.groupBy + groupBy(entity).toQueryColumn()))
+    return copy(data = data.copy(groupBy = data.groupBy + groupBy(entity).column))
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -73,7 +73,7 @@ inline fun <E: Any> QueryVector<E>.groupByIter(groupBy: (E) -> Iterable<KPropert
     contract {
         callsInPlace(groupBy, InvocationKind.EXACTLY_ONCE)
     }
-    return copy(data = data.copy(groupBy = data.groupBy + groupBy(entity).map { it.toQueryColumn() }))
+    return copy(data = data.copy(groupBy = data.groupBy + groupBy(entity).map { it.column }))
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -81,7 +81,7 @@ inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(order: Order = Ord
     contract {
         callsInPlace(sortedBy, InvocationKind.EXACTLY_ONCE)
     }
-    return copy(data = data.copy(orderBy = data.orderBy + sortedBy(entity).toQueryColumn().toOrd(order)))
+    return copy(data = data.copy(orderBy = data.orderBy + sortedBy(entity).column.toOrd(order)))
 }
 
 @OptIn(ExperimentalContracts::class)

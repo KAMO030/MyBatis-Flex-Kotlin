@@ -19,19 +19,15 @@ import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.table.TableDef
+import kotlin.reflect.KClass
+
 /**
  * 查询作用域
  * @author 卡莫sama
  * @date 2023/8/7
  */
-class QueryScope :QueryWrapper() {
+class QueryScope : QueryWrapper() {
     companion object CurrentQueryScope : ThreadLocal<QueryScope>()
-
-    fun from(init: (QueryScope.() -> Unit)? = null): QueryWrapper = this.from(queryScope(init = init))
-
-    fun <T : TableDef> where(tableDef: T, build: T.() -> QueryCondition): QueryWrapper = this.where(build(tableDef))
-
-    fun where(build: QueryScope.() -> QueryCondition): QueryWrapper = this.where(build(this))
 
     operator fun String.get(name: String): QueryColumn = QueryColumn(this, name)
 

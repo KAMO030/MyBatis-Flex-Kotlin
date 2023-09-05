@@ -18,7 +18,6 @@ package com.mybatisflex.kotlin.test.entity
 import com.mybatisflex.annotation.Id
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.core.activerecord.Model
-import com.mybatisflex.kotlin.test.entity.table.AccountTableDef
 import java.util.*
 /**
  * 测试用数据类（最好不要写成data class，否则没有无参构造需要与数据库字段数据顺序一致）
@@ -32,8 +31,6 @@ data class Account(
     var age: Int? = null,
     var birthday: Date? = null,
 ) : Model<Account>(){
-   companion object : AccountTableDef()
-
     override fun toString(): String {
         return "Account(id=$id, userName=$userName, birthday=$birthday, age=$age)"
     }
