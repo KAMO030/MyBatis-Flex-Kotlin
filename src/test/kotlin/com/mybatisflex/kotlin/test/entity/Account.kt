@@ -16,7 +16,6 @@
 package com.mybatisflex.kotlin.test.entity
 
 import com.mybatisflex.annotation.Id
-import com.mybatisflex.annotation.NoneListener
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.kotlin.test.entity.table.AccountTableDef
