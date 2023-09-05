@@ -26,9 +26,11 @@ import java.lang.reflect.Field
 import kotlin.reflect.KProperty
 import kotlin.reflect.jvm.javaField
 
-fun <T> KProperty<T?>.toQueryColumn(): QueryColumn = requireNotNull(javaField) {
-    "Cannot convert to ${Field::class.java.canonicalName} because the property has no backing field."
-}.toQueryColumn()
+
+val KProperty<*>.column: QueryColumn
+    get() = requireNotNull(javaField) {
+        "Cannot convert to ${Field::class.java.canonicalName} because the property has no backing field."
+    }.toQueryColumn()
 
 fun Field.toQueryColumn(): QueryColumn {
     val from = declaringClass
@@ -38,40 +40,40 @@ fun Field.toQueryColumn(): QueryColumn {
     )
 }
 
-fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = toQueryColumn().toOrd(order)
+fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = column.toOrd(order)
 
-infix fun <T : Comparable<T>> KProperty<T?>.eq(other: T): QueryCondition = toQueryColumn().eq(other)
+infix fun <T : Comparable<T>> KProperty<T?>.eq(other: T): QueryCondition = column.eq(other)
 
-infix fun <T : Comparable<T>> KProperty<T?>.gt(other: T): QueryCondition = toQueryColumn().gt(other)
+infix fun <T : Comparable<T>> KProperty<T?>.gt(other: T): QueryCondition = column.gt(other)
 
-infix fun <T : Comparable<T>> KProperty<T?>.ge(other: T): QueryCondition = toQueryColumn().ge(other)
+infix fun <T : Comparable<T>> KProperty<T?>.ge(other: T): QueryCondition = column.ge(other)
 
-infix fun <T : Comparable<T>> KProperty<T?>.lt(other: T): QueryCondition = toQueryColumn().lt(other)
+infix fun <T : Comparable<T>> KProperty<T?>.lt(other: T): QueryCondition = column.lt(other)
 
-infix fun <T : Comparable<T>> KProperty<T?>.le(other: T): QueryCondition = toQueryColumn().le(other)
+infix fun <T : Comparable<T>> KProperty<T?>.le(other: T): QueryCondition = column.le(other)
 
 infix fun <T : Comparable<T>> KProperty<T?>.between(other: ClosedRange<T>): QueryCondition =
-    toQueryColumn().between(other.start, other.endInclusive)
+    column.between(other.start, other.endInclusive)
 
 infix fun <T : Comparable<T>> KProperty<T?>.between(other: Pair<T, T>): QueryCondition =
-    toQueryColumn().between(other.first, other.second)
+    column.between(other.first, other.second)
 
 infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: ClosedRange<T>): QueryCondition =
-    toQueryColumn().notBetween(other.start, other.endInclusive)
+    column.notBetween(other.start, other.endInclusive)
 
 infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: Pair<T, T>): QueryCondition =
-    toQueryColumn().notBetween(other.first, other.second)
+    column.notBetween(other.first, other.second)
 
-infix fun KProperty<String?>.like(other: String): QueryCondition = toQueryColumn().likeRaw(other)
+infix fun KProperty<String?>.like(other: String): QueryCondition = column.likeRaw(other)
 
-infix fun KProperty<String?>.startsWith(other: String): QueryCondition = toQueryColumn().likeLeft(other)
+infix fun KProperty<String?>.startsWith(other: String): QueryCondition = column.likeLeft(other)
 
-infix fun KProperty<String?>.endsWith(other: String): QueryCondition = toQueryColumn().likeRight(other)
+infix fun KProperty<String?>.endsWith(other: String): QueryCondition = column.likeRight(other)
 
-infix fun KProperty<String?>.contains(other: String): QueryCondition = toQueryColumn().like(other)
+infix fun KProperty<String?>.contains(other: String): QueryCondition = column.like(other)
 
 infix fun KProperty<String?>.notLike(other: String): QueryCondition =
-    QueryCondition.create(toQueryColumn(), SqlConsts.NOT_LIKE, other)
+    QueryCondition.create(column, SqlConsts.NOT_LIKE, other)
 
 infix fun KProperty<Int?>.`in`(other: IntRange): QueryCondition = this inList other.toList()
 
@@ -83,7 +85,7 @@ infix fun <T : Comparable<T>> KProperty<T?>.inList(other: Collection<T>): QueryC
     require(other.isNotEmpty()) {
         "The collection must not be empty."
     }
-    val queryColumn = toQueryColumn()
+    val queryColumn = column
     return if (other.size == 1) queryColumn.eq(other.first()) else queryColumn.`in`(other)
 }
 
@@ -91,42 +93,45 @@ infix fun <T : Comparable<T>> KProperty<T?>.inArray(other: Array<out T>): QueryC
     require(other.isNotEmpty()) {
         "The array must not be empty."
     }
-    val queryColumn = toQueryColumn()
+    val queryColumn = column
     return if (other.size == 1) queryColumn.eq(other[0]) else queryColumn.`in`(other)
 }
 
-infix fun <T> KProperty<T?>.alias(other: String): QueryColumn = toQueryColumn().`as`(other)
+infix fun <T> KProperty<T?>.alias(other: String): QueryColumn = column.`as`(other)
 
-infix fun <T> KProperty<T?>.`as`(other: String): QueryColumn = toQueryColumn().`as`(other)
+infix fun <T> KProperty<T?>.`as`(other: String): QueryColumn = column.`as`(other)
 
-operator fun <T : Number> KProperty<T?>.plus(other: QueryColumn): QueryColumn = toQueryColumn() + other
+operator fun <T : Number> KProperty<T?>.plus(other: QueryColumn): QueryColumn = column + other
 
-operator fun <T : Number> KProperty<T?>.plus(other: KProperty<T?>): QueryColumn =
-    toQueryColumn() + other.toQueryColumn()
+operator fun <T : Number> KProperty<T?>.plus(other: KProperty<T?>): QueryColumn = column + other.column
 
-operator fun <T : Number> KProperty<T?>.plus(other: T): QueryColumn = toQueryColumn() + other
+operator fun <T : Number> KProperty<T?>.plus(other: T): QueryColumn = column + other
 
-operator fun <T : Number> KProperty<T?>.minus(other: QueryColumn): QueryColumn = toQueryColumn() - other
+operator fun <T : Number> KProperty<T?>.minus(other: QueryColumn): QueryColumn = column - other
 
-operator fun <T : Number> KProperty<T?>.minus(other: KProperty<T?>): QueryColumn =
-    toQueryColumn() - other.toQueryColumn()
+operator fun <T : Number> KProperty<T?>.minus(other: KProperty<T?>): QueryColumn = column - other.column
 
-operator fun <T : Number> KProperty<T?>.minus(other: T): QueryColumn = toQueryColumn() - other
+operator fun <T : Number> KProperty<T?>.minus(other: T): QueryColumn = column - other
 
-operator fun <T : Number> KProperty<T?>.times(other: QueryColumn): QueryColumn = toQueryColumn() * other
+operator fun <T : Number> KProperty<T?>.times(other: QueryColumn): QueryColumn = column * other
 
-operator fun <T : Number> KProperty<T?>.times(other: KProperty<T?>): QueryColumn =
-    toQueryColumn() * other.toQueryColumn()
+operator fun <T : Number> KProperty<T?>.times(other: KProperty<T?>): QueryColumn = column * other.column
 
-operator fun <T : Number> KProperty<T?>.times(other: T): QueryColumn = toQueryColumn() * other
+operator fun <T : Number> KProperty<T?>.times(other: T): QueryColumn = column * other
 
-operator fun <T : Number> KProperty<T?>.div(other: QueryColumn): QueryColumn = toQueryColumn() / other
+operator fun <T : Number> KProperty<T?>.div(other: QueryColumn): QueryColumn = column / other
 
-operator fun <T : Number> KProperty<T?>.div(other: KProperty<T?>): QueryColumn = toQueryColumn() / other.toQueryColumn()
+operator fun <T : Number> KProperty<T?>.div(other: KProperty<T?>): QueryColumn = column / other.column
 
-operator fun <T : Number> KProperty<T?>.div(other: T): QueryColumn = toQueryColumn() / other
+operator fun <T : Number> KProperty<T?>.div(other: T): QueryColumn = column / other
 
-fun <T> KProperty<T?>.isNull(): QueryCondition = toQueryColumn().isNull
+operator fun KProperty<*>.unaryPlus(): QueryOrderBy = this.column.asc()
 
-fun <T> KProperty<T?>.isNotNull(): QueryCondition = toQueryColumn().isNotNull
+operator fun KProperty<*>.unaryMinus(): QueryOrderBy = this.column.desc()
+
+fun <T> KProperty<T?>.isNull(): QueryCondition = column.isNull
+
+fun <T> KProperty<T?>.isNotNull(): QueryCondition = column.isNotNull
+
+
 

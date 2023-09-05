@@ -22,10 +22,12 @@ import com.mybatisflex.kotlin.extensions.db.filter
 import com.mybatisflex.kotlin.extensions.db.mapper
 import com.mybatisflex.kotlin.extensions.db.query
 import com.mybatisflex.kotlin.extensions.kproperty.between
+import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.kproperty.eq
 import com.mybatisflex.kotlin.extensions.kproperty.`in`
 import com.mybatisflex.kotlin.extensions.model.*
 import com.mybatisflex.kotlin.extensions.sql.*
+import com.mybatisflex.kotlin.extensions.wrapper.from
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
@@ -101,10 +103,10 @@ open class KotlinTest {
         }.forEach(::println)
 //       query:
         query<Account> {
-            from(Account)
-            where(Account) {
+            from(Account::class)
+            where (
                 (Account::age `in` (17..19) and (Account::birthday between (start to end)))
-            } orderBy -Account.ID
+            ) orderBy - Account::id.column
         }.forEach(::println)
 
 //        查询表对象对应的实体数据并根据条件过滤
@@ -124,7 +126,7 @@ open class KotlinTest {
 
         println("保存后————————")
 //      获得mapper实例通过自定义的默认方法查，并将查到的删除
-        mapper<AccountMapper>().findByAge(18, 1, 2).stream().peek { println(it) }.forEach { it.removeById() }
+        mapper<AccountMapper>().findByAge(18, 1).stream().peek { println(it) }.forEach { it.removeById() }
 
         println("删除后————————")
         all<Account>().stream().peek { println(it) }.map {
@@ -144,7 +146,7 @@ open class KotlinTest {
 
         println("批量删除后————————")
         //直接使用函数查询时需指定from表
-        query<Account> { from(Account) }.stream().peek { println(it) }.toList().filter { it.id.rem(3) == 0 }.map {
+        query<Account> { from(Account::class)}.stream().peek { println(it) }.toList().filter { it.id.rem(3) == 0 }.map {
             it.userName = "cloud-player"
             it
         }.batchUpdateById()

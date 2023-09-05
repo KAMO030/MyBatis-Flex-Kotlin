@@ -16,7 +16,7 @@
 package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.query.*
-import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumn
+import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.vec.Order
 import java.util.function.Consumer
 import kotlin.reflect.KProperty
@@ -114,25 +114,25 @@ operator fun QueryColumn.plus(other: QueryColumn): QueryColumn = add(other)
 
 operator fun QueryColumn.plus(other: Number): QueryColumn = add(other)
 
-operator fun QueryColumn.plus(other: KProperty<Number?>): QueryColumn = add(other.toQueryColumn())
+operator fun QueryColumn.plus(other: KProperty<Number?>): QueryColumn = add(other.column)
 
 operator fun QueryColumn.minus(other: QueryColumn): QueryColumn = subtract(other)
 
 operator fun QueryColumn.minus(other: Number): QueryColumn = subtract(other)
 
-operator fun QueryColumn.minus(other: KProperty<Number?>): QueryColumn = subtract(other.toQueryColumn())
+operator fun QueryColumn.minus(other: KProperty<Number?>): QueryColumn = subtract(other.column)
 
 operator fun QueryColumn.times(other: QueryColumn): QueryColumn = multiply(other)
 
 operator fun QueryColumn.times(other: Number): QueryColumn = multiply(other)
 
-operator fun QueryColumn.times(other: KProperty<Number?>): QueryColumn = multiply(other.toQueryColumn())
+operator fun QueryColumn.times(other: KProperty<Number?>): QueryColumn = multiply(other.column)
 
 operator fun QueryColumn.div(other: QueryColumn): QueryColumn = divide(other)
 
 operator fun QueryColumn.div(other: Number): QueryColumn = divide(other)
 
-operator fun QueryColumn.div(other: KProperty<Number?>): QueryColumn = divide(other.toQueryColumn())
+operator fun QueryColumn.div(other: KProperty<Number?>): QueryColumn = divide(other.column)
 
 fun QueryColumn.toOrd(order: Order = Order.ASC): QueryOrderBy = when (order) {
     Order.ASC -> asc()

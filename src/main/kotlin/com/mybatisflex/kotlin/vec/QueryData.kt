@@ -18,7 +18,7 @@ package com.mybatisflex.kotlin.vec
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
-import com.mybatisflex.core.table.TableDef
+import com.mybatisflex.core.table.TableInfo
 
 /**
  * 查询时的对应数据。
@@ -34,7 +34,7 @@ import com.mybatisflex.core.table.TableDef
  */
 data class QueryData(
     val columns: List<QueryColumn> = emptyList(),
-    val table: TableDef,
+    val tableInfo: TableInfo,
     val condition: QueryCondition? = null,
     val groupBy: List<QueryColumn> = emptyList(),
     val having: QueryCondition? = null,
@@ -42,5 +42,5 @@ data class QueryData(
     val orderBy: List<QueryOrderBy> = emptyList(),
     val offset: Long = 0L,
     val rows: Long = -1L,
-    val tableAlias: String = table.tableName
+    val tableAlias: String = tableInfo.tableName
 )
