@@ -43,7 +43,6 @@ class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBoot
 
 class DataSourceScope(private val bootstrap: MybatisFlexBootstrap) {
 
-
     fun dataSource(dataSourceKey: String, dataSource: DataSource) =
         bootstrap.addDataSource(dataSourceKey, dataSource)
 
