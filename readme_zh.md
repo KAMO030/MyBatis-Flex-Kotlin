@@ -1,9 +1,45 @@
 # 基于 Kotlin 扩展 Mybatis-Flex
 
+> MyBatis-Flex-Kotlin 是一个 [Mybatis-Flex](https://mybatis-flex.com) 框架的扩展模块，
+> 它继承了 Mybatis-Flex 轻量的特性，同时拥有 Kotlin 特有的扩展方法、中缀表达式与DSL等语法支持，
+> 使其拥有了更高的灵活性。让我们可以更加轻松的在 Kotlin 中使用 Mybaits-Flex 所带来的开发效率和开发体验。
+
 ## 特点
 
-- 本模块基于 [Mybatis-Flex](https://mybatis-flex.com) 核心库 ，只做扩展不做改变
-- 结合 Kotlin 特性、DSL让数据库操作更简单
+- 轻量：只基于 Mybatis-Flex 核心库 ，只做扩展不做改变
+- 灵活：结合 Kotlin 特性、DSL让数据库操作更简单
+
+## 亮点
+
+- 快速构建启动：通过DSL➕重载运算符，快速配置 MybatisFlexBootstrap 实例并启动：
+    ```kotlin
+    buildBootstrap {
+        // 配置数据源 相当于 setDataSource(dataSource)
+        +dataSource
+        // 配置Mapper 相当于 addMapper(AccountMapper::class.java)
+        +AccountMapper::class.java
+        // 配置日志输出 相当于 setLogImpl(StdOutImpl::class.java)
+        it.logImpl = StdOutImpl::class.java
+    }.start()
+    ```
+- 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供两个函数：all, filter 和 query )
+  - `all<Account>()` 查泛型对应的表的所有数据
+  - `filter<Account>(vararg columns: QueryColumn?, condition: ()->QueryCondition)` 按条件查泛型对应的表的数据
+  - `query<Account>(queryScope: QueryScope.()->Unit)` 较复杂查泛型对应的表的数据,如分组排序等
+- 简明地构建条件：通过中缀表达式➕扩展方法能更加简单明了的构建条件:
+  ```kotlin
+  query<Account>{
+      select{listOf(Account::id,Account::userName)}
+      where{
+          Account::age `in` (17..19) 
+      } orderBy  - Account::id
+  }
+  ```
+- 摆脱APT: 使用扩展方法摆脱对 APT(注解处理器) 的使用,直接使用属性引用让代码更加灵活优雅:
+  >  使用APT: `ACCOUNT.ID eq 1` ,使用属性引用: `Account::id eq 1`
+  >  (少依赖一个模块且不用开启注解处理器功能)
+- 属性类型约束：使用泛型➕扩展方法对操作的属性进行类型约束:
+  > 如: Account 中 age 属性为 Int 类型,那么 `Account::age between (17 to 19)`而 `Account::age between ("17" to "19")`则会报错提醒
 
 ## 快速开始
 
@@ -15,7 +51,7 @@
 
 > 本文档涉及到的 [演示源码](https://gitee.com/mybatis-flex/mybatis-flex-kotlin/tree/main/src/test/kotlin/com/mybatisflex/kotlin/test) 已经全部上传
 > 在开始之前，您也可以先下载到本地，导入到 idea 开发工具后，在继续看文档。
->
+> 
 > 在 [Mybatis-Flex源项目](https://mybatis-flex.com) 中所介绍的功能本文档不再过多赘述建议，本文档只对 Mybatis-Flex 在 Kotlin 中特有的用法进行介绍
 
 ### Hello World 文档
@@ -118,6 +154,6 @@ Account(id=1, userName=张三, birthday=2020-01-11 00:00:00.0, age=18)
 
 - 功能 1：[Bootstrap简化配置](docs/bootstrapExt.md)
 - 功能 2：[简单查询与扩展]()
-- 功能 3：[矢量查询](docs/vecSimple.md)
+- 功能 3：[矢量查询](docs/vecSimple.md) (实验性)
 
 [comment]: <> (###### TODO ...)
