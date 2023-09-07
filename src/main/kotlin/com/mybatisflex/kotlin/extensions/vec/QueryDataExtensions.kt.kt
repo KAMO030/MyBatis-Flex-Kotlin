@@ -31,10 +31,9 @@ import kotlin.contracts.contract
 
 @OptIn(ExperimentalDistinct::class)
 fun QueryData.wrap(): QueryWrapper = (if (distinct) DistinctQueryWrapper() else QueryWrapper()).apply {
-    val tableInfo = this@wrap.tableInfo
     select(*columns.toTypedArray())
-    from(QueryTable(tableInfo.schema, tableInfo.tableName))
-    if (tableAlias != tableInfo.tableName) `as`(tableAlias)
+    from(this@wrap.table)
+    if (tableAlias != table.name) `as`(tableAlias)
     condition?.let {
         where(it)
     }
@@ -61,7 +60,7 @@ fun QueryData.wrap(): QueryWrapper = (if (distinct) DistinctQueryWrapper() else 
 @ExperimentalConvert
 inline fun <reified T : Any> QueryWrapper.toQueryData() = QueryData(
     columns = CPI.getSelectColumns(this),
-    tableInfo = T::class.tableInfo,
+    table = T::class.tableInfo.run { QueryTable(schema, tableName) },
     condition = CPI.getWhereQueryCondition(this),
     groupBy = CPI.getGroupByColumns(this),
     having = CPI.getHavingQueryCondition(this),

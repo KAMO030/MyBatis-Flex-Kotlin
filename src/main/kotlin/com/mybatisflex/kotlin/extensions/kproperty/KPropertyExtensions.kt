@@ -24,13 +24,26 @@ import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.vec.Order
 import java.lang.reflect.Field
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
-
+/**
+ * 实例引用时只能用此属性，（如：it::id.column）
+ */
 val KProperty<*>.column: QueryColumn
     get() = requireNotNull(javaField) {
         "Cannot convert to ${Field::class.java.canonicalName} because the property has no backing field."
     }.toQueryColumn()
+
+/**
+ * 类型直接引用用此方法更好，（如：Account::id.column()）
+ */
+inline fun <reified T, V> KProperty1<T, V>.column(): QueryColumn  {
+   return TableInfoFactory.ofEntityClass(T::class.java).getQueryColumnByProperty(name) ?: throw NoSuchElementException(
+        "The attribute $this of class ${T::class.java} could not find the corresponding QueryColumn"
+    )
+}
+
 
 fun Field.toQueryColumn(): QueryColumn {
     val from = declaringClass

@@ -20,8 +20,7 @@ import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.core.row.Db.selectListByQuery
-import com.mybatisflex.core.row.Db.selectOneByQuery
+import com.mybatisflex.core.row.Db.*
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
@@ -29,6 +28,7 @@ import com.mybatisflex.kotlin.extensions.model.toEntities
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSuperclassOf
 
 
 /*
@@ -40,27 +40,23 @@ import kotlin.reflect.KClass
  * 把泛型类型当作mapper类型拿到mapper实例
  * @author 卡莫sama
  */
-inline fun <reified M > mapper(): M = Mappers.ofMapperClass(M::class.java)
-/**
- * 把泛型类型当作mapper类型拿到tableInfo实例
- * @author 卡莫sama
- */
-inline fun <reified M > tableInfo(): TableInfo = TableInfoFactory.ofMapperClass(M::class.java)
-/**
- * 把泛型类型当作实体类型拿到tableInfo实例
- * @author 卡莫sama
- */
-val <E : Any> KClass<E>.tableInfo: TableInfo
-    get() = TableInfoFactory.ofEntityClass(java)
+inline fun <reified M> mapper(): M = Mappers.ofMapperClass(M::class.java)
+
 /**
  * 把泛型类型当作实体类型拿到mapper实例
  * @author 卡莫sama
  */
-val <E : Any> KClass<E>.mapper: BaseMapper<E>
+val <E : Any> KClass<E>.baseMapper: BaseMapper<E>
     get() = Mappers.ofEntityClass(java)
 
+val <E : Any> KClass<E>.tableInfo: TableInfo
+    get() = if (isSuperclassOf(BaseMapper::class)) {
+        TableInfoFactory.ofMapperClass(java)
+    } else {
+        TableInfoFactory.ofEntityClass(java)
+    }
 
-
+//    query-----------
 inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
     schema: String? = null,
@@ -85,7 +81,7 @@ fun queryRow(
 inline fun <reified T> query(
     vararg columns: QueryColumn?,
     noinline init: QueryScope.() -> Unit
-): List<T> =TableInfoFactory.ofEntityClass(T::class.java).run {
+): List<T> = TableInfoFactory.ofEntityClass(T::class.java).run {
     queryRows(schema = schema, tableName = tableName, columns = columns, init = init)
         .toEntities<T>()
 }
@@ -97,7 +93,7 @@ fun queryRows(
     tableName: String? = null,
     init: QueryScope.() -> Unit
 ): List<Row> = selectListByQuery(
-    schema,tableName,queryScope(columns = columns, init = init)
+    schema, tableName, queryScope(columns = columns, init = init)
 )
 
 //    filter-----------
@@ -112,7 +108,7 @@ inline fun <reified E> filter(
     QueryWrapper().select(*columns).where(queryCondition)
 ).toEntities<E>()
 
-inline fun <reified E:Any > filter(
+inline fun <reified E : Any> filter(
     vararg columns: QueryColumn?,
     init: () -> QueryCondition
 ): List<E> {
@@ -125,6 +121,16 @@ inline fun <reified E:Any > filter(
     )
 }
 
+//    insert-----------
+inline fun <reified E : Any> insert(build: E.() -> Unit): Int {
+    val entity = E::class.java.newInstance()
+    entity.build()
+    return E::class.baseMapper.insert(entity)
+}
+
+//    update-----------
+inline fun <reified E : Any> update(entity: E,conditionBlock: (E)->QueryCondition): Int =
+    E::class.baseMapper.updateByCondition(entity,conditionBlock(entity))
 
 
 

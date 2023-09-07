@@ -15,6 +15,7 @@
  */
 package com.mybatisflex.kotlin.test
 
+import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
@@ -38,7 +39,10 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
 import javax.sql.DataSource
+import kotlin.reflect.full.isSubclassOf
 import kotlin.streams.toList
+
+
 
 
 open class KotlinTest {
@@ -89,11 +93,11 @@ open class KotlinTest {
 
     @Test
     fun testDb() {
-//        查询表对象对应的所有实体数据
+//      查询表对象对应的所有实体数据
         Account::class.all.forEach(::println)
-//        ACCOUNT.query<Account> {}.forEach(::println)
+//      all<Account>().forEach(::println)
 
-//        a and (b or c)
+//      a and (b or c)
 //      filter:
         val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
         val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
@@ -103,12 +107,11 @@ open class KotlinTest {
         }.forEach(::println)
 //       query:
         query<Account> {
-            from(Account::class)
             where (
                 (Account::age `in` (17..19) and (Account::birthday between (start to end)))
-            ) orderBy - Account::id.column
+            ) orderBy - Account::id.column()
         }.forEach(::println)
-
+        println(Account::class.isSubclassOf(BaseMapper::class).toString()+"-------")
 //        查询表对象对应的实体数据并根据条件过滤
         filter<Account> {
             Account::age eq 12 or

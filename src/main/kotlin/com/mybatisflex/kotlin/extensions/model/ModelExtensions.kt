@@ -30,15 +30,15 @@ import kotlin.reflect.KClass
 
 inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
 
-inline fun <reified E> Collection<Row>.toEntities() = map { it.toEntity<E>() }.toList()
+inline fun <reified E> Collection<Row>.toEntities(): MutableList<E> = RowUtil.toEntityList(this.toMutableList(), E::class.java)
 
 inline fun <reified E : Any> all(): List<E> =
-    E::class.mapper.selectAll()
+    E::class.baseMapper.selectAll()
 
 val <E : Any> KClass<E>.all: List<E>
-    get() = mapper.selectAll()
+    get() = baseMapper.selectAll()
 
-inline fun <reified E : Model<E>> List<E>.batchInsert() = E::class.mapper.insertBatch(this)
+inline fun <reified E : Model<E>> List<E>.batchInsert() = E::class.baseMapper.insertBatch(this)
 
 fun <E : Model<E>> List<E>.batchUpdateById(): Boolean = all(Model<E>::updateById)
 
@@ -46,6 +46,6 @@ inline fun <reified E : Model<E>> List<E>.batchDeleteById(): Boolean {
     val tableInfo = E::class.tableInfo
     //拿到集合中所有实体的主键
     val primaryValues = this.map { tableInfo.getPkValue(it) as Serializable }
-    return SqlUtil.toBool(E::class.mapper.deleteBatchByIds(primaryValues))
+    return SqlUtil.toBool(E::class.baseMapper.deleteBatchByIds(primaryValues))
 }
 
