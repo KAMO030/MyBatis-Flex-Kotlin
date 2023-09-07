@@ -14,8 +14,8 @@ fun QueryWrapper.from(init: (QueryScope.() -> Unit)? = null): QueryWrapper = thi
 
 fun QueryWrapper.from(vararg entities: KClass<*>): QueryWrapper = this.from(*entities.map { it.java }.toTypedArray())
 
-fun QueryWrapper.select(vararg properties: KProperty<*>): QueryWrapper =
-    this.select(*properties.map { it.column }.toTypedArray())
+fun QueryWrapper.select( properties:()-> Iterable<KProperty<*>>): QueryWrapper =
+    this.select(*(properties().map { it.column }.toTypedArray()))
 
 fun <T : TableDef> QueryWrapper.where(tableDef: T, build: T.() -> QueryCondition): QueryWrapper =
     this.where(build(tableDef))

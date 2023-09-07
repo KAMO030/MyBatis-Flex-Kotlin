@@ -23,6 +23,7 @@ import com.mybatisflex.kotlin.extensions.wrapper.from
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
+import com.mybatisflex.kotlin.extensions.wrapper.select
 import com.mybatisflex.kotlin.vec.*
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
@@ -76,7 +77,7 @@ class VecExample {
         val filterColumn = vec.filterProperties { listOf(it::id, it::userName) }
 
         val query = QueryWrapper().also {
-            it.select(Account::id.column, Account::userName.column).from(Account::class)
+            it.select{ listOf(Account::id, Account::userName) }.from(Account::class)
         }
 
         assertEquals(filterColumn.sql, query.toSQL())
