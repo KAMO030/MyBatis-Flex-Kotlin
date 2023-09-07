@@ -15,11 +15,7 @@
  */
 package com.mybatisflex.kotlin.vec
 
-import com.mybatisflex.core.query.CPI
-import com.mybatisflex.core.query.QueryColumn
-import com.mybatisflex.core.query.QueryCondition
-import com.mybatisflex.core.query.QueryMethods
-import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.core.query.*
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.kotlin.extensions.kproperty.column
@@ -57,7 +53,7 @@ inline fun <reified E : Any, reified R : Comparable<R>> QueryVector<E>.maxBy(sel
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
     val column = selector(entity).column
-    val maxValue = QueryWrapper().select(QueryFunctions.max(column)).from(tableDef)
+    val maxValue = QueryWrapper().select(QueryFunctions.max(column)).from(queryTable)
     return find { column.eq(maxValue) }
 }
 
@@ -78,7 +74,7 @@ inline fun <reified E : Any, reified R : Comparable<R>> QueryVector<E>.minBy(sel
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
     val column = selector(entity).column
-    val minValue = QueryWrapper().select(QueryFunctions.min(column)).from(tableDef)
+    val minValue = QueryWrapper().select(QueryFunctions.min(column)).from(queryTable)
     return find { column.eq(minValue) }
 }
 
@@ -233,7 +229,7 @@ fun <E : Any> QueryVector<E>.isNotEmpty(): Boolean = !isEmpty()
 
 inline fun <reified E : Any> QueryVector<E>.push(entity: E, vararg columns: KProperty1<E, *>): Int {
     if (entity is Row) {
-        return Db.insert(tableDef.schema, tableDef.tableName, entity)
+        return Db.insert(queryTable.schema, queryTable.name, entity)
     }
     return if (columns.isEmpty()) {
         mapper.insert(entity, false)
@@ -241,7 +237,7 @@ inline fun <reified E : Any> QueryVector<E>.push(entity: E, vararg columns: KPro
         val row = columns.associateTo(Row()) {
             it.column.name to it(entity)
         }
-        Db.insert(tableDef.schema, tableDef.tableName, row)
+        Db.insert(queryTable.schema, queryTable.name, row)
     }
 }
 
@@ -252,7 +248,7 @@ inline fun <reified E : Any> QueryVector<E>.removeIf(predicate: (E) -> QueryCond
     }
     val condition = predicate(entity)
     return if (isRow<E>()) {
-        Db.deleteByCondition(tableDef.schema, tableDef.tableName, condition)
+        Db.deleteByCondition(queryTable.schema, queryTable.name, condition)
     } else {
         mapper.deleteByCondition(condition)
     }

@@ -17,24 +17,32 @@ package com.mybatisflex.kotlin.vec
 
 import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.mybatis.Mappers
+import com.mybatisflex.core.query.QueryTable
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.core.table.TableDef
-import com.mybatisflex.core.table.TableDefs
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.vec.wrap
 
-open class QueryVector<E>(
-    open val entityClass: Class<E>,
-    open val data: QueryData,
-    open val entityInstance: E? = null
+class QueryVector<E>(
+    private val entityClass: Class<E>,
+    internal val tableInfo: TableInfo,
+    val data: QueryData,
+    private val entityInstance: E? = null
 ) {
     companion object {
         inline operator fun <reified E : Any> invoke(tableAlias: String? = null): QueryVector<E> {
             val clazz = E::class.java
             val tableInfo = E::class.tableInfo
-            return QueryVector(clazz, QueryData(tableInfo = tableInfo, tableAlias = tableAlias ?: tableInfo.tableName))
+                ?: error("QueryVector cannot be initialized by class $clazz, which does not have a corresponding TableInfo.")
+            return QueryVector(
+                clazz,
+                tableInfo,
+                QueryData(
+                    table = QueryTable(tableInfo.schema, tableInfo.tableName),
+                    tableAlias = tableAlias ?: tableInfo.tableName
+                )
+            )
         }
     }
 
@@ -44,14 +52,9 @@ open class QueryVector<E>(
 
     val sql: String get() = wrapper.toSQL()
 
-    val tableDef: TableDef
-        get() = TableDefs.getTableDef(entityClass, tableInfo.tableNameWithSchema)
-            ?: throw NoSuchElementException("The TableDef corresponding to class $entityClass could not be found")
+    val queryTable: QueryTable
+        get() = data.table
 
-
-    val tableInfo: TableInfo
-        get() = TableInfoFactory.ofEntityClass(entityClass)
-            ?: throw NoSuchElementException("The TableInfo corresponding to class $entityClass could not be found")
 
     val size: Long get() = mapper.selectCountByQuery(wrapper)
 
@@ -60,5 +63,5 @@ open class QueryVector<E>(
     fun copy(
         data: QueryData = this.data,
         entityClass: Class<E> = this.entityClass
-    ) = QueryVector(entityClass, data)
+    ) = QueryVector(entityClass, TableInfoFactory.ofEntityClass(entityClass), data)
 }
