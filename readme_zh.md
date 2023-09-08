@@ -1,6 +1,5 @@
 # 基于 Kotlin 扩展 Mybatis-Flex
-
-> Mybatis-Flex-Kotlin 是一个 [Mybatis-Flex](https://mybatis-flex.com) 框架的扩展模块，
+**MyBatis-Flex-Kotlin 基于 [Mybatis-Flex](https://mybatis-flex.com) 的 Kotlin 扩展模块，方便 Kotlin 开发者使用 MyBatis-Flex 进行开发**
 > 它继承了 Mybatis-Flex 轻量的特性，同时拥有 Kotlin 特有的扩展方法、中缀表达式与DSL等语法支持，
 > 使其拥有了更高的灵活性。让我们可以更加轻松的在 Kotlin 中使用 Mybaits-Flex 所带来的开发效率和开发体验。
 
@@ -37,7 +36,7 @@
             .orderBy(Account::id.column().desc())
     mapper<AccountMapper>().selectListByQuery(queryWrapper)
     ```
-    
+
   * **【扩展方式】**
     ```kotlin
     query<Account> {
@@ -45,16 +44,16 @@
       where { Account::age `in` (17..19) } orderBy -Account::id
     }
     ```
-    
+
 - 摆脱APT: 使用扩展方法摆脱对 APT(注解处理器) 的使用,直接使用属性引用让代码更加灵活优雅:
   >  使用APT: `ACCOUNT.ID eq 1` ,使用属性引用: `Account::id eq 1`
-  > 
+  >
   >  (少依赖一个模块且不用开启注解处理器功能)
 - 属性类型约束：使用泛型➕扩展方法对操作的属性进行类型约束:
   > 如: Account 中 age 属性为 Int 类型
-  > 
-  > 那么使用between时后续参数也必须是Int： `Account::age between (17 to 19)` 
-  > 
+  >
+  > 那么使用between时后续参数也必须是Int： `Account::age between (17 to 19)`
+  >
   > 而如果写成String：`Account::age between ("17" to "19")`则会报错提醒
 
 
@@ -82,10 +81,10 @@
 **【Kotlin】**
 ```kotlin
 dependencies {
-    //kotlin扩展库
-    implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0")
-    //核心库
-    implementation("com.mybatis-flex:mybatis-flex-core:$version")
+  //kotlin扩展库
+  implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0")
+  //核心库
+  implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
 ```
 
@@ -93,18 +92,18 @@ dependencies {
 
 ```xml
 <dependencies>
-    <!--kotlin扩展库-->
-    <dependency>
-        <groupId>com.mybatis-flex</groupId>
-        <artifactId>mybatis-flex-kotlin</artifactId>
-        <version>1.0</version>
-    </dependency>
-    <!--核心库-->
-    <dependency>
-        <groupId>com.mybatis-flex</groupId>
-        <artifactId>mybatis-flex-core</artifactId>
-        <version>${mybatis-flex-core.version}</version>
-    </dependency>
+  <!--kotlin扩展库-->
+  <dependency>
+    <groupId>com.mybatis-flex</groupId>
+    <artifactId>mybatis-flex-kotlin</artifactId>
+    <version>1.0</version>
+  </dependency>
+  <!--核心库-->
+  <dependency>
+    <groupId>com.mybatis-flex</groupId>
+    <artifactId>mybatis-flex-core</artifactId>
+    <version>${mybatis-flex-core.version}</version>
+  </dependency>
 </dependencies>
 ```
 
@@ -119,11 +118,11 @@ dependencies {
 @Table("tb_account")
 class Account {
 
-     @Id
-     var id: Long
-     var userName: String
-     var age: Integer
-     var birthday: Date
+  @Id
+  var id: Long
+  var userName: String
+  var age: Integer
+  var birthday: Date
 
 }
 ```
