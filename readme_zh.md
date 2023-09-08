@@ -1,10 +1,10 @@
 # 基于 Kotlin 扩展 Mybatis-Flex
 
-> MyBatis-Flex-Kotlin 是一个 [Mybatis-Flex](https://mybatis-flex.com) 框架的扩展模块，
+> Mybatis-Flex-Kotlin 是一个 [Mybatis-Flex](https://mybatis-flex.com) 框架的扩展模块，
 > 它继承了 Mybatis-Flex 轻量的特性，同时拥有 Kotlin 特有的扩展方法、中缀表达式与DSL等语法支持，
 > 使其拥有了更高的灵活性。让我们可以更加轻松的在 Kotlin 中使用 Mybaits-Flex 所带来的开发效率和开发体验。
 
-## 特点
+## 特征
 
 - 轻量：只基于 Mybatis-Flex 核心库 ，只做扩展不做改变
 - 简明：使用 DSL 让查询语句更加简单明了
@@ -23,7 +23,7 @@
         logImpl = StdOutImpl::class
       }.start()
     ```
-- 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供两个函数：all, filter 和 query )
+- 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供三个函数：all, filter 和 query )
   - `all<Account>()` 查泛型对应的表的所有数据
   - `filter<Account>(vararg columns: QueryColumn?, condition: ()->QueryCondition)` 按条件查泛型对应的表的数据
   - `query<Account>(queryScope: QueryScope.()->Unit)` 较复杂查泛型对应的表的数据,如分组排序等
