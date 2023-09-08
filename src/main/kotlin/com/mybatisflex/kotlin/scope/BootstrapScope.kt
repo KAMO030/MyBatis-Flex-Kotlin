@@ -16,7 +16,9 @@
 package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.MybatisFlexBootstrap
+import org.apache.ibatis.logging.Log
 import javax.sql.DataSource
+import kotlin.reflect.KClass
 
 
 /**
@@ -29,9 +31,15 @@ class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBoot
     fun dataSources(dataSourceScope: DataSourceScope.() -> Unit) =
         dataSourceScope(DataSourceScope(instant))
 
+    var logImpl : KClass<out Log>
+        get() = instant.logImpl.kotlin
+        set(v) { instant.logImpl = v.java }
 
-    operator fun <T> Class<T>.unaryPlus(): MybatisFlexBootstrap =
+    operator fun  Class<*>.unaryPlus(): MybatisFlexBootstrap =
         instant.addMapper(this)
+
+    operator fun  KClass<*>.unaryPlus(): MybatisFlexBootstrap =
+        instant.addMapper(java)
 
     operator fun DataSource.unaryPlus(): MybatisFlexBootstrap =
         instant.setDataSource(this)

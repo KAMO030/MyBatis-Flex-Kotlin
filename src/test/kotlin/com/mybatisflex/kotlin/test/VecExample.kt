@@ -15,15 +15,18 @@
  */
 package com.mybatisflex.kotlin.test
 
-import com.mybatisflex.core.MybatisFlexBootstrap
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.kotlin.extensions.kproperty.*
+import com.mybatisflex.kotlin.extensions.db.mapper
+import com.mybatisflex.kotlin.extensions.kproperty.`as`
+import com.mybatisflex.kotlin.extensions.kproperty.column
+import com.mybatisflex.kotlin.extensions.kproperty.eq
+import com.mybatisflex.kotlin.extensions.kproperty.ge
 import com.mybatisflex.kotlin.extensions.vec.vecOf
 import com.mybatisflex.kotlin.extensions.wrapper.from
+import com.mybatisflex.kotlin.extensions.wrapper.select
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
-import com.mybatisflex.kotlin.extensions.wrapper.select
 import com.mybatisflex.kotlin.vec.*
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
@@ -35,18 +38,18 @@ import kotlin.test.assertEquals
 
 
 class VecExample {
-    val accountMapper: AccountMapper get() = MybatisFlexBootstrap.getInstance().getMapper(AccountMapper::class.java)
+    val accountMapper: AccountMapper get() = mapper()
 
     init {
         buildBootstrap {
-            it.addMapper(AccountMapper::class.java)
-            it.dataSource = EmbeddedDatabaseBuilder().run {
+            +AccountMapper::class
+            +EmbeddedDatabaseBuilder().run {
                 setType(EmbeddedDatabaseType.H2)
                 addScript("schema.sql")
                 addScript("data-kt.sql")
                 build()
             }
-            it.logImpl = StdOutImpl::class.java
+            logImpl = StdOutImpl::class
         }.start()
     }
 
@@ -91,7 +94,7 @@ class VecExample {
         val aggregation = vec.filterColumns { listOf(it::id `as` "accountId", it::userName.column) }
         val query: QueryWrapper = QueryWrapper()
             .select(
-                Account::id.`as`("accountId"), Account::userName.column
+                Account::id.`as`("accountId"), Account::userName.column()
             )
             .from(Account::class).`as`("a")
 

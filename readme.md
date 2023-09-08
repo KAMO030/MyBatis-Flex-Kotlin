@@ -7,7 +7,8 @@
 ## 特点
 
 - 轻量：只基于 Mybatis-Flex 核心库 ，只做扩展不做改变
-- 灵活：结合 Kotlin 特性、DSL让数据库操作更简单
+- 简明：使用DSL让查询语句更加简单明了
+- 快捷：结合 Kotlin 特性快速对数据库进行操作
 
 ## 亮点
 
@@ -17,24 +18,31 @@
         // 配置数据源 相当于 setDataSource(dataSource)
         +dataSource
         // 配置Mapper 相当于 addMapper(AccountMapper::class.java)
-        +AccountMapper::class.java
+        +AccountMapper::class
         // 配置日志输出 相当于 setLogImpl(StdOutImpl::class.java)
-        it.logImpl = StdOutImpl::class.java
-    }.start()
+        logImpl = StdOutImpl::class
+      }.start()
     ```
 - 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供两个函数：all, filter 和 query )
   - `all<Account>()` 查泛型对应的表的所有数据
   - `filter<Account>(vararg columns: QueryColumn?, condition: ()->QueryCondition)` 按条件查泛型对应的表的数据
   - `query<Account>(queryScope: QueryScope.()->Unit)` 较复杂查泛型对应的表的数据,如分组排序等
 - 简明地构建条件：通过中缀表达式➕扩展方法能更加简单明了的构建条件:
-  ```kotlin
-  query<Account>{
-      select{listOf(Account::id,Account::userName)}
-      where{
-          Account::age `in` (17..19) 
-      } orderBy  - Account::id
-  }
-  ```
+  * **【原生方式】**
+    ```kotlin
+    val queryWrapper = QueryWrapper.create()
+            .select(Account::id.column(), Account::userName.column())
+            .where(Account::age.column().`in`(17, 18, 19))
+            .orderBy(Account::id.column().desc())
+    mapper<AccountMapper>().selectListByQuery(queryWrapper)
+    ```
+  * **【扩展方式】**
+    ```kotlin
+    query<Account> {
+      select { listOf(Account::id, Account::userName) }
+      where { Account::age `in` (17..19) } orderBy -Account::id
+    }
+    ```
 - 摆脱APT: 使用扩展方法摆脱对 APT(注解处理器) 的使用,直接使用属性引用让代码更加灵活优雅:
   >  使用APT: `ACCOUNT.ID eq 1` ,使用属性引用: `Account::id eq 1`
   >  (少依赖一个模块且不用开启注解处理器功能)
@@ -66,7 +74,7 @@
 ```kotlin
 dependencies {
     //kt扩展库
-    implementation("com.mybatis-flex:mybatis-flex-kotlin:$version")
+    implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0")
     //核心库
     implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
@@ -80,7 +88,7 @@ dependencies {
     <dependency>
         <groupId>com.mybatis-flex</groupId>
         <artifactId>mybatis-flex-kotlin</artifactId>
-        <version>${mybatis-flex-kotlin.version}</version>
+        <version>1.0</version>
     </dependency>
     <!--核心库-->
     <dependency>

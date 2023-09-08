@@ -5,7 +5,7 @@ buildBootstrap {
     // 此方法体 it 是 MybatisFlexBootstrap 实例
     // 配置Mapper
     // 1.通过+（重写自增）的方式
-    +AccountMapper::class.java
+    +AccountMapper::class
     // 2.通过原始的方式
     // it.addMapper(AccountMapper::class.java)
     
@@ -29,6 +29,6 @@ buildBootstrap {
     // 3.通过原始的方式
     // it.addDataSource(FlexConsts.NAME,dataSource)
     // 配置日志打印在控制台
-    it.logImpl = StdOutImpl::class.java
+    logImpl = StdOutImpl::class
 }.start()
 ```
