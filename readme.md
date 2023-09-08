@@ -40,11 +40,14 @@
   * **【扩展方式】**
     ```kotlin
     query<Account> {
-      select { listOf(Account::id, Account::userName) }
-      where { Account::age `in` (17..19) } orderBy -Account::id
+        select(Account::id, Account::userName)
+        where { Account::age `in` (17..19) } orderBy -Account::id
     }
     ```
-
+  执行的SQL
+  ```sql
+    SELECT `id`, `user_name` FROM `tb_account` WHERE `age` IN (17, 18, 19) ORDER BY `id` DESC
+  ```
 - 摆脱APT: 使用扩展方法摆脱对 APT(注解处理器) 的使用,直接使用属性引用让代码更加灵活优雅:
   >  使用APT: `ACCOUNT.ID eq 1` ,使用属性引用: `Account::id eq 1`
   >

@@ -26,7 +26,6 @@ import com.mybatisflex.kotlin.extensions.kproperty.*
 import com.mybatisflex.kotlin.extensions.model.*
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.extensions.wrapper.from
-import com.mybatisflex.kotlin.extensions.wrapper.select
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
@@ -115,17 +114,16 @@ open class KotlinTest {
         mapper<AccountMapper>().selectListByQuery(queryWrapper)
         // 【扩展后】
         query<Account> {
-            select { listOf(Account::id, Account::userName) }
+            select(Account::id, Account::userName)
             where { Account::age `in` (17..19) } orderBy -Account::id
         }
-
 
         // 查询表对象对应的实体数据并根据条件过滤
         filter<Account> {
             Account::age eq 12 or
                     // if的第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
                     `if`(true) { Account::id between (1 to 2) }
-                    // `if`(false) { Account::id between (1 to 2 }
+            // `if`(false) { Account::id between (1 to 2 }
         }.stream().peek(::println)
             // 过滤后修改id再次保存
             .peek { it.id = it.id.plus(2) }.forEach(Model<*>::save)

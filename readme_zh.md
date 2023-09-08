@@ -40,11 +40,14 @@
   * **【扩展方式】**
     ```kotlin
     query<Account> {
-      select { listOf(Account::id, Account::userName) }
-      where { Account::age `in` (17..19) } orderBy -Account::id
+        select(Account::id, Account::userName)
+        where { Account::age `in` (17..19) } orderBy -Account::id
     }
     ```
-
+  执行的SQL
+  ```sql
+    SELECT `id`, `user_name` FROM `tb_account` WHERE `age` IN (17, 18, 19) ORDER BY `id` DESC
+  ```
 - 摆脱APT: 使用扩展方法摆脱对 APT(注解处理器) 的使用,直接使用属性引用让代码更加灵活优雅:
   >  使用APT: `ACCOUNT.ID eq 1` ,使用属性引用: `Account::id eq 1`
   >
@@ -81,10 +84,10 @@
 **【Kotlin】**
 ```kotlin
 dependencies {
-  //kotlin扩展库
-  implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0")
-  //核心库
-  implementation("com.mybatis-flex:mybatis-flex-core:$version")
+    //kotlin扩展库
+    implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0")
+    //核心库
+    implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
 ```
 
@@ -92,18 +95,18 @@ dependencies {
 
 ```xml
 <dependencies>
-  <!--kotlin扩展库-->
-  <dependency>
-    <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-kotlin</artifactId>
-    <version>1.0</version>
-  </dependency>
-  <!--核心库-->
-  <dependency>
-    <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-core</artifactId>
-    <version>${mybatis-flex-core.version}</version>
-  </dependency>
+    <!--kotlin扩展库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-kotlin</artifactId>
+        <version>1.0</version>
+    </dependency>
+    <!--核心库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-core</artifactId>
+        <version>${mybatis-flex-core.version}</version>
+    </dependency>
 </dependencies>
 ```
 
