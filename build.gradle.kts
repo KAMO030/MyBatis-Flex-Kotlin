@@ -117,6 +117,12 @@ publishing {
                     name.set("KAMOsama")
                     email.set("837080904@qq.com")
                 }
+
+                developer {
+                    id = "CloudPlayer"
+                    name = "CloudPlayer"
+                    email = "2909078582@qq.com"
+                }
             }
             scm {
                 url.set("https://github.com/KAMO030/MyBatis-Flex-Kotlin.git")
