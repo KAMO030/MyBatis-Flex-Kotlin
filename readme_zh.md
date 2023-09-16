@@ -44,7 +44,7 @@
         where { Account::age `in` (17..19) } orderBy -Account::id
     }
     ```
-  执行的SQL
+  >执行的SQL:
   ```sql
     SELECT `id`, `user_name` FROM `tb_account` WHERE `age` IN (17, 18, 19) ORDER BY `id` DESC
   ```

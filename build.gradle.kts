@@ -1,3 +1,4 @@
+import org.gradle.internal.impldep.org.codehaus.plexus.util.MatchPatterns.from
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
@@ -75,6 +76,7 @@ val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
 }
 val sourceJar by tasks.registering(Jar::class) {
+    from(sourceSets["main"].allSource)
     archiveClassifier.set("sources")
 }
 
@@ -96,8 +98,8 @@ publishing {
     // Configure all publications
     publications.withType<MavenPublication> {
         // Stub javadoc.jar artifact
-        artifact(javadocJar.get())
-        artifact(sourceJar.get())
+        artifact(javadocJar)
+        artifact(sourceJar)
 
         // Provide artifacts information requited by Maven Central
         pom {
