@@ -15,27 +15,23 @@
  */
 package com.mybatisflex.kotlin.extensions.vec
 
-import com.mybatisflex.core.query.CPI
 import com.mybatisflex.core.query.QueryTable
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.core.row.Row
-import com.mybatisflex.core.util.MapperUtil
 import com.mybatisflex.kotlin.extensions.db.tableInfo
+import com.mybatisflex.kotlin.extensions.wrapper.self
 import com.mybatisflex.kotlin.vec.DistinctQueryWrapper
 import com.mybatisflex.kotlin.vec.QueryData
 import com.mybatisflex.kotlin.vec.QueryVector
 import com.mybatisflex.kotlin.vec.annotation.ExperimentalConvert
 import com.mybatisflex.kotlin.vec.annotation.ExperimentalDistinct
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 @OptIn(ExperimentalDistinct::class)
 fun QueryData.wrap(): QueryWrapper = (if (distinct) DistinctQueryWrapper() else QueryWrapper()).apply {
-    select(*columns.toTypedArray())
-    from(this@wrap.table)
+    self.selectColumns = columns
+    self.queryTables = mutableListOf(table)
     if (tableAlias != table.name) `as`(tableAlias)
     condition?.let {
-        where(it)
+        self.where = it
     }
     /*    join?.let { (join, condition, table, alias) ->
         when (join) {
@@ -46,39 +42,27 @@ fun QueryData.wrap(): QueryWrapper = (if (distinct) DistinctQueryWrapper() else 
             RIGHT -> rightJoin(table)
         }.`as`(alias).on(condition)
     }*/
-    groupBy(*groupBy.toTypedArray())
+    self.groupBy = groupBy
     having?.let {
         having(it)
     }
-    if (orderBy.isNotEmpty()) orderBy(*orderBy.toTypedArray())
+    if (orderBy.isNotEmpty()) self.orderBys = orderBy
     if (rows > 0) {
         limit(offset, rows)
     }
 }
 
-
 @ExperimentalConvert
 inline fun <reified T : Any> QueryWrapper.toQueryData() = QueryData(
-    columns = CPI.getSelectColumns(this),
+    columns = self.selectColumns,
     table = T::class.tableInfo.run { QueryTable(schema, tableName) },
-    condition = CPI.getWhereQueryCondition(this),
-    groupBy = CPI.getGroupByColumns(this),
-    having = CPI.getHavingQueryCondition(this),
-    distinct = MapperUtil.hasDistinct(CPI.getSelectColumns(this)),
-    orderBy = CPI.getOrderBys(this),
-    offset = CPI.getLimitOffset(this),
-    rows = CPI.getLimitRows(this),
+    condition = self.where,
+    groupBy = self.groupBy,
+    having = self.having,
+    distinct = self.isDistinct,
+    orderBy = self.orderBys,
+    offset = self.offset,
+    rows = self.rows,
 )
 
 inline fun <reified E : Any> vecOf(tableAlias: String? = null) = QueryVector<E>(tableAlias)
-
-inline fun <reified T : Any> isRow(): Boolean = Row::class.java.isAssignableFrom(T::class.java)
-
-@OptIn(ExperimentalContracts::class)
-fun isRow(entity: Any?): Boolean {
-    contract {
-        returns(true) implies (entity is Row)
-    }
-    return entity is Row
-}
-

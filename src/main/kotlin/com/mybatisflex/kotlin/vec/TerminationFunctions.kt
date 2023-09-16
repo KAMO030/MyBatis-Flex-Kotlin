@@ -20,7 +20,6 @@ import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.sql.not
-import com.mybatisflex.kotlin.extensions.vec.isRow
 import java.math.BigDecimal
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -247,9 +246,5 @@ inline fun <reified E : Any> QueryVector<E>.removeIf(predicate: (E) -> QueryCond
         callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
     }
     val condition = predicate(entity)
-    return if (isRow<E>()) {
-        Db.deleteByCondition(queryTable.schema, queryTable.name, condition)
-    } else {
-        mapper.deleteByCondition(condition)
-    }
+    return mapper.deleteByCondition(condition)
 }
