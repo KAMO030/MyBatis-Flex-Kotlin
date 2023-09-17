@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 group = "com.mybatis-flex"
-version = "1.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
