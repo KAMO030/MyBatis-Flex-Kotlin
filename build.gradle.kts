@@ -121,9 +121,9 @@ publishing {
                 }
 
                 developer {
-                    id = "CloudPlayer"
-                    name = "CloudPlayer"
-                    email = "2909078582@qq.com"
+                    id.set("CloudPlayer")
+                    name.set("CloudPlayer")
+                    email.set("2909078582@qq.com")
                 }
             }
             scm {
