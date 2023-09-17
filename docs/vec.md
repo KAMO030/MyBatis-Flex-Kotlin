@@ -1,27 +1,27 @@
-# 查询矢量
+# 查询向量
 
-在前一节中，我们简单了解了如何使用查询矢量获取实体类，现在我们来对它进行更详细的介绍。
+在前一节中，我们简单了解了如何使用查询向量获取实体类，现在我们来对它进行更详细的介绍。
 
-## 矢量简介
+## 向量简介
 
-要使用查询矢量，首先要创建查询矢量对象。创建一个查询矢量非常简单，只需要使用函数`vecOf`即可。
+要使用查询向量，首先要创建查询向量对象。创建一个查询向量非常简单，只需要使用函数`vecOf`即可。
 
 ```kotlin
-val empVec: QueryVector<Emp> = vecOf<Emp>()  // 以实体类Emp创建了一个查询矢量
-val accountVec: QueryVector<Account> = vecOf<Account>()  // 以实体类Account创建了一个查询矢量
+val empVec: QueryVector<Emp> = vecOf<Emp>()  // 以实体类Emp创建了一个查询向量
+val accountVec: QueryVector<Account> = vecOf<Account>()  // 以实体类Account创建了一个查询向量
 ```
 
-> 注意：并非任何类都能直接使用`vecOf`直接创建查询矢量。这个类**必须拥有其对应的`TableDef`类和继承自`BaseMapper`的Mapper接口**。换言之，以下代码是无法正常运行的：
+> 注意：并非任何类都能直接使用`vecOf`直接创建查询向量。这个类**必须拥有对应的继承自`BaseMapper`的Mapper接口**。换言之，以下代码是无法正常运行的：
 
 ```kotlin
 val vec: QueryVector<Nothing> = vecOf<Nothing>()  // 此处会抛出异常
 ```
 
-显然，Nothing类只是kotlin官方库中一个普通类，它并没有对应的TableDef，也没有对应的Mapper接口。在运行时它会抛出`IllegalArgumentException`。
+显然，Nothing类只是kotlin官方库中一个普通类，它并没有对应的Mapper接口。在运行时它会抛出`IllegalArgumentException`。
 
-`vecOf` 函数会返回一个 QueryVector ，它可以获得表中的所有实体对象。正如 QueryWrapper 一样，它并不会在创建时就立刻进行一次查询。只有当我们进行终止操作时，它才会立刻执行查询。
+`vecOf` 函数会返回一个 QueryVector 。正如 QueryWrapper 一样，它并不会在创建时就立刻进行一次查询。只有当我们进行终止操作时，它才会立刻执行查询。
 
-我们可以使用 `toList` 扩展函数将矢量指向的数据保存为一个列表：
+我们可以使用 `toList` 扩展函数将向量指向的数据保存为一个列表：
 
 ````kotlin
 val vec = vecOf<Emp>()
@@ -55,13 +55,13 @@ WHERE `dept_id` = ?
 
 > 为了演示方便，在下面的例子中若我们的查询中包括了所有列，那么将直接使用 * 来替代。
 
-我们来看看查询矢量 `QueryVector` 的类中的部分成员：
+我们来看看查询向量 `QueryVector` 的类中的部分成员：
 
 ```kotlin
-open class QueryVector<E : Any>(
-    open val entityClass: Class<E>,
-    open val data: QueryData,
-    open val entityInstance: E? = null
+class QueryVector<E : Any>(
+    private val entityClass: Class<E>,
+    val data: QueryData,
+    val entityInstance: E? = null
 ) {
     val wrapper: QueryWrapper
 
@@ -69,16 +69,16 @@ open class QueryVector<E : Any>(
 }
 ```
 
-可以看出，查询矢量中包含了一个`QueryWrapper`和`mapper`，而我们的查询正是基于`QueryWrapper`和`mapper`来共同完成。
+可以看出，查询向量中包含了一个 `QueryWrapper` 类型和一个 `BaseMapper` 类型的属性。而我们的查询正是基于`QueryWrapper`和`BaseMapper`来共同完成。
 
-查询矢量中的大部分功能都是以扩展函数的方式实现的，这些扩展函数大致可以分为两类，中间操作和终止操作，它们对应的意思就和flex中 QueryWrapper 对应的操作一样：
+查询向量中的大部分功能都是以扩展函数的方式实现的，这些扩展函数大致可以分为两类，中间操作和终止操作，它们对应的意思就和flex中 QueryWrapper 对应的操作一样：
 
-- **中间操作：** 这类函数在执行过后仍然可以继续链式地调用扩展函数来完成功能。它们并不会立即执行查询，而是将数据保存起来，并且在调用时重新返回一个携带着新数据的矢量，比如`filter`, `distinct`, `groupBy`等。
+- **中间操作：** 这类函数在执行过后仍然可以继续链式地调用扩展函数来完成功能。它们并不会立即执行查询，而是将数据保存起来，并且在调用时重新返回一个携带着新数据的向量，比如`filter`, `distinct`, `groupBy`等。
 - **终止操作：** 这类函数的返回值通常是一个集合或者是某个计算的结果，他们会马上执行一个查询，然后获取它的结果并执行一定的运算，比如 `toList`、`funOf` 等。
 
 ## 中间操作
 
-中间操作并不会立即查询，它们都返回一个新的矢量对象。`QueryVector` 的中间操作主要有如下几个。
+中间操作并不会立即查询，它们都返回一个新的向量对象。`QueryVector` 的中间操作主要有如下几个。
 
 ### filter
 
@@ -88,7 +88,7 @@ inline fun <E : Any> QueryVector<E>.filter(predicate: (E) -> QueryCondition): Qu
 
 当我们使用`filter`进行过滤时，相当于`QueryWrapper`中where的调用。
 
-与`kotlin.sequences`的`filter`函数类似，`QueryVector`的`filter`函数也接受一个闭包作为参数，使用闭包中指定的筛选条件令矢量过滤对应的数据。
+与`kotlin.sequences`的`filter`函数类似，`QueryVector`的`filter`函数也接受一个闭包作为参数，使用闭包中指定的筛选条件令向量过滤对应的数据。
 不同的是，我们的闭包接受当前表对象`E`作为参数，因此我们在闭包中使用`it`访问到的是实体对象。
 
 另外，在使用时，我们应当使用对应属性的引用，即kotlin反射库中的`KProperty<*>`作为要过滤的列而不是直接使用属性。下面是使用`filter`获取部门 1 中的所有员工的例子：
@@ -140,7 +140,7 @@ inline fun <E: Any> QueryVector<E>.filterProperty(predicate: (E) -> KProperty<*>
 inline fun <E: Any> QueryVector<E>.filterProperties(predicate: (E) -> Iterable<KProperty<*>>): QueryVector<E>
 ```
 
-查询矢量默认会查询实体类对象的所有列。如果我们不需要查询所有的列，我们可以用这四个方法来指定我们想要的列。其中，闭包返回值为Iterable的函数可以一次性指定多个列，
+查询向量默认会查询实体类对象的所有列。如果我们不需要查询所有的列，我们可以用这四个方法来指定我们想要的列。其中，闭包返回值为Iterable的函数可以一次性指定多个列，
 而`filterColumn`可以让我们使用flex官方`QueryMethods`中提供的静态方法，或是我们自己定义的一些方法来进行更方便地查询。
 
 下面是一个稍复杂的过滤的例子：
@@ -174,14 +174,11 @@ SELECT `id`, `dept_id` + 1, LENGTH(`name`) FROM `emp`
 这一步例子中我们使用了`toRows`而非`toList`作为终止操作，它会返回一个`List<Row>`而非`List<Emp>`。这是因为我们要查询的列不足以装配为实体类对象，需要使用`toRows`来返回通用查询结果。
 关于`toList`和`toRows`的区别，后续的章节会进行详细的介绍。
 
-### sortedBy, sortedByIter
+### sortedBy
 
 ```kotlin
 inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(order: Order = Order.ASC, sortedBy: (E) -> KProperty<V?>): QueryVector<E>
-```
-
-```kotlin
-inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedByIter(sortedBy: (E) -> Iterable<QueryOrderBy>): QueryVector<E>
+inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(sortedBy: (E) -> Iterable<QueryOrderBy>): QueryVector<E>
 ```
 
 `sortedBy` 函数用于指定查询结果的排序方式，我们在第一个参数order中传入枚举类`Order`的成员来指定我们需要以什么顺序排序，
@@ -200,13 +197,13 @@ FROM `emp`
 ORDER BY `id` DESC
 ````
 
-如果我们需要根据多个列进行排序，我们可以使用`sortedByIter`来根据多个列进行排序。
+如果我们需要根据多个列进行排序，我们可以按照下面的例子来进行操作。
 
 下面是一个稍复杂的排序的例子：
 
 ```kotlin
 val vec = vecOf<Emp>()
-vec.sortedByIter {
+vec.sortedBy {
     listOf(
         it::id.toOrd(Order.DESC),
         it::createTime.toOrd(Order.ASC),
@@ -276,7 +273,7 @@ vec.limit(1, 1).toList()
 
 > 注意：该功能目前是实验性的。如果你需要使用，你需要在使用处添加上`@OptIn(ExperimentalDistinct::class)`来使用，或添加上`@ExperimentalDistinct`注解将其传播，否则无法通过编译。
 
-> 截至此文档编写前，flex官方（版本1.6.3）并未提供统一的去重实现，而是在`QueryMethods`提供了一个用于去重的函数`distinct`。
+> 截至此文档编写前，flex官方（版本1.6.5）并未提供统一的去重实现，而是在`QueryMethods`提供了一个用于去重的函数`distinct`。
 > 这个函数并不能满足我们的需求，因此我们编写了一个`DistinctQueryWrapper`来实现我们的功能。
 
 ```kotlin
@@ -300,7 +297,7 @@ SELECT DISTINCT `emp`.* FROM `emp`
 
 ## 终止操作
 
-查询矢量的终止操作会立刻计算结果，完成查询并返回。
+查询向量的终止操作会立刻计算结果，完成查询并返回。
 
 ### toList, toRows
 
@@ -337,7 +334,7 @@ val emp = vec
 ```
 
 在上面的两个例子中，第一个例子尽管使用了诸多的扩展函数，如`filter`, `distinct`, `limit`等，但 **它并没有指定我们要查询的列。换言之，它查询了所有列**。
-此时我们返回的结果中包含了所有的列，而这些列足以矢量装配成我们自己定义的实体类，因此我们可以使用`toList`来返回一个列表。
+此时我们返回的结果中包含了所有的列，而这些列足以向量装配成我们自己定义的实体类，因此我们可以使用`toList`来返回一个列表。
 
 在第二个例子中，我们**指定了我们要查询的列。换言之，我们没有查询所有的列**。此时我们查询得到的列中**不足以为实体类中的每个属性进行装配**。
 此时如果使用`toList`进行返回，那么**实体类中没有被查询的列的属性的值将会是我们定义时的默认值**。

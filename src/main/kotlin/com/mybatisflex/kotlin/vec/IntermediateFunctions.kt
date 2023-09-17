@@ -26,6 +26,7 @@ import com.mybatisflex.kotlin.vec.annotation.ExperimentalDistinct
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
 import kotlin.reflect.KProperty
 
 @OptIn(ExperimentalContracts::class)
@@ -68,8 +69,10 @@ inline fun <E: Any> QueryVector<E>.groupBy(groupBy: (E) -> KProperty<*>): QueryV
     return copy(data = data.copy(groupBy = data.groupBy + groupBy(entity).column))
 }
 
-@OptIn(ExperimentalContracts::class)
-inline fun <E: Any> QueryVector<E>.groupByIter(groupBy: (E) -> Iterable<KProperty<*>>): QueryVector<E> {
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+@JvmName("groupByIter")
+inline fun <E: Any> QueryVector<E>.groupBy(groupBy: (E) -> Iterable<KProperty<*>>): QueryVector<E> {
     contract {
         callsInPlace(groupBy, InvocationKind.EXACTLY_ONCE)
     }
@@ -84,8 +87,10 @@ inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(order: Order = Ord
     return copy(data = data.copy(orderBy = data.orderBy + sortedBy(entity).column.toOrd(order)))
 }
 
-@OptIn(ExperimentalContracts::class)
-inline fun <E: Any> QueryVector<E>.sortedByIter(sortedBy: (E) -> Iterable<QueryOrderBy>): QueryVector<E> {
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+@JvmName("sortedByIter")
+inline fun <E: Any> QueryVector<E>.sortedBy(sortedBy: (E) -> Iterable<QueryOrderBy>): QueryVector<E> {
     contract {
         callsInPlace(sortedBy, InvocationKind.EXACTLY_ONCE)
     }

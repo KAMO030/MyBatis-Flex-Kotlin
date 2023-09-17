@@ -54,19 +54,19 @@ val <E : Any> KClass<E>.tableInfo: TableInfo
         TableInfoFactory.ofMapperClass(java)
     } else {
         TableInfoFactory.ofEntityClass(java)
-    }
+    } ?: error("QueryVector cannot be initialized by class $this, which does not have a corresponding TableInfo.")
 
 //    query-----------
 inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
     schema: String? = null,
     tableName: String? = null,
-    noinline init: QueryScope.() -> Unit
+    init: QueryScope.() -> Unit
 ): T = queryRow(schema = schema, tableName = tableName, columns = columns, init = init).toEntity(T::class.java)
 
 
-fun queryRow(
-    vararg columns: QueryColumn?,
+inline fun queryRow(
+    vararg columns: QueryColumn,
     schema: String? = null,
     tableName: String? = null,
     init: QueryScope.() -> Unit
@@ -79,16 +79,15 @@ fun queryRow(
 
 
 inline fun <reified T> query(
-    vararg columns: QueryColumn?,
-    noinline init: QueryScope.() -> Unit
+    vararg columns: QueryColumn,
+    init: QueryScope.() -> Unit
 ): List<T> = TableInfoFactory.ofEntityClass(T::class.java).run {
-    queryRows(schema = schema, tableName = tableName, columns = columns, init = init)
-        .toEntities<T>()
+    queryRows(schema = schema, tableName = tableName, columns = columns, init = init).toEntities()
 }
 
 
-fun queryRows(
-    vararg columns: QueryColumn?,
+inline fun queryRows(
+    vararg columns: QueryColumn,
     schema: String? = null,
     tableName: String? = null,
     init: QueryScope.() -> Unit
@@ -100,20 +99,20 @@ fun queryRows(
 inline fun <reified E> filter(
     tableName: String,
     schema: String,
-    vararg columns: QueryColumn?,
+    vararg columns: QueryColumn,
     queryCondition: QueryCondition = QueryCondition.createEmpty()
 ): List<E> = selectListByQuery(
     schema,
     tableName,
     QueryWrapper().select(*columns).where(queryCondition)
-).toEntities<E>()
+).toEntities()
 
 inline fun <reified E : Any> filter(
-    vararg columns: QueryColumn?,
+    vararg columns: QueryColumn,
     init: () -> QueryCondition
 ): List<E> {
     val tableInfo = E::class.tableInfo
-    return filter<E>(
+    return filter(
         columns = columns,
         schema = tableInfo.schema,
         tableName = tableInfo.tableName,
@@ -129,7 +128,7 @@ inline fun <reified E : Any> insert(build: E.() -> Unit): Int {
 }
 
 //    update-----------
-inline fun <reified E : Any> update(entity: E,conditionBlock: (E)->QueryCondition): Int =
+inline fun <reified E : Any> update(entity: E,conditionBlock: (E) -> QueryCondition): Int =
     E::class.baseMapper.updateByCondition(entity,conditionBlock(entity))
 
 

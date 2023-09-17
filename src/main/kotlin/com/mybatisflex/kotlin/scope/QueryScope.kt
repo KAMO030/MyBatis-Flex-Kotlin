@@ -33,26 +33,24 @@ class QueryScope : QueryWrapper() {
 
     operator fun String.unaryMinus(): QueryColumn = QueryColumn(this)
 
-    fun select(vararg properties:KProperty<*>): QueryWrapper =
+    fun select(vararg properties: KProperty<*>): QueryWrapper =
         this.select(*(properties.map { it.column }.toTypedArray()))
 
     fun where(build: QueryWrapper.() -> QueryCondition): QueryWrapper = where(this.build())
 }
 
 
-fun queryScope(vararg columns: QueryColumn?, init: (QueryScope.() -> Unit)? = null): QueryWrapper {
+inline fun queryScope(vararg columns: QueryColumn, init: QueryScope.() -> Unit = {}): QueryWrapper {
     val builder = QueryScope()
 
     if (columns.isNotEmpty()) {
         builder.select(*columns)
     }
     //用于嵌套查询拿到上层查询包装对象
-    init?.also {
-        val prentQueryScope = QueryScope.get()
-        QueryScope.set(builder)
-        it(builder)
-        QueryScope.set(prentQueryScope)
-    }
+    val prentQueryScope = QueryScope.get()
+    QueryScope.set(builder)
+    init(builder)
+    QueryScope.set(prentQueryScope)
 
     return builder
 }
