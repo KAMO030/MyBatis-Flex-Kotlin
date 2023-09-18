@@ -95,9 +95,9 @@ open class KotlinExample {
         val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
         val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
         filter<Account> {
-            and (Account::id eq 1)
-            and (Account::id.isNotNull)
-            and (Account::age `in` (17..19) or (Account::birthday between (start to end)))
+            and(Account::id eq 1)
+            and(Account::id.isNotNull)
+            and(Account::age `in` (17..19) or (Account::birthday between (start to end)))
         }.forEach(::println)
         // query: 较复杂查泛型对应的表的数据,如分组排序等
         query<Account> {
@@ -121,17 +121,17 @@ open class KotlinExample {
 
         // 查询表对象对应的实体数据并根据条件过滤
         filter<Account> {
-            Account::age eq 12 or
-                    // if的第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
-                    `if`(true) { Account::id between (1 to 2) }
+            and(Account::age eq 12)
+            // if的第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
+            or(`if`(true) { Account::id between (1 to 2) })
             // `if`(false) { Account::id between (1 to 2 }
         }.stream().peek(::println)
             // 过滤后修改id再次保存
             .peek { it.id = it.id.plus(2) }.forEach(Model<*>::save)
         // 使用表对象filter或者DB对象有两个泛型的filter方法时方法体内this为表对象无需XXX.AA调用，直接AA
         filter<Account> {
-            Account::age eq 12 or
-                    `if`(true) { Account::id `in` listOf(1, 2) }
+            and(Account::age eq 12)
+            or(`if`(true) { Account::id `in` listOf(1, 2) })
         }.stream().peek(::println).peek { it.id = it.id.plus(6) }.forEach(Model<Account>::save)
 
         println("保存后————————")
