@@ -84,10 +84,10 @@
 **【Kotlin】**
 ```kotlin
 dependencies {
-    //kotlin扩展库
-    implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0.1")
-    //核心库
-    implementation("com.mybatis-flex:mybatis-flex-core:$version")
+  //kotlin扩展库
+  implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0.1")
+  //核心库
+  implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
 ```
 
@@ -95,18 +95,18 @@ dependencies {
 
 ```xml
 <dependencies>
-    <!--kotlin扩展库-->
-    <dependency>
-        <groupId>com.mybatis-flex</groupId>
-        <artifactId>mybatis-flex-kotlin</artifactId>
-        <version>1.0.1</version>
-    </dependency>
-    <!--核心库-->
-    <dependency>
-        <groupId>com.mybatis-flex</groupId>
-        <artifactId>mybatis-flex-core</artifactId>
-        <version>${mybatis-flex-core.version}</version>
-    </dependency>
+  <!--kotlin扩展库-->
+  <dependency>
+    <groupId>com.mybatis-flex</groupId>
+    <artifactId>mybatis-flex-kotlin</artifactId>
+    <version>1.0.1</version>
+  </dependency>
+  <!--核心库-->
+  <dependency>
+    <groupId>com.mybatis-flex</groupId>
+    <artifactId>mybatis-flex-core</artifactId>
+    <version>${mybatis-flex-core.version}</version>
+  </dependency>
 </dependencies>
 ```
 
@@ -118,20 +118,19 @@ dependencies {
 **第 3 步：编写实体类**
 
 ```kotlin
-@Table("tb_account")
-class Account {
-
-     @Id
-     var id: Long
-     var userName: String
-     var age: Integer
-     var birthday: Date
-
-}
+  @Table("tb_account")
+  data class Account(
+    @Id var id: Int = -1,
+    var userName: String? = null,
+    var age: Int? = null,
+    var birthday: Date? = null,
+  )
 ```
 
 - 使用 `@Table("tb_account")` 设置实体类与表名的映射关系
 - 使用 `@Id` 标识主键
+> ⚠️最好不要写成 data class ，否则没有无参构造某些情况下会报错；
+> 如有需要可以安装官方 [noArg](https://kotlinlang.org/docs/no-arg-plugin.html) 插件
 
 **第 4 步：开始使用**
 
