@@ -26,7 +26,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import kotlin.test.Test
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [AppConfig::class])
-open class KotlinSpringTest  {
+open class KotlinSpringExample  {
 	@Autowired
 	lateinit var accountMapper: AccountMapper
 
@@ -35,7 +35,6 @@ open class KotlinSpringTest  {
 		val accounts = accountMapper.findByAge(18,2,1)
 		accounts.forEach(::println)
 	}
-
 
 }
 

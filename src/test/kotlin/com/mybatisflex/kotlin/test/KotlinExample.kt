@@ -39,7 +39,7 @@ import javax.sql.DataSource
 import kotlin.streams.toList
 
 
-open class KotlinTest {
+open class KotlinExample {
 
     val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
         setType(EmbeddedDatabaseType.H2)
