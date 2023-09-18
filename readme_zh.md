@@ -95,18 +95,18 @@ dependencies {
 
 ```xml
 <dependencies>
-  <!--kotlin扩展库-->
-  <dependency>
-    <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-kotlin</artifactId>
-    <version>1.0.1</version>
-  </dependency>
-  <!--核心库-->
-  <dependency>
-    <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-core</artifactId>
-    <version>${mybatis-flex-core.version}</version>
-  </dependency>
+    <!--kotlin扩展库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-kotlin</artifactId>
+        <version>1.0.1</version>
+    </dependency>
+    <!--核心库-->
+    <dependency>
+        <groupId>com.mybatis-flex</groupId>
+        <artifactId>mybatis-flex-core</artifactId>
+        <version>${mybatis-flex-core.version}</version>
+    </dependency>
 </dependencies>
 ```
 
@@ -121,11 +121,11 @@ dependencies {
 @Table("tb_account")
 class Account {
 
-  @Id
-  var id: Long
-  var userName: String
-  var age: Integer
-  var birthday: Date
+     @Id
+     var id: Long
+     var userName: String
+     var age: Integer
+     var birthday: Date
 
 }
 ```
@@ -171,7 +171,7 @@ Account(id=1, userName=张三, birthday=2020-01-11 00:00:00.0, age=18)
 ## 更多使用
 
 - 功能 1：[Bootstrap简化配置](docs/bootstrapExt.md)
-- 功能 2：[简单查询与扩展]()
+- 功能 2：[简单查询与扩展](docs/extensions.md)
 - 功能 3：[向量查询](docs/vecSimple.md) (实验性)
 
 [comment]: <> (###### TODO ...)
