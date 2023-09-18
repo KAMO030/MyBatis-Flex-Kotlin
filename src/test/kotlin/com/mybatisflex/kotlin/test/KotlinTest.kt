@@ -95,8 +95,9 @@ open class KotlinTest {
         val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
         val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
         filter<Account> {
-            Account::id eq 1 and
-                    (Account::age `in` (17..19) or (Account::birthday between (start to end)))
+            and (Account::id eq 1)
+            and (Account::id.isNotNull)
+            and (Account::age `in` (17..19) or (Account::birthday between (start to end)))
         }.forEach(::println)
         // query: 较复杂查泛型对应的表的数据,如分组排序等
         query<Account> {

@@ -38,11 +38,10 @@ val KProperty<*>.column: QueryColumn
 /**
  * 类型直接引用用此方法更好，（如：Account::id.column()）
  */
-inline fun <reified T, V> KProperty1<T, V>.column(): QueryColumn  {
-   return TableInfoFactory.ofEntityClass(T::class.java).getQueryColumnByProperty(name) ?: throw NoSuchElementException(
+inline fun <reified T, V> KProperty1<T, V>.column(): QueryColumn =
+    TableInfoFactory.ofEntityClass(T::class.java).getQueryColumnByProperty(name) ?: throw NoSuchElementException(
         "The attribute $this of class ${T::class.java} could not find the corresponding QueryColumn"
     )
-}
 
 
 fun Field.toQueryColumn(): QueryColumn {
@@ -108,7 +107,7 @@ infix fun KProperty<String?>.contains(other: String): QueryCondition = column.li
 infix fun KProperty<String?>.notLike(other: String): QueryCondition =
     QueryCondition.create(column, SqlConsts.NOT_LIKE, other)
 
-infix fun <T: Comparable<T>> KProperty<T?>.`in`(other: ClosedRange<T>): QueryCondition = this inRange other
+infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: ClosedRange<T>): QueryCondition = this inRange other
 
 infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: Collection<T>): QueryCondition = this inList other
 
@@ -133,7 +132,10 @@ infix fun <T : Comparable<T>> KProperty<T?>.inArray(other: Array<out T>): QueryC
 
 infix fun <T : Comparable<T>> KProperty<T?>.inRange(other: ClosedRange<out T>): QueryCondition {
     val queryColumn = column
-    return if (other.endInclusive == other.start) queryColumn.eq(other.start) else queryColumn.between(other.start, other.endInclusive)
+    return if (other.endInclusive == other.start) queryColumn.eq(other.start) else queryColumn.between(
+        other.start,
+        other.endInclusive
+    )
 }
 
 infix fun <T> KProperty<T?>.alias(other: String): QueryColumn = column.`as`(other)
@@ -164,10 +166,10 @@ operator fun <T : Number> KProperty<T?>.div(other: KProperty<T?>): QueryColumn =
 
 operator fun <T : Number> KProperty<T?>.div(other: T): QueryColumn = column / other
 
-operator fun <T: Comparable<T>> KProperty<T?>.unaryPlus(): QueryOrderBy = this.column.asc()
+operator fun <T : Comparable<T>> KProperty<T?>.unaryPlus(): QueryOrderBy = this.column.asc()
 
-operator fun <T: Comparable<T>> KProperty<T?>.unaryMinus(): QueryOrderBy = this.column.desc()
+operator fun <T : Comparable<T>> KProperty<T?>.unaryMinus(): QueryOrderBy = this.column.desc()
 
-fun <T> KProperty<T?>.isNull(): QueryCondition = column.isNull
+val KProperty<*>.isNull: QueryCondition get() = column.isNull
 
-fun <T> KProperty<T?>.isNotNull(): QueryCondition = column.isNotNull
+val KProperty<*>.isNotNull: QueryCondition get() = column.isNotNull

@@ -84,10 +84,10 @@
 **【Kotlin】**
 ```kotlin
 dependencies {
-    //kotlin扩展库
-    implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0.1")
-    //核心库
-    implementation("com.mybatis-flex:mybatis-flex-core:$version")
+  //kotlin扩展库
+  implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0.1")
+  //核心库
+  implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
 ```
 
@@ -95,18 +95,18 @@ dependencies {
 
 ```xml
 <dependencies>
-    <!--kotlin扩展库-->
-    <dependency>
-        <groupId>com.mybatis-flex</groupId>
-        <artifactId>mybatis-flex-kotlin</artifactId>
-        <version>1.0.1</version>
-    </dependency>
-    <!--核心库-->
-    <dependency>
-        <groupId>com.mybatis-flex</groupId>
-        <artifactId>mybatis-flex-core</artifactId>
-        <version>${mybatis-flex-core.version}</version>
-    </dependency>
+  <!--kotlin扩展库-->
+  <dependency>
+    <groupId>com.mybatis-flex</groupId>
+    <artifactId>mybatis-flex-kotlin</artifactId>
+    <version>1.0.1</version>
+  </dependency>
+  <!--核心库-->
+  <dependency>
+    <groupId>com.mybatis-flex</groupId>
+    <artifactId>mybatis-flex-core</artifactId>
+    <version>${mybatis-flex-core.version}</version>
+  </dependency>
 </dependencies>
 ```
 
@@ -152,14 +152,15 @@ fun main() {
   val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
   //条件过滤查询并打印
   filter<Account> {
-    Account::id eq 1 and
-            (Account::age `in` (17..19) or (Account::birthday between (start to end)))
+    and (Account::id eq 1)
+    and (Account::id.isNotNull)
+    and (Account::age `in` (17..19) or (Account::birthday between (start to end)))
   }.forEach(::println)
 }
 ```
 执行的SQL：
 ```sql
-SELECT * FROM `tb_account` WHERE `id` = 1 AND (`age` IN (17, 18, 19) OR `birthday` BETWEEN  '2020-01-10 08:00:00' AND '2020-01-12 08:00:00' )
+SELECT * FROM `tb_account` WHERE `id` = 1 AND `id` IS NOT NULL  AND (`age` BETWEEN  17 AND 19  OR `birthday` BETWEEN  '2020-01-10 08:00:00' AND '2020-01-12 08:00:00' )
 ```
 控制台输出：
 
@@ -171,6 +172,6 @@ Account(id=1, userName=张三, birthday=2020-01-11 00:00:00.0, age=18)
 
 - 功能 1：[Bootstrap简化配置](docs/bootstrapExt.md)
 - 功能 2：[简单查询与扩展]()
-- 功能 3：[矢量查询](docs/vecSimple.md) (实验性)
+- 功能 3：[向量查询](docs/vecSimple.md) (实验性)
 
 [comment]: <> (###### TODO ...)

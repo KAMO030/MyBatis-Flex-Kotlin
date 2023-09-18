@@ -62,7 +62,7 @@ inline fun <reified T : Any> queryOne(
     schema: String? = null,
     tableName: String? = null,
     init: QueryScope.() -> Unit
-): T = queryRow(schema = schema, tableName = tableName, columns = columns, init = init).toEntity(T::class.java)
+): T? = queryRow(schema = schema, tableName = tableName, columns = columns, init = init)?.toEntity(T::class.java)
 
 
 inline fun queryRow(
@@ -70,7 +70,7 @@ inline fun queryRow(
     schema: String? = null,
     tableName: String? = null,
     init: QueryScope.() -> Unit
-): Row =
+): Row? =
     selectOneByQuery(
         schema,
         tableName,
@@ -109,14 +109,14 @@ inline fun <reified E> filter(
 
 inline fun <reified E : Any> filter(
     vararg columns: QueryColumn,
-    init: () -> QueryCondition
+    init: QueryCondition.() -> Unit
 ): List<E> {
     val tableInfo = E::class.tableInfo
     return filter(
         columns = columns,
         schema = tableInfo.schema,
         tableName = tableInfo.tableName,
-        queryCondition = init()
+        queryCondition = QueryCondition.createEmpty().apply(init)
     )
 }
 
