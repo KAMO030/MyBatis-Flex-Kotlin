@@ -27,21 +27,6 @@ import kotlin.reflect.KProperty
  * @date 2023/8/7
  */
 
-
-//logic------
-inline fun `if`(test: Boolean, block: () -> QueryCondition): QueryCondition =
-    if (test) block() else QueryCondition.createEmpty()
-
-inline fun QueryCondition.andIf(test: Boolean, block: () -> QueryCondition): QueryCondition =
-    if (test) this.and(block()) else this
-
-inline fun QueryCondition.orIf(test: Boolean, block: () -> QueryCondition): QueryCondition =
-    if (test) this.or(block()) else this
-
-infix fun QueryCondition.and(other: QueryCondition): QueryCondition = this.and(other)
-
-infix fun QueryCondition.or(other: QueryCondition): QueryCondition = this.or(other)
-
 //Comparable------
 infix fun QueryColumn.like(value: String): QueryCondition = this.like(value)
 

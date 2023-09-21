@@ -19,6 +19,7 @@ import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.kotlin.extensions.condition.*
 import com.mybatisflex.kotlin.extensions.db.filter
 import com.mybatisflex.kotlin.extensions.db.mapper
 import com.mybatisflex.kotlin.extensions.db.query
@@ -85,6 +86,18 @@ open class KotlinExample {
     }
 
     @Test
+    fun testFilter(){
+        filter<Account>{
+            and(Account::id eq 1) or { (Account::id.isNotNull).and(Account::id.isNotNull) }
+        }
+        filter<Account>{
+            and(Account::id eq 1)
+            or (false){ (Account::id.isNotNull).and(Account::id.isNotNull) }
+            and(Account::id eq 1)
+        }
+    }
+
+    @Test
     fun testDb() {
         // all: 查泛型对应的表的所有数据
         Account::class.all.forEach(::println)
@@ -122,16 +135,17 @@ open class KotlinExample {
         // 查询表对象对应的实体数据并根据条件过滤
         filter<Account> {
             and(Account::age eq 12)
-            // if的第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
-            or(`if`(true) { Account::id between (1 to 2) })
-            // `if`(false) { Account::id between (1 to 2 }
+            // or第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
+            or(true){ Account::id between (1 to 2) }
+            // 可以用以下方法替代
+            // or(`if`(false) { Account::id between (1 to 2 })
         }.stream().peek(::println)
             // 过滤后修改id再次保存
             .peek { it.id = it.id.plus(2) }.forEach(Model<*>::save)
         // 使用表对象filter或者DB对象有两个泛型的filter方法时方法体内this为表对象无需XXX.AA调用，直接AA
         filter<Account> {
             and(Account::age eq 12)
-            or(`if`(true) { Account::id `in` listOf(1, 2) })
+            or(true) { Account::id `in` listOf(1, 2)}
         }.stream().peek(::println).peek { it.id = it.id.plus(6) }.forEach(Model<Account>::save)
 
         println("保存后————————")

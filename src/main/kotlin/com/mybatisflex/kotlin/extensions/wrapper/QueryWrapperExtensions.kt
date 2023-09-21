@@ -17,8 +17,11 @@ inline fun QueryWrapper.from(init: QueryScope.() -> Unit = {}): QueryWrapper = t
 fun QueryWrapper.from(vararg entities: KClass<*>): QueryWrapper = this.from(*entities.map { it.java }.toTypedArray())
 
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
-    this.select(*properties().map { it.column }.toTypedArray())
- 
+    this.select(*(properties().map { it.column }.toTypedArray()))
+
+fun QueryWrapper.select(vararg properties: KProperty<*>): QueryWrapper =
+    this.select(*(properties.map { it.column }.toTypedArray()))
+
 val QueryWrapper.self
     get() = QueryWrapperDevelopEntry(this)
 
