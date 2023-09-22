@@ -150,7 +150,7 @@ data class Account(
   val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
   val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
   // 查泛型对应的表的所有数据
-  Account::class.all.forEach(::println)
+  all<Account>.forEach(::println)
   // 条件过滤查询并打印
   filter<Account> {
     and(Account::id.isNotNull)
