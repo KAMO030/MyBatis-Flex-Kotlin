@@ -16,6 +16,7 @@
 package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.query.*
+import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.vec.Order
 import java.util.function.Consumer
@@ -62,12 +63,25 @@ infix fun QueryColumn.notIn(values: Array<Any?>): QueryCondition = this.notIn(va
 
 infix fun QueryColumn.`in`(value: Collection<Any?>): QueryCondition = this.`in`(value)
 
-infix fun QueryColumn.`in`(values: Array<Any?>): QueryCondition = this.`in`(values)
+infix fun QueryColumn.`in`(values: Array<Any?>): QueryCondition = this.`in`(values.toList())
 
 infix fun QueryColumn.`in`(range: IntRange): QueryCondition = this.`in`(range.toList())
 
+fun <C : QueryColumn, A : Any> Pair<C, C>.inPair(vararg others: Pair<A, A>): QueryCondition =
+    this inPair others.toList()
+
+infix fun <C : QueryColumn, A : Any> Pair<C, C>.inPair(others: Iterable<Pair<A, A>>): QueryCondition =
+    others.map { this.first.eq(it.first) and this.second.eq(it.second) }.reduce { c1, c2 -> c1.or(c2) }
+
+fun <C : QueryColumn, A : Any> Pair<Pair<C, C>, C>.inTriple(vararg others: Pair<Pair<A, A>, A>): QueryCondition =
+    this inTriple others.toList()
+
+infix fun <C : QueryColumn, A : Any> Pair<Pair<C, C>, C>.inTriple(others: Iterable<Pair<Pair<A, A>, A>>): QueryCondition =
+    others.map { this.first.first.eq(it.first.first) and this.first.second.eq(it.first.second) and this.second.eq(it.second) }
+        .reduce { c1, c2 -> c1.or(c2) }
+
 //as-----
-infix fun QueryWrapper.`as`(alias: String?) = this.`as`(alias)
+infix fun QueryWrapper.`as`(alias: String?): QueryWrapper = this.`as`(alias)
 
 //join------
 infix fun <M> Joiner<M>.`as`(alias: String?): Joiner<M> = this.`as`(alias)

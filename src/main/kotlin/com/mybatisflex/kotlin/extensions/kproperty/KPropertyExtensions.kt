@@ -20,6 +20,7 @@ import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.vec.Order
 import java.lang.reflect.Field
@@ -52,10 +53,10 @@ fun Field.toQueryColumn(): QueryColumn {
     )
 }
 
-fun <T:KProperty<*>> Array<T>.toKProperties(): Array<QueryColumn> =
+fun <T : KProperty<*>> Array<T>.toKProperties(): Array<QueryColumn> =
     map { it.column }.toTypedArray()
 
-fun <T:KProperty<*>> Iterable<T>.toKProperties(): Array<QueryColumn> =
+fun <T : KProperty<*>> Iterable<T>.toKProperties(): Array<QueryColumn> =
     map { it.column }.toTypedArray()
 
 fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = column.toOrd(order)
@@ -117,13 +118,30 @@ infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: ClosedRange<T>): QueryCo
 
 infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: Collection<T>): QueryCondition = this inList other
 
-infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: Array<out T>): QueryCondition = this inArray other
+fun <T : Comparable<T>> KProperty<T?>.`in`(vararg other: T): QueryCondition = this inArray other
+
+fun <T : Comparable<T>, E : Comparable<E>> Pair<KProperty<T?>, KProperty<E?>>.inPair(vararg others: Pair<T, E>): QueryCondition =
+    this inPair others.toList()
+
+infix fun <T : Comparable<T>, E : Comparable<E>> Pair<KProperty<T?>, KProperty<E?>>.inPair(others: Iterable<Pair<T, E>>): QueryCondition =
+    others.map { this.first.eq(it.first) and this.second.eq(it.second) }.reduce { c1, c2 -> c1.or(c2) }
+
+
+fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KProperty<A?>, KProperty<B?>>, KProperty<C?>>.inTriple(
+    vararg others: Pair<Pair<A, B>, C>
+): QueryCondition =
+    this inTriple others.toList()
+
+infix fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KProperty<A?>, KProperty<B?>>, KProperty<C?>>.inTriple(
+    others: Iterable<Pair<Pair<A, B>, C>>
+): QueryCondition =
+    others.map { this.first.first.eq(it.first.first) and this.first.second.eq(it.first.second) and this.second.eq(it.second) }
+        .reduce { c1, c2 -> c1.or(c2) }
 
 infix fun <T : Comparable<T>> KProperty<T?>.inList(other: Collection<T>): QueryCondition {
     require(other.isNotEmpty()) {
         "The collection must not be empty."
     }
-
     val queryColumn = column
     return if (other.size == 1) queryColumn.eq(other.first()) else queryColumn.`in`(other)
 }

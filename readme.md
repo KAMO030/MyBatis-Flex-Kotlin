@@ -138,33 +138,43 @@ dependencies {
 
 ```kotlin
   fun main() {
-    //加载数据源(为了方便演示这里使用了演示源码中的内嵌数据源)
+    // 加载数据源(为了方便演示这里使用了演示源码中的内嵌数据源)
     val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
       setType(EmbeddedDatabaseType.H2)
       addScript("schema.sql")
       addScript("data-kt.sql")
       build()
     }
-    //启动并配入数据源
+    // 启动并配入数据源
     buildBootstrap { +dataSource }.start()
     val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
     val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
-    //条件过滤查询并打印
+    // 查泛型对应的表的所有数据
+    Account::class.all.forEach(::println)
+    // 条件过滤查询并打印
     filter<Account> {
-      and (Account::id eq 1)
-      and (Account::id.isNotNull)
-      and (Account::age `in` (17..19) or { Account::birthday between (start to end) })
+      and(Account::id.isNotNull)
+      and { (Account::id to Account::userName).inPair(1 to "张三", 2 to "李四") }
+      and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
     }.forEach(::println)
   }
 ```
 执行的SQL：
-```sql
-SELECT * FROM `tb_account` WHERE `id` = 1 AND `id` IS NOT NULL  AND (`age` BETWEEN  17 AND 19  OR `birthday` BETWEEN  '2020-01-10 08:00:00' AND '2020-01-12 08:00:00' )
-```
+- ```sql
+  SELECT * FROM `tb_account`
+  ```
+- ```sql
+  SELECT *
+  FROM `tb_account`
+  WHERE `id` IS NOT NULL
+    AND (`id` = 1 AND `user_name` = '张三' OR (`id` = 2 AND `user_name` = '李四'))
+    AND (`age` BETWEEN 17 AND 19 OR `birthday` BETWEEN '2020-01-10 08:00:00' AND '2020-01-12 08:00:00')
+  ```
 控制台输出：
 
-```txt
-Account(id=1, userName=张三, birthday=2020-01-11 00:00:00.0, age=18)
+```js
+Account(id=1, userName="张三", birthday="2020-01-11 00:00:00.0", age=18)
+Account(id=2, userName="李四", birthday="2021-03-21 00:00:00.0", age=19)
 ```
 
 ## 更多使用

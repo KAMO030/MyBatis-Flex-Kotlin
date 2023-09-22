@@ -129,7 +129,8 @@ inline fun <reified E : Any> filter(
         init = init
     )
 
-
+inline fun <reified E : Any> all(): List<E> =
+    E::class.tableInfo.run { selectAll(schema, tableName).toEntities() }
 
 
 

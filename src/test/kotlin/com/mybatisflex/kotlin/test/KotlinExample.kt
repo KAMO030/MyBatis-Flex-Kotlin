@@ -20,11 +20,11 @@ import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.kotlin.extensions.condition.*
+import com.mybatisflex.kotlin.extensions.db.all
 import com.mybatisflex.kotlin.extensions.db.filter
 import com.mybatisflex.kotlin.extensions.db.mapper
 import com.mybatisflex.kotlin.extensions.db.query
 import com.mybatisflex.kotlin.extensions.kproperty.*
-import com.mybatisflex.kotlin.extensions.mapper.all
 import com.mybatisflex.kotlin.extensions.model.*
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.extensions.wrapper.from
@@ -113,8 +113,8 @@ open class KotlinExample {
      */
     @Test
     fun testAll() {
-        Account::class.all.forEach(::println)
-        // 或者 all<Account>().forEach(::println)
+        all<Account>().forEach(::println)
+        // 或者 Account::class.all.forEach(::println) (需要注册Mapper接口)
     }
 
     /**
@@ -123,10 +123,15 @@ open class KotlinExample {
     @Test
     fun testFilter() {
         // a and b and (c or d)
-        filter<Account>(Account::id,Account::userName){
-            and(Account::id eq 1)
+        filter<Account>(Account::id, Account::userName, Account::age, Account::birthday) {
             and(Account::id.isNotNull)
-            and(Account::age `in` (17..19) or { Account::birthday between (start to end) })
+            and {
+                (Account::id to Account::userName to Account::age).inTriple(
+                    1 to "张三" to 18,
+                    2 to "李四" to 19
+                )
+            }
+            and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
         }.forEach(::println)
     }
 
@@ -149,7 +154,7 @@ open class KotlinExample {
         filter<Account> {
             and(Account::age eq 12)
             // or第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
-            or(true) { Account::id between (1 to 2) }
+            or { Account::id between (1 to 2) }
             // 可以用以下方法替代
             // or(`if`(false) { Account::id between (1 to 2 })
         }.stream().peek(::println)

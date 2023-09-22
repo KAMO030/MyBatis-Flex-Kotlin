@@ -36,7 +36,7 @@ data class Account(
     var birthday: Date? = null,
 ) : Model<Account>() {
     override fun toString(): String {
-        return "Account(id=$id, userName=$userName, birthday=$birthday, age=$age)"
+        return """Account(id=$id, userName="$userName", birthday="$birthday", age=$age)"""
     }
 
 }

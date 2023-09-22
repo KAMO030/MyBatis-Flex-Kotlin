@@ -26,10 +26,10 @@ import kotlin.reflect.KClass
  * 映射器操作扩展
  * @author 卡莫sama
  */
-fun <T> BaseMapper<T>.selectListByQuery(init: QueryScope.() -> Unit): List<T> =
+fun <T> BaseMapper<T>.query(init: QueryScope.() -> Unit): List<T> =
     queryScope(init = init).let(this::selectListByQuery)
 
-fun <T> BaseMapper<T>.selectListBCondition(init: () -> QueryCondition): List<T> =
+fun <T> BaseMapper<T>.filter(init: () -> QueryCondition): List<T> =
     init().let(this::selectListByCondition)
 
 fun <T> BaseMapper<T>.updateByQuery(entity: T, init: QueryScope.() -> Unit): Int =
@@ -45,9 +45,6 @@ fun <T> BaseMapper<T>.deleteByCondition(init: () -> QueryCondition): Int =
     init().let(this::deleteByCondition)
 
 //    all-----------
-inline fun <reified E : Any> all(): List<E> =
-    E::class.baseMapper.selectAll()
-
 val <E : Any> KClass<E>.all: List<E>
     get() = baseMapper.selectAll()
 

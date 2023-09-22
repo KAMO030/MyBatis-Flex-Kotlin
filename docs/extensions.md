@@ -21,32 +21,32 @@
 
 ## 快速查询
 
-- `all<实体类>()` : 查泛型对应的表的所有数据
+1. `all<实体类>()` : 查泛型对应的表的所有数据
 
-  ```kotlin
-   val accounts: List<Account> = all<Account>()
-   // 或者 Account::class.all
-  ```
+      ```kotlin
+       val accounts: List<Account> = all<Account>()
+       // 或者 Account::class.all (需要注册Mapper接口)
+      ```
 
-- `filter<实体类>(vararg QueryColumn,QueryCondition.() -> Unit)`: 按条件查泛型对应的表的数据
-  > 第一个入参为查询的列，为空时默认查询全部字段
+2. `filter<实体类>(vararg QueryColumn,QueryCondition.() -> Unit)`: 按条件查泛型对应的表的数据
+      > 第一个入参为查询的列，为空时默认查询全部字段
+    
+      ```kotlin
+        // a and b and (c or d)
+        val accounts: List<Account> = filter<Account>(Account::id,Account::userName) {
+                and(Account::id eq 1)
+                and(Account::id.isNotNull)
+                and(Account::age `in` (17..19) or { Account::birthday between (start to end) })
+            }
+      ```
 
-  ```kotlin
-    // a and b and (c or d)
-    val accounts: List<Account> = filter<Account>(Account::id,Account::userName) {
-            and(Account::id eq 1)
-            and(Account::id.isNotNull)
-            and(Account::age `in` (17..19) or { Account::birthday between (start to end) })
+3. `query<实体类>(QueryScope.()->Unit)`: 较复杂查泛型对应的表的数据 (如分组,排序等)
+
+      ```kotlin
+        val accounts: List<Account> = query<Account> {
+            where{
+                and (Account::age `in` (17..19)
+                and (Account::birthday between (start to end)))
+            } orderBy -Account::id
         }
-  ```
-
-- `query<实体类>(QueryScope.()->Unit)`: 较复杂查泛型对应的表的数据 (如分组,排序等)
-
-  ```kotlin
-    val accounts: List<Account> = query<Account> {
-        where{
-            and (Account::age `in` (17..19)
-            and (Account::birthday between (start to end)))
-        } orderBy -Account::id
-    }
-  ```
+      ```
