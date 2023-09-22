@@ -160,16 +160,16 @@ data class Account(
 }
 ```
 执行的SQL：
-- ```sql
+```sql
   SELECT * FROM `tb_account`
-  ```
-- ```sql
+```
+```sql
   SELECT *
   FROM `tb_account`
   WHERE `id` IS NOT NULL
     AND (`id` = 1 AND `user_name` = '张三' OR (`id` = 2 AND `user_name` = '李四'))
     AND (`age` BETWEEN 17 AND 19 OR `birthday` BETWEEN '2020-01-10 08:00:00' AND '2020-01-12 08:00:00')
-  ```
+```
 控制台输出：
 
 ```js
