@@ -52,6 +52,12 @@ fun Field.toQueryColumn(): QueryColumn {
     )
 }
 
+fun <T:KProperty<*>> Array<T>.toKProperties(): Array<QueryColumn> =
+    map { it.column }.toTypedArray()
+
+fun <T:KProperty<*>> Iterable<T>.toKProperties(): Array<QueryColumn> =
+    map { it.column }.toTypedArray()
+
 fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = column.toOrd(order)
 
 infix fun <T> KProperty<T?>.eq(other: T): QueryCondition = column.eq(other)

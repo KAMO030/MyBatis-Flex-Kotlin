@@ -23,9 +23,9 @@
       }.start()
     ```
 - 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供三个函数：all, filter 和 query )
-  >- `all<Account>()` 查泛型对应的表的所有数据
-  >- `filter<Account>(vararg columns: QueryColumn?, condition: ()->QueryCondition)` 按条件查泛型对应的表的数据
-  >- `query<Account>(queryScope: QueryScope.()->Unit)` 较复杂查泛型对应的表的数据 (如分组,排序等)
+  >- `all<实体类>()` 查泛型对应的表的所有数据
+  >- `filter<实体类>(vararg KProperty<*>,QueryCondition.() -> Unit)` 按条件查泛型对应的表的数据
+  >- `query<实体类>(QueryScope.()->Unit)` 较复杂查泛型对应的表的数据 (如分组,排序等)
 - 简明地构建条件：通过中缀表达式➕扩展方法能更加简单明了的构建条件:
 
   * **【原生方式】**
@@ -41,7 +41,7 @@
     ```kotlin
     query<Account> {
         select(Account::id, Account::userName)
-        where { Account::age `in` (17..19) } orderBy -Account::id
+        where { and(Account::age `in` (17..19)) } orderBy -Account::id
     }
     ```
   >执行的SQL:
@@ -129,7 +129,7 @@ dependencies {
 
 - 使用 `@Table("tb_account")` 设置实体类与表名的映射关系
 - 使用 `@Id` 标识主键
-> ⚠️最好不要写成 data class ，否则没有无参构造某些情况下会报错；
+> ⚠️ 最好不要写成 data class ，否则没有无参构造某些情况下会报错；
 > 如有需要可以安装官方 [noArg](https://kotlinlang.org/docs/no-arg-plugin.html) 插件
 
 **第 4 步：开始使用**
@@ -137,7 +137,7 @@ dependencies {
 添加测试类，进行功能测试：
 
 ```kotlin
-fun main() {
+  fun main() {
   //加载数据源(为了方便演示这里使用了演示源码中的内嵌数据源)
   val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
     setType(EmbeddedDatabaseType.H2)
@@ -153,7 +153,7 @@ fun main() {
   filter<Account> {
     and (Account::id eq 1)
     and (Account::id.isNotNull)
-    and (Account::age `in` (17..19) or (Account::birthday between (start to end)))
+    and (Account::age `in` (17..19) or { Account::birthday between (start to end) })
   }.forEach(::println)
 }
 ```

@@ -21,7 +21,6 @@ import com.mybatisflex.core.row.RowUtil
 import com.mybatisflex.core.util.SqlUtil
 import com.mybatisflex.kotlin.extensions.db.*
 import java.io.Serializable
-import kotlin.reflect.KClass
 
 /*
  * 实体操作扩展
@@ -31,12 +30,6 @@ import kotlin.reflect.KClass
 inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
 
 inline fun <reified E> Collection<Row>.toEntities(): MutableList<E> = RowUtil.toEntityList(this.toMutableList(), E::class.java)
-
-inline fun <reified E : Any> all(): List<E> =
-    E::class.baseMapper.selectAll()
-
-val <E : Any> KClass<E>.all: List<E>
-    get() = baseMapper.selectAll()
 
 inline fun <reified E : Model<E>> List<E>.batchInsert() = E::class.baseMapper.insertBatch(this)
 
@@ -48,4 +41,3 @@ inline fun <reified E : Model<E>> List<E>.batchDeleteById(): Boolean {
     val primaryValues = this.map { tableInfo.getPkValue(it) as Serializable }
     return SqlUtil.toBool(E::class.baseMapper.deleteBatchByIds(primaryValues))
 }
-

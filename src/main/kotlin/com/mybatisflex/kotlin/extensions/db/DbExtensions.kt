@@ -27,7 +27,9 @@ import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.model.toEntities
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
+import com.mybatisflex.kotlin.extensions.kproperty.toKProperties
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.isSuperclassOf
 
 
@@ -79,20 +81,18 @@ inline fun queryRow(
 
 
 inline fun <reified T> query(
-    vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
 ): List<T> = TableInfoFactory.ofEntityClass(T::class.java).run {
-    queryRows(schema = schema, tableName = tableName, columns = columns, init = init).toEntities()
+    queryRows(schema = schema, tableName = tableName, init = init).toEntities()
 }
 
 
 inline fun queryRows(
-    vararg columns: QueryColumn,
     schema: String? = null,
     tableName: String? = null,
     init: QueryScope.() -> Unit
 ): List<Row> = selectListByQuery(
-    schema, tableName, queryScope(columns = columns, init = init)
+    schema, tableName, queryScope(init = init)
 )
 
 //    filter-----------
@@ -107,7 +107,7 @@ inline fun <reified E> filter(
     QueryWrapper().select(*columns).where(queryCondition)
 ).toEntities()
 
-inline fun <reified E : Any> filter(
+inline fun <reified E : Any> filterColumn(
     vararg columns: QueryColumn,
     init: QueryCondition.() -> Unit
 ): List<E> {
@@ -120,16 +120,16 @@ inline fun <reified E : Any> filter(
     )
 }
 
-//    insert-----------
-inline fun <reified E : Any> insert(build: E.() -> Unit): Int {
-    val entity = E::class.java.newInstance()
-    entity.build()
-    return E::class.baseMapper.insert(entity)
-}
+inline fun <reified E : Any> filter(
+    vararg columns: KProperty<*>,
+    init: QueryCondition.() -> Unit
+): List<E> =
+    filterColumn(
+        columns = columns.toKProperties(),
+        init = init
+    )
 
-//    update-----------
-inline fun <reified E : Any> update(entity: E,conditionBlock: (E) -> QueryCondition): Int =
-    E::class.baseMapper.updateByCondition(entity,conditionBlock(entity))
+
 
 
 
