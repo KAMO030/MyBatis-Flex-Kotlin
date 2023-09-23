@@ -102,6 +102,7 @@ open class KotlinExample {
             .orderBy(Account::id.column().desc())
         mapper<AccountMapper>().selectListByQuery(queryWrapper)
         // 【扩展后】
+        // 无需注册Mapper即可查询操作
         query<Account> {
             select(Account::id, Account::userName)
             where { and(Account::age `in` (17..19)) } orderBy -Account::id
@@ -113,7 +114,8 @@ open class KotlinExample {
      */
     @Test
     fun testAll() {
-        all<Account>().forEach(::println)
+        val accounts:List<Account> = all()
+        accounts.forEach(::println)
         // 或者 Account::class.all.forEach(::println) (需要注册Mapper接口)
     }
 
@@ -122,17 +124,17 @@ open class KotlinExample {
      */
     @Test
     fun testFilter() {
-        // a and b and (c or d)
-        filter<Account>(Account::id, Account::userName, Account::age, Account::birthday) {
+        val accounts:List<Account> = filter(Account::id, Account::userName, Account::age, Account::birthday) {
             and(Account::id.isNotNull)
             and {
                 (Account::id to Account::userName to Account::age).inTriple(
                     1 to "张三" to 18,
-                    2 to "李四" to 19
+                    2 to "李四" to 19,
                 )
             }
             and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
-        }.forEach(::println)
+        }
+        accounts.forEach(::println)
     }
 
     /**
@@ -140,12 +142,14 @@ open class KotlinExample {
      */
     @Test
     fun testQuery() {
-        query<Account> {
+        val accounts:List<Account> = query {
+            select(Account::id, Account::userName)
             where {
                 and(Account::age `in` (17..19))
                 and(Account::birthday between (start to end))
             } orderBy -Account::id
-        }.forEach(::println)
+        }
+        accounts.forEach(::println)
     }
 
     @Test

@@ -18,7 +18,7 @@ package com.mybatisflex.kotlin.test.mapper
 import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.kotlin.extensions.kproperty.eq
 import com.mybatisflex.kotlin.extensions.kproperty.`in`
-import com.mybatisflex.kotlin.extensions.mapper.selectListByQuery
+import com.mybatisflex.kotlin.extensions.mapper.query
 import com.mybatisflex.kotlin.extensions.wrapper.and
 import com.mybatisflex.kotlin.test.entity.Account
 
@@ -27,7 +27,7 @@ import com.mybatisflex.kotlin.test.entity.Account
 interface AccountMapper : BaseMapper<Account> {
 
 
-    fun findByAge(age: Int, vararg ids: Int): List<Account> = selectListByQuery {
+    fun findByAge(age: Int, vararg ids: Int): List<Account> = query {
         where {
             and(Account::age eq age)
             and(ids.isNotEmpty()) {
