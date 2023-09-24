@@ -1,9 +1,8 @@
-import org.gradle.internal.impldep.org.codehaus.plexus.util.MatchPatterns.from
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 group = "com.mybatis-flex"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()

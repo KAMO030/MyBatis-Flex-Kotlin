@@ -27,6 +27,7 @@ import com.mybatisflex.kotlin.extensions.db.query
 import com.mybatisflex.kotlin.extensions.kproperty.*
 import com.mybatisflex.kotlin.extensions.model.*
 import com.mybatisflex.kotlin.extensions.sql.*
+import com.mybatisflex.kotlin.extensions.wrapper.and
 import com.mybatisflex.kotlin.extensions.wrapper.from
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
@@ -98,14 +99,14 @@ open class KotlinExample {
         // 【原生】
         val queryWrapper = QueryWrapper.create()
             .select(Account::id.column(), Account::userName.column())
-            .where(Account::age.column().`in`(17, 18, 19))
+            .where(Account::age.column().isNotNull()).and(Account::age.column().ge(17))
             .orderBy(Account::id.column().desc())
         mapper<AccountMapper>().selectListByQuery(queryWrapper)
         // 【扩展后】
         // 无需注册Mapper即可查询操作
         query<Account> {
             select(Account::id, Account::userName)
-            where { and(Account::age `in` (17..19)) } orderBy -Account::id
+            where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
         }
     }
 
@@ -114,7 +115,7 @@ open class KotlinExample {
      */
     @Test
     fun testAll() {
-        val accounts:List<Account> = all()
+        val accounts: List<Account> = all()
         accounts.forEach(::println)
         // 或者 Account::class.all.forEach(::println) (需要注册Mapper接口)
     }
@@ -124,15 +125,14 @@ open class KotlinExample {
      */
     @Test
     fun testFilter() {
-        val accounts:List<Account> = filter(Account::id, Account::userName, Account::age, Account::birthday) {
-            and(Account::id.isNotNull)
-            and {
-                (Account::id to Account::userName to Account::age).inTriple(
-                    1 to "张三" to 18,
-                    2 to "李四" to 19,
-                )
-            }
-            and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
+        val accounts: List<Account> = filter(Account::class.allColumns) {
+            (Account::id.isNotNull)
+                .and { (Account::id to Account::userName to Account::age).inTriple(
+                        1 to "张三" to 18,
+                        2 to "李四" to 19,
+                    )
+                }
+                .and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
         }
         accounts.forEach(::println)
     }
@@ -142,7 +142,7 @@ open class KotlinExample {
      */
     @Test
     fun testQuery() {
-        val accounts:List<Account> = query {
+        val accounts: List<Account> = query {
             select(Account::id, Account::userName)
             where {
                 and(Account::age `in` (17..19))
@@ -156,19 +156,15 @@ open class KotlinExample {
     fun testDb() {
         // 查询表对象对应的实体数据并根据条件过滤
         filter<Account> {
-            and(Account::age eq 12)
-            // or第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
-            or { Account::id between (1 to 2) }
+            (Account::age eq 12)
+                // or第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
+                .or(true) { Account::id between (1 to 2) }
             // 可以用以下方法替代
-            // or(`if`(false) { Account::id between (1 to 2 })
+            // or(`if`(true) { Account::id between (1 to 2 })
         }.stream().peek(::println)
             // 过滤后修改id再次保存
             .peek { it.id = it.id.plus(2) }.forEach(Model<*>::save)
-        // 使用表对象filter或者DB对象有两个泛型的filter方法时方法体内this为表对象无需XXX.AA调用，直接AA
-        filter<Account> {
-            and(Account::age eq 12)
-            or(true) { Account::id `in` listOf(1, 2) }
-        }.stream().peek(::println).peek { it.id = it.id.plus(6) }.forEach(Model<Account>::save)
+
 
         println("保存后————————")
         // 获得mapper实例通过自定义的默认方法查，并将查到的删除

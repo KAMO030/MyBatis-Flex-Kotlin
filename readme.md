@@ -24,30 +24,57 @@
     ```
 - 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供三个函数：all, filter 和 query )
   >- `all<实体类>()` 查泛型对应的表的所有数据
-  >- `filter<实体类>(vararg KProperty<*>,QueryCondition.() -> Unit)` 按条件查泛型对应的表的数据
-  >- `query<实体类>(QueryScope.()->Unit)` 较复杂查泛型对应的表的数据 (如分组,排序等)
-- 简明地构建条件：通过中缀表达式➕扩展方法能更加简单明了的构建条件:
+  >- `filter<实体类>(vararg KProperty<*>, ()->QueryCondition)` 按条件查泛型对应的表的数据
+  >- `query<实体类>(QueryScope.()->Unit)` 较复杂查泛型对应的表的数据 (如: 分组,排序等)
 
-  * **【原生方式】**
-    ```kotlin
-    val queryWrapper = QueryWrapper.create()
-            .select(Account::id.column(), Account::userName.column())
-            .where(Account::age.column().`in`(17, 18, 19))
-            .orderBy(Account::id.column().desc())
-    mapper<AccountMapper>().selectListByQuery(queryWrapper)
+- 简明地构建查询：通过中缀表达式➕扩展方法能更加简单明了的构建条件:
+
+  * **【对比原生】**
+    * **原生**
+      ```kotlin
+      val queryWrapper = QueryWrapper.create()
+          .select(Account::id.column(), Account::userName.column())
+          .where(Account::age.column().isNotNull()).and(Account::age.column().ge(17))
+          .orderBy(Account::id.column().desc())
+      mapper<AccountMapper>().selectListByQuery(queryWrapper)
+      ```
+
+    * **扩展后**
+      ```kotlin
+      query<Account> {
+          select(Account::id, Account::userName)
+          where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
+      }
+      ```
+    执行的SQL:
+    ```sql
+     SELECT `id`, `user_name` FROM `tb_account` WHERE `age` IS NOT NULL  AND `age` >= 17 ORDER BY `id` DESC
     ```
 
-  * **【扩展方式】**
-    ```kotlin
-    query<Account> {
-        select(Account::id, Account::userName)
-        where { and(Account::age `in` (17..19)) } orderBy -Account::id
-    }
-    ```
-  >执行的SQL:
-  ```sql
-    SELECT `id`, `user_name` FROM `tb_account` WHERE `age` IN (17, 18, 19) ORDER BY `id` DESC
-  ```
+  * **【条件优化】**
+    - 例如: 查询属性是否在一个连续的区间时，会自动将 IN 转为 BETWEEN 调用
+      ```kotlin
+       filter<Account> { Account::age `in` (17..19) }
+      ```
+      执行的SQL:
+      ```sql
+      SELECT * FROM `tb_account` WHERE `age` BETWEEN  17 AND 19
+      ```
+    - 例如: 构建多属性组合 IN (最多支持三个属性)
+      ```kotlin
+      filter<Account> {
+        (Account::id to Account::userName to Account::age).inTriple(
+            1 to "张三" to 18,
+            2 to "李四" to 19,
+        )
+      }
+      ```
+      执行的SQL:
+      ```sql
+      SELECT * FROM `tb_account`
+      WHERE (`id` = 1 AND `user_name` = '张三' AND `age` = 18) 
+         OR (`id` = 2 AND `user_name` = '李四' AND `age` = 19)
+      ```
 - 摆脱APT: 使用扩展方法摆脱对 APT(注解处理器) 的使用,直接使用属性引用让代码更加灵活优雅:
   >  使用APT: `ACCOUNT.ID eq 1` ,使用属性引用: `Account::id eq 1`
   >
@@ -153,9 +180,9 @@ data class Account(
   all<Account>.forEach(::println)
   // 条件过滤查询并打印
   filter<Account> {
-    and(Account::id.isNotNull)
-    and { (Account::id to Account::userName).inPair(1 to "张三", 2 to "李四") }
-    and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
+    (Account::id.isNotNull)
+      .and { (Account::id to Account::userName).inPair(1 to "张三", 2 to "李四") }
+      .and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
   }.forEach(::println)
 }
 ```

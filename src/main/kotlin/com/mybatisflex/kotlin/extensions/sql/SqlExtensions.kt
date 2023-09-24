@@ -71,14 +71,14 @@ fun <C : QueryColumn, A : Any> Pair<C, C>.inPair(vararg others: Pair<A, A>): Que
     this inPair others.toList()
 
 infix fun <C : QueryColumn, A : Any> Pair<C, C>.inPair(others: Iterable<Pair<A, A>>): QueryCondition =
-    others.map { this.first.eq(it.first) and this.second.eq(it.second) }.reduce { c1, c2 -> c1.or(c2) }
+    others.map { this.first.eq(it.first) and this.second.eq(it.second) }.reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
 fun <C : QueryColumn, A : Any> Pair<Pair<C, C>, C>.inTriple(vararg others: Pair<Pair<A, A>, A>): QueryCondition =
     this inTriple others.toList()
 
 infix fun <C : QueryColumn, A : Any> Pair<Pair<C, C>, C>.inTriple(others: Iterable<Pair<Pair<A, A>, A>>): QueryCondition =
     others.map { this.first.first.eq(it.first.first) and this.first.second.eq(it.first.second) and this.second.eq(it.second) }
-        .reduce { c1, c2 -> c1.or(c2) }
+        .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
 //as-----
 infix fun QueryWrapper.`as`(alias: String?): QueryWrapper = this.`as`(alias)
@@ -96,7 +96,7 @@ infix fun <M> Joiner<M>.on(consumer: Consumer<QueryWrapper?>): M = this.on(consu
 infix fun QueryWrapper.orderBy(orderBys: Collection<QueryOrderBy?>): QueryWrapper =
     this.orderBy(*orderBys.toTypedArray())
 
-infix fun QueryWrapper.orderBy(orderBy: QueryOrderBy?): QueryWrapper = this.orderBy(orderBy)
+infix fun QueryWrapper.orderBy(orderBy: QueryOrderBy): QueryWrapper = this.orderBy(orderBy)
 
 operator fun QueryColumn.unaryPlus(): QueryOrderBy = this.asc()
 

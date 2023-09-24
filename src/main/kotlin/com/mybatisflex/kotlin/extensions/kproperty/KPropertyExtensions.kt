@@ -16,6 +16,7 @@
 package com.mybatisflex.kotlin.extensions.kproperty
 
 import com.mybatisflex.core.constant.SqlConsts
+import com.mybatisflex.core.query.Brackets
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
@@ -24,8 +25,10 @@ import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.vec.Order
 import java.lang.reflect.Field
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
 /**
@@ -44,6 +47,9 @@ inline fun <reified T, V> KProperty1<T, V>.column(): QueryColumn =
         "The attribute $this of class ${T::class.java} could not find the corresponding QueryColumn"
     )
 
+val KClass<*>.allColumns: Array<out QueryColumn>
+    get() = this.memberProperties.toQueryColumns()
+
 
 fun Field.toQueryColumn(): QueryColumn {
     val from = declaringClass
@@ -53,10 +59,10 @@ fun Field.toQueryColumn(): QueryColumn {
     )
 }
 
-fun <T : KProperty<*>> Array<T>.toKProperties(): Array<QueryColumn> =
+fun <T : KProperty<*>> Array<T>.toQueryColumns(): Array<QueryColumn> =
     map { it.column }.toTypedArray()
 
-fun <T : KProperty<*>> Iterable<T>.toKProperties(): Array<QueryColumn> =
+fun <T : KProperty<*>> Iterable<T>.toQueryColumns(): Array<QueryColumn> =
     map { it.column }.toTypedArray()
 
 fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = column.toOrd(order)
@@ -124,7 +130,8 @@ fun <T : Comparable<T>, E : Comparable<E>> Pair<KProperty<T?>, KProperty<E?>>.in
     this inPair others.toList()
 
 infix fun <T : Comparable<T>, E : Comparable<E>> Pair<KProperty<T?>, KProperty<E?>>.inPair(others: Iterable<Pair<T, E>>): QueryCondition =
-    others.map { this.first.eq(it.first) and this.second.eq(it.second) }.reduce { c1, c2 -> c1.or(c2) }
+    others.map { this.first.eq(it.first) and this.second.eq(it.second) }
+        .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
 
 fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KProperty<A?>, KProperty<B?>>, KProperty<C?>>.inTriple(
@@ -136,7 +143,7 @@ infix fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KP
     others: Iterable<Pair<Pair<A, B>, C>>
 ): QueryCondition =
     others.map { this.first.first.eq(it.first.first) and this.first.second.eq(it.first.second) and this.second.eq(it.second) }
-        .reduce { c1, c2 -> c1.or(c2) }
+        .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
 infix fun <T : Comparable<T>> KProperty<T?>.inList(other: Collection<T>): QueryCondition {
     require(other.isNotEmpty()) {
