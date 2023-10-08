@@ -26,6 +26,7 @@ import kotlin.reflect.KClass
  * 映射器操作扩展
  * @author 卡莫sama
  */
+
 fun <T> BaseMapper<T>.query(init: QueryScope.() -> Unit): List<T> =
     queryScope(init = init).let(this::selectListByQuery)
 

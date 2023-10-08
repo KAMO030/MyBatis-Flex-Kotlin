@@ -12,6 +12,10 @@ import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
+/*
+ * QueryWrapper操作扩展
+ * @author 卡莫sama
+ */
 
 inline fun QueryWrapper.from(init: QueryScope.() -> Unit = {}): QueryWrapper = this.from(queryScope(init = init))
 

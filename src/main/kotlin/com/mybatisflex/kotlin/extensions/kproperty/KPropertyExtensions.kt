@@ -31,6 +31,11 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
+/*
+ * KProperty操作扩展
+ * @author 卡莫sama,CloudPlayer
+ */
+
 /**
  * 实例引用时只能用此属性，（如：it::id.column）
  */
