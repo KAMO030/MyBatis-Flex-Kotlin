@@ -38,3 +38,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/mybatis-flex.config
+/mybatis-flex-kotlin-extensions/mybatis-flex.config
