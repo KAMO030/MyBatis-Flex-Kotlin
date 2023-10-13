@@ -23,31 +23,58 @@
       }.start()
     ```
 - 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供三个函数：all, filter 和 query )
-  >- `all<Account>()` 查泛型对应的表的所有数据
-  >- `filter<Account>(vararg columns: QueryColumn?, condition: ()->QueryCondition)` 按条件查泛型对应的表的数据
-  >- `query<Account>(queryScope: QueryScope.()->Unit)` 较复杂查泛型对应的表的数据 (如分组,排序等)
-- 简明地构建条件：通过中缀表达式➕扩展方法能更加简单明了的构建条件:
+  >- `all<实体类>()` 查泛型对应的表的所有数据
+  >- `filter<实体类>(vararg KProperty<*>, ()->QueryCondition)` 按条件查泛型对应的表的数据
+  >- `query<实体类>(QueryScope.()->Unit)` 较复杂查泛型对应的表的数据 (如: 分组,排序等)
 
-  * **【原生方式】**
-    ```kotlin
-    val queryWrapper = QueryWrapper.create()
-            .select(Account::id.column(), Account::userName.column())
-            .where(Account::age.column().`in`(17, 18, 19))
-            .orderBy(Account::id.column().desc())
-    mapper<AccountMapper>().selectListByQuery(queryWrapper)
+- 简明地构建查询：通过中缀表达式➕扩展方法能更加简单明了的构建条件:
+
+  * **【对比原生】**
+    * **原生**
+      ```kotlin
+      val queryWrapper = QueryWrapper.create()
+          .select(Account::id.column(), Account::userName.column())
+          .where(Account::age.column().isNotNull()).and(Account::age.column().ge(17))
+          .orderBy(Account::id.column().desc())
+      mapper<AccountMapper>().selectListByQuery(queryWrapper)
+      ```
+
+    * **扩展后**
+      ```kotlin
+      query<Account> {
+          select(Account::id, Account::userName)
+          where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
+      }
+      ```
+    执行的SQL:
+    ```sql
+     SELECT `id`, `user_name` FROM `tb_account` WHERE `age` IS NOT NULL  AND `age` >= 17 ORDER BY `id` DESC
     ```
 
-  * **【扩展方式】**
-    ```kotlin
-    query<Account> {
-        select(Account::id, Account::userName)
-        where { Account::age `in` (17..19) } orderBy -Account::id
-    }
-    ```
-  >执行的SQL:
-  ```sql
-    SELECT `id`, `user_name` FROM `tb_account` WHERE `age` IN (17, 18, 19) ORDER BY `id` DESC
-  ```
+  * **【条件优化】**
+    - 例如: 查询属性是否在一个连续的区间时，会自动将 IN 转为 BETWEEN 调用
+      ```kotlin
+       filter<Account> { Account::age `in` (17..19) }
+      ```
+      执行的SQL:
+      ```sql
+      SELECT * FROM `tb_account` WHERE `age` BETWEEN  17 AND 19
+      ```
+    - 例如: 构建多属性组合 IN (最多支持三个属性)
+      ```kotlin
+      filter<Account> {
+        (Account::id to Account::userName to Account::age).inTriple(
+            1 to "张三" to 18,
+            2 to "李四" to 19,
+        )
+      }
+      ```
+      执行的SQL:
+      ```sql
+      SELECT * FROM `tb_account`
+      WHERE (`id` = 1 AND `user_name` = '张三' AND `age` = 18) 
+         OR (`id` = 2 AND `user_name` = '李四' AND `age` = 19)
+      ```
 - 摆脱APT: 使用扩展方法摆脱对 APT(注解处理器) 的使用,直接使用属性引用让代码更加灵活优雅:
   >  使用APT: `ACCOUNT.ID eq 1` ,使用属性引用: `Account::id eq 1`
   >
@@ -119,17 +146,17 @@ dependencies {
 
 ```kotlin
   @Table("tb_account")
-  data class Account(
-    @Id var id: Int = -1,
-    var userName: String? = null,
-    var age: Int? = null,
-    var birthday: Date? = null,
-  )
+data class Account(
+  @Id var id: Int = -1,
+  var userName: String? = null,
+  var age: Int? = null,
+  var birthday: Date? = null,
+)
 ```
 
 - 使用 `@Table("tb_account")` 设置实体类与表名的映射关系
 - 使用 `@Id` 标识主键
-> ⚠️最好不要写成 data class ，否则没有无参构造某些情况下会报错；
+> ⚠️ 最好不要写成 data class ，否则没有无参构造某些情况下会报错；
 > 如有需要可以安装官方 [noArg](https://kotlinlang.org/docs/no-arg-plugin.html) 插件
 
 **第 4 步：开始使用**
@@ -137,34 +164,44 @@ dependencies {
 添加测试类，进行功能测试：
 
 ```kotlin
-fun main() {
-  //加载数据源(为了方便演示这里使用了演示源码中的内嵌数据源)
+  fun main() {
+  // 加载数据源(为了方便演示这里使用了演示源码中的内嵌数据源)
   val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
     setType(EmbeddedDatabaseType.H2)
     addScript("schema.sql")
     addScript("data-kt.sql")
     build()
   }
-  //启动并配入数据源
+  // 启动并配入数据源
   buildBootstrap { +dataSource }.start()
   val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
   val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
-  //条件过滤查询并打印
+  // 查泛型对应的表的所有数据
+  all<Account>.forEach(::println)
+  // 条件过滤查询并打印
   filter<Account> {
-    and (Account::id eq 1)
-    and (Account::id.isNotNull)
-    and (Account::age `in` (17..19) or (Account::birthday between (start to end)))
+    (Account::id.isNotNull)
+      .and { (Account::id to Account::userName).inPair(1 to "张三", 2 to "李四") }
+      .and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
   }.forEach(::println)
 }
 ```
 执行的SQL：
 ```sql
-SELECT * FROM `tb_account` WHERE `id` = 1 AND `id` IS NOT NULL  AND (`age` BETWEEN  17 AND 19  OR `birthday` BETWEEN  '2020-01-10 08:00:00' AND '2020-01-12 08:00:00' )
+  SELECT * FROM `tb_account`
+```
+```sql
+  SELECT *
+  FROM `tb_account`
+  WHERE `id` IS NOT NULL
+    AND (`id` = 1 AND `user_name` = '张三' OR (`id` = 2 AND `user_name` = '李四'))
+    AND (`age` BETWEEN 17 AND 19 OR `birthday` BETWEEN '2020-01-10 08:00:00' AND '2020-01-12 08:00:00')
 ```
 控制台输出：
 
-```txt
-Account(id=1, userName=张三, birthday=2020-01-11 00:00:00.0, age=18)
+```js
+Account(id=1, userName="张三", birthday="2020-01-11 00:00:00.0", age=18)
+Account(id=2, userName="李四", birthday="2021-03-21 00:00:00.0", age=19)
 ```
 
 ## 更多使用

@@ -16,7 +16,6 @@
 package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.query.QueryColumn
-import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import kotlin.reflect.KProperty
@@ -36,7 +35,6 @@ class QueryScope : QueryWrapper() {
     fun select(vararg properties: KProperty<*>): QueryWrapper =
         this.select(*(properties.map { it.column }.toTypedArray()))
 
-    fun where(build: QueryWrapper.() -> QueryCondition): QueryWrapper = where(this.build())
 }
 
 

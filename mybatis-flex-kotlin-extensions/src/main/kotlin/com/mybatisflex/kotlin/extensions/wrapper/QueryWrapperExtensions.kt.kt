@@ -2,25 +2,50 @@ package com.mybatisflex.kotlin.extensions.wrapper
 
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.util.MapperUtil
-import com.mybatisflex.kotlin.extensions.kproperty.column
+import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
+import java.util.function.Consumer
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
+/*
+ * QueryWrapper操作扩展
+ * @author 卡莫sama
+ */
 
 inline fun QueryWrapper.from(init: QueryScope.() -> Unit = {}): QueryWrapper = this.from(queryScope(init = init))
 
 fun QueryWrapper.from(vararg entities: KClass<*>): QueryWrapper = this.from(*entities.map { it.java }.toTypedArray())
 
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
-    this.select(*properties().map { it.column }.toTypedArray())
- 
+    this.select(*properties().toQueryColumns())
+
+fun QueryWrapper.select(vararg properties: KProperty<*>): QueryWrapper =
+    this.select(*properties.toQueryColumns())
+
 val QueryWrapper.self
     get() = QueryWrapperDevelopEntry(this)
+
+fun QueryWrapper.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
+    if (isEffective) and(predicate()) else this
+
+fun QueryWrapper.or(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
+    if (isEffective) this.or(predicate()) else this
+
+inline infix fun QueryWrapper.and(predicate: () -> QueryCondition): QueryWrapper = this.and(predicate())
+
+inline infix fun QueryWrapper.or(predicate: () -> QueryCondition): QueryWrapper = this.or(predicate())
+
+infix fun QueryWrapper.and(queryColumn: QueryCondition): QueryWrapper = this.and(queryColumn)
+
+infix fun QueryWrapper.or(queryColumn: QueryCondition): QueryWrapper = this.or(queryColumn)
+
+fun QueryWrapper.where(queryColumn: QueryCondition, consumer: Consumer<QueryWrapper>): QueryWrapper =
+    and(queryColumn).where(consumer)
 
 /**
  * wrapper的内部实现的访问，基于官方CPI而编写。其目的用于简化开发时的
