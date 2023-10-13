@@ -19,12 +19,15 @@ import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.kotlin.extensions.condition.*
+import com.mybatisflex.kotlin.extensions.db.all
 import com.mybatisflex.kotlin.extensions.db.filter
 import com.mybatisflex.kotlin.extensions.db.mapper
 import com.mybatisflex.kotlin.extensions.db.query
 import com.mybatisflex.kotlin.extensions.kproperty.*
 import com.mybatisflex.kotlin.extensions.model.*
 import com.mybatisflex.kotlin.extensions.sql.*
+import com.mybatisflex.kotlin.extensions.wrapper.and
 import com.mybatisflex.kotlin.extensions.wrapper.from
 import com.mybatisflex.kotlin.scope.buildBootstrap
 import com.mybatisflex.kotlin.test.entity.Account
@@ -36,7 +39,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
 import javax.sql.DataSource
-import kotlin.streams.toList
 
 
 open class KotlinExample {
@@ -47,6 +49,9 @@ open class KotlinExample {
         addScript("data-kt.sql")
         build()
     }
+
+    val start: Date = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
+    val end: Date = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
 
     init {
         buildBootstrap {
@@ -76,67 +81,93 @@ open class KotlinExample {
             }
 //          3.通过原始的方式
 //          it.addDataSource(FlexConsts.NAME,dataSource)
+
 //          配置日志打印在控制台
             logImpl = StdOutImpl::class
         }.start()
+
         AuditManager.setAuditEnable(true)
         AuditManager.setMessageCollector(ConsoleMessageCollector())
+    }
 
+    /**
+     * 对比原生
+     */
+    @Test
+    fun contrastOriginal() {
+        // 【原生】
+        val queryWrapper = QueryWrapper.create()
+            .select(Account::id.column(), Account::userName.column())
+            .where(Account::age.column().isNotNull()).and(Account::age.column().ge(17))
+            .orderBy(Account::id.column().desc())
+        mapper<AccountMapper>().selectListByQuery(queryWrapper)
+        // 【扩展后】
+        // 无需注册Mapper即可查询操作
+        query<Account> {
+            select(Account::id, Account::userName)
+            where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
+        }
+    }
+
+    /**
+     * all: 查泛型对应的表的所有数据
+     */
+    @Test
+    fun testAll() {
+        val accounts: List<Account> = all()
+        accounts.forEach(::println)
+        // 或者 Account::class.all.forEach(::println) (需要注册Mapper接口)
+    }
+
+    /**
+     * filter: 按条件查泛型对应的表的数据
+     */
+    @Test
+    fun testFilter() {
+        val accounts: List<Account> = filter(arrayOf()) {
+            (Account::id.isNotNull)
+                .and { (Account::id to Account::userName to Account::age).inTriple(
+                        1 to "张三" to 18,
+                        2 to "李四" to 19,
+                    )
+                }
+                .and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
+        }
+        accounts.forEach(::println)
+    }
+
+    /**
+     * query: 较复杂查泛型对应的表的数据,如分组排序等
+     */
+    @Test
+    fun testQuery() {
+        val accounts: List<Account> = query {
+            select(Account::id, Account::userName)
+            where {
+                and(Account::age `in` (17..19))
+                and(Account::birthday between (start to end))
+            } orderBy -Account::id
+        }
+        accounts.forEach(::println)
     }
 
     @Test
     fun testDb() {
-        // all: 查泛型对应的表的所有数据
-        Account::class.all.forEach(::println)
-        //或者 all<Account>().forEach(::println)
-
-        // filter: 按条件查泛型对应的表的数据
-        // a and (b or c)
-        val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
-        val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
-        filter<Account> {
-            and(Account::id eq 1)
-            and(Account::id.isNotNull)
-            and(Account::age `in` (17..19) or (Account::birthday between (start to end)))
-        }.forEach(::println)
-        // query: 较复杂查泛型对应的表的数据,如分组排序等
-        query<Account> {
-            where(
-                (Account::age `in` (17..19) and (Account::birthday between (start to end)))
-            ) orderBy -Account::id
-        }.forEach(::println)
-
-        // 对比原生：
-        // 【原生】
-        val queryWrapper = QueryWrapper.create()
-            .select(Account::id.column(), Account::userName.column())
-            .where(Account::age.column().`in`(17, 18, 19))
-            .orderBy(Account::id.column().desc())
-        mapper<AccountMapper>().selectListByQuery(queryWrapper)
-        // 【扩展后】
-        query<Account> {
-            select(Account::id, Account::userName)
-            where { Account::age `in` (17..19) } orderBy -Account::id
-        }
-
         // 查询表对象对应的实体数据并根据条件过滤
         filter<Account> {
-            and(Account::age eq 12)
-            // if的第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
-            or(`if`(true) { Account::id between (1 to 2) })
-            // `if`(false) { Account::id between (1 to 2 }
+            (Account::age eq 12)
+                // or第一个参数为true时则会调用花括号类的方法返回一个条件对象与上面那个条件对象相连接
+                .or(true) { Account::id between (1 to 2) }
+            // 可以用以下方法替代
+            // or(`if`(true) { Account::id between (1 to 2 })
         }.stream().peek(::println)
             // 过滤后修改id再次保存
             .peek { it.id = it.id.plus(2) }.forEach(Model<*>::save)
-        // 使用表对象filter或者DB对象有两个泛型的filter方法时方法体内this为表对象无需XXX.AA调用，直接AA
-        filter<Account> {
-            and(Account::age eq 12)
-            or(`if`(true) { Account::id `in` listOf(1, 2) })
-        }.stream().peek(::println).peek { it.id = it.id.plus(6) }.forEach(Model<Account>::save)
+
 
         println("保存后————————")
         // 获得mapper实例通过自定义的默认方法查，并将查到的删除
-        mapper<AccountMapper>().findByAge(18, 1).stream().peek { println(it) }.forEach { it.removeById() }
+//        mapper<AccountMapper>().findByAge(18, 1).stream().peek { println(it) }.forEach { it.removeById() }
 
         println("删除后————————")
         all<Account>().stream().peek { println(it) }.map {
