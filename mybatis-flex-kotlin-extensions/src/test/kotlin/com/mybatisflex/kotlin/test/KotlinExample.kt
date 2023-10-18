@@ -39,6 +39,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
 import javax.sql.DataSource
+import kotlin.streams.toList
 
 
 open class KotlinExample {
@@ -124,7 +125,7 @@ open class KotlinExample {
      */
     @Test
     fun testFilter() {
-        val accounts: List<Account> = filter(arrayOf()) {
+        val accounts: List<Account> = filter(Account::class.allColumns) {
             (Account::id.isNotNull)
                 .and { (Account::id to Account::userName to Account::age).inTriple(
                         1 to "张三" to 18,
@@ -167,7 +168,7 @@ open class KotlinExample {
 
         println("保存后————————")
         // 获得mapper实例通过自定义的默认方法查，并将查到的删除
-//        mapper<AccountMapper>().findByAge(18, 1).stream().peek { println(it) }.forEach { it.removeById() }
+        mapper<AccountMapper>().findByAge(18, 1).stream().peek { println(it) }.forEach { it.removeById() }
 
         println("删除后————————")
         all<Account>().stream().peek { println(it) }.map {

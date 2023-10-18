@@ -32,7 +32,6 @@ import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
-import java.nio.charset.Charset
 import java.time.Instant
 import java.util.*
 import kotlin.test.assertEquals
@@ -95,18 +94,12 @@ class VecExample {
         val aggregation = vec.filterColumns { listOf(it::id `as` "accountId", it::userName.column) }
         val query: QueryWrapper = QueryWrapper()
             .select(
-                Account::id `as` "accountId", Account::userName.column()
+                Account::id.`as`("accountId"), Account::userName.column()
             )
             .from(Account::class).`as`("a")
 
         assertEquals(aggregation.sql, query.toSQL())
 
-    }
-
-    @Test
-    fun test() {
-        println("你好中国！".toByteArray(Charset.forName("gbk")).toString(Charset.forName("gbk")))
-        println(Charset.defaultCharset())
     }
 }
 

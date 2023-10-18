@@ -28,7 +28,7 @@ import java.util.*
  * @author 卡莫sama
  * @date 2023/8/7
  */
-@Table("tb_account", camelToUnderline = false, mapperGenerateEnable = false)
+@Table("tb_account")
 data class Account(
     @Id var id: Int = -1,
     var userName: String? = null,
@@ -40,3 +40,4 @@ data class Account(
     }
 
 }
+
