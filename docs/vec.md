@@ -125,19 +125,19 @@ WHERE `dept_id` = ?
 ### filterColumn, filterColumns, filterProperty, filterProperties
 
 ```kotlin
-inline fun <E: Any> QueryVector<E>.filterColumn(aggregateFun: QueryFunctions.(E) -> QueryColumn): QueryVector<E>
+inline fun <E: Any> QueryVector<E>.filterColumn(columnSelector: QueryFunctions.(E) -> QueryColumn): QueryVector<E>
 ```
 
 ```kotlin
-inline fun <E: Any> QueryVector<E>.filterColumns(aggregateFun: QueryFunctions.(E) -> Iterable<QueryColumn>): QueryVector<E>
+inline fun <E: Any> QueryVector<E>.filterColumns(columnSelector: QueryFunctions.(E) -> Iterable<QueryColumn>): QueryVector<E>
 ```
 
 ```kotlin
-inline fun <E: Any> QueryVector<E>.filterProperty(predicate: (E) -> KProperty<*>): QueryVector<E>
+inline fun <E: Any> QueryVector<E>.filterProperty(propertySelector: (E) -> KProperty<*>): QueryVector<E>
 ```
 
 ```kotlin
-inline fun <E: Any> QueryVector<E>.filterProperties(predicate: (E) -> Iterable<KProperty<*>>): QueryVector<E>
+inline fun <E: Any> QueryVector<E>.filterProperties(propertySelector: (E) -> Iterable<KProperty<*>>): QueryVector<E>
 ```
 
 查询向量默认会查询实体类对象的所有列。如果我们不需要查询所有的列，我们可以用这四个方法来指定我们想要的列。其中，闭包返回值为Iterable的函数可以一次性指定多个列，
@@ -177,8 +177,8 @@ SELECT `id`, `dept_id` + 1, LENGTH(`name`) FROM `emp`
 ### sortedBy
 
 ```kotlin
-inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(order: Order = Order.ASC, sortedBy: (E) -> KProperty<V?>): QueryVector<E>
-inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(sortedBy: (E) -> Iterable<QueryOrderBy>): QueryVector<E>
+inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(order: Order = Order.ASC, selector: (E) -> KProperty<V?>): QueryVector<E>
+inline fun <E: Any, V: Comparable<V>> QueryVector<E>.sortedBy(selector: (E) -> Iterable<QueryOrderBy>): QueryVector<E>
 ```
 
 `sortedBy` 函数用于指定查询结果的排序方式，我们在第一个参数order中传入枚举类`Order`的成员来指定我们需要以什么顺序排序，

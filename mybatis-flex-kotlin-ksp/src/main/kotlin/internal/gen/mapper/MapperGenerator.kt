@@ -13,10 +13,10 @@ import org.apache.ibatis.annotations.Mapper
 import java.nio.charset.Charset
 
 
-class MapperGenerator(private val baseMapper: KSClassDeclaration) : (KSClassDeclaration) -> Unit {
+class MapperGenerator(private val baseMapper: KSClassDeclaration) {
     private val superTypeParam = baseMapper.superTypes.first().element?.typeArguments?.firstOrNull()
 
-    override fun invoke(classDeclaration: KSClassDeclaration) {
+    operator fun invoke(classDeclaration: KSClassDeclaration) {
         if (MapperBaseClass.isOriginalBaseMapper) {
             return generateMapper(classDeclaration, BASE_MAPPER.plusParameter(classDeclaration.toClassName()))
         }

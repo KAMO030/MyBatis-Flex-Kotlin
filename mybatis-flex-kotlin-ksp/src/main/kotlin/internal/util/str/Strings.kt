@@ -9,10 +9,11 @@ fun String.asPropertyName(): String = when (TableDefPropertiesNameStyle.value) {
     upperCase -> toUpperCase()
     lowerCase -> toLowerCase()
     upperCamelCase -> toUpperCamelCase()
-    lowerCamelCase -> this
+    lowerCamelCase -> toLowerCamelCase()
 }
 
 fun String.toUpperCase(): String {
+    if (isBlank()) return ""
     val sb = StringBuilder()
     forEachIndexed { index, c ->
         if (c.isUpperCase()) {
@@ -31,6 +32,10 @@ fun String.toLowerCase(): String = toUpperCase().lowercase()
 
 fun String.toUpperCamelCase(): String = replaceFirstChar {
     it.uppercaseChar()
+}
+
+fun String.toLowerCamelCase(): String = replaceFirstChar {
+    it.lowercaseChar()
 }
 
 val String.filterInstanceSuffix: String

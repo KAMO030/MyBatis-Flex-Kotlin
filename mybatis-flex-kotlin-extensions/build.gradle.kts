@@ -1,7 +1,5 @@
 plugins {
-    id("java")
     kotlin("jvm") version "1.8.20"
-    id("com.google.devtools.ksp") version "1.8.20-1.0.11"
 }
 
 group = "com.mybatis-flex"
@@ -9,12 +7,6 @@ version = "1.0.1"
 
 repositories {
     mavenCentral()
-}
-
-ksp {
-    arg("flex.project.path", projectDir.path)
-    arg("flex.root.project.path", rootProject.projectDir.absolutePath)
-    arg("flex.generate.lazy", "true")
 }
 
 dependencies {
@@ -29,7 +21,6 @@ dependencies {
 
     compileOnly("com.mybatis-flex:mybatis-flex-core:1.6.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    kspTest(project(":mybatis-flex-kotlin-ksp"))
 }
 
 tasks.getByName<Test>("test") {

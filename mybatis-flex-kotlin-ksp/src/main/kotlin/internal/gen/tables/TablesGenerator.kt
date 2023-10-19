@@ -10,14 +10,14 @@ import internal.util.write
 import logger
 
 
-class TablesGenerator : () -> Unit {
+class TablesGenerator {
     companion object {
         private var isExists = false  // 此属性用于判断是否已经生成了 Tables 类。
     }
 
     val properties = ArrayList<PropertySpec>()
 
-    override fun invoke() {
+    operator fun invoke() {
         generate()
     }
 

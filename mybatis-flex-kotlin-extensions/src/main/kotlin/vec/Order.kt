@@ -17,6 +17,21 @@ package com.mybatisflex.kotlin.vec
 
 import com.mybatisflex.core.constant.SqlConsts
 
-enum class Order(val description: String) {
-    DESC(SqlConsts.DESC), ASC(SqlConsts.ASC)
+/**
+ * 用于表示排序的顺序。
+ * @param sql 对应的 SQL 语句。
+ * @author CloudPlayer
+ */
+enum class Order(val sql: String) {
+    /**
+     * 倒序。
+     * @author CloudPlayer
+     */
+    DESC(SqlConsts.DESC),
+
+    /**
+     * 顺序。
+     * @author CloudPlayer
+     */
+    ASC(SqlConsts.ASC)
 }

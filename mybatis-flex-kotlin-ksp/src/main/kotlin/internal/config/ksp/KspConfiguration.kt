@@ -28,8 +28,10 @@ internal sealed interface KspConfiguration<out T> : Configuration<T> {
          * @author CloudPlayer
          */
         val configs by lazy {
-            KspConfiguration::class.java.permittedSubclasses.map {
-                it.getDeclaredField("INSTANCE")[null] as KspConfiguration<Any?>
+            KspConfiguration::class.sealedSubclasses.map {
+                requireNotNull(it.objectInstance) {
+                    "${it.qualifiedName} is not an object."
+                }
             }
         }
 

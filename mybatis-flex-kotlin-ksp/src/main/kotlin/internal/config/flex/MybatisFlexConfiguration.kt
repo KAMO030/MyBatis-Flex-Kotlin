@@ -23,13 +23,15 @@ internal sealed interface MybatisFlexConfiguration<out T> : Configuration<T> {
 
     companion object {
         /**
-         * apt 设置中对应的所有配置类。这些类均是单例。ksp对 apt 设置大部分均兼容。
+         * apt 设置中对应的所有配置类。这些类均是单例。ksp 对 apt 设置大部分均兼容。
          *
          * @author CloudPlayer
          */
         val configs by lazy {
-            MybatisFlexConfiguration::class.java.permittedSubclasses.map {
-                it.getDeclaredField("INSTANCE")[null] as MybatisFlexConfiguration<Any?>
+            MybatisFlexConfiguration::class.sealedSubclasses.map {
+                requireNotNull(it.objectInstance) {
+                    "${it.qualifiedName} is not an object."
+                }
             }
         }
 

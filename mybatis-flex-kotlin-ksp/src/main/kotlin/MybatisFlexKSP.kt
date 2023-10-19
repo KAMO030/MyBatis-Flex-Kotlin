@@ -15,9 +15,9 @@ import internal.util.file.flexConfigs
 
 internal class MybatisFlexKSP : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        logger.warn("mybatis flex kotlin symbol processor run start...")
-        if (!Enable.value) return emptyList()
         initConfigs(flexConfigs)
+        if (!Enable.value) return emptyList()
+        logger.warn("mybatis flex kotlin symbol processor run start...")
         generate(resolver)
         return emptyList()
     }
@@ -55,6 +55,7 @@ internal class MybatisFlexKSP : SymbolProcessor {
     }
 
     // 用于打印 options 中的内容，仅调试时使用。
+    @Suppress("unused")
     private fun logOptions() = options.forEach { (key, value) ->
         logger.warn("options:  $key = $value")
     }

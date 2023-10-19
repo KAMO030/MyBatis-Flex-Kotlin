@@ -8,8 +8,8 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import internal.util.*
 
-class ObjectGenerator : (KSClassDeclaration) -> PropertySpec.Builder {
-    override operator fun invoke(it: KSClassDeclaration): PropertySpec.Builder {
+class ObjectGenerator {
+    operator fun invoke(it: KSClassDeclaration): PropertySpec.Builder {
         val tableClassName = it.tableClassName
         val generateClassName = ClassName("${it.packageName.asString()}.table", it.tableClassName)  // 将要生成的类的ClassName
         val fileSpec = FileSpec.builder(

@@ -11,5 +11,3 @@ plugins {
 rootProject.name = "mybatis-flex-kotlin"
 include("mybatis-flex-kotlin-ksp")
 include("mybatis-flex-kotlin-extensions")
-include("untitled")
-include("untitled")
