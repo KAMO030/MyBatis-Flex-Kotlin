@@ -42,17 +42,17 @@ import javax.sql.DataSource
 import kotlin.streams.toList
 
 
-open class KotlinExample {
+class KotlinExample {
 
-    val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
+    private val dataSource: DataSource = EmbeddedDatabaseBuilder().run {
         setType(EmbeddedDatabaseType.H2)
         addScript("schema.sql")
         addScript("data-kt.sql")
         build()
     }
 
-    val start: Date = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
-    val end: Date = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
+    private val start: Date = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
+    private val end: Date = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
 
     init {
         buildBootstrap {
@@ -87,6 +87,7 @@ open class KotlinExample {
             logImpl = StdOutImpl::class
         }.start()
 
+        // 开启sql审计，设置为打印在控制台
         AuditManager.setAuditEnable(true)
         AuditManager.setMessageCollector(ConsoleMessageCollector())
     }
@@ -127,7 +128,8 @@ open class KotlinExample {
     fun testFilter() {
         val accounts: List<Account> = filter(Account::class.allColumns) {
             (Account::id.isNotNull)
-                .and { (Account::id to Account::userName to Account::age).inTriple(
+                .and {
+                    (Account::id to Account::userName to Account::age).inTriple(
                         1 to "张三" to 18,
                         2 to "李四" to 19,
                     )

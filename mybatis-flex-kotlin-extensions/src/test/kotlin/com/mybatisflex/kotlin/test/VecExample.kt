@@ -38,7 +38,8 @@ import java.util.*
 
 
 class VecExample {
-    val accountMapper: AccountMapper get() = mapper()
+
+    private val accountMapper: AccountMapper get() = mapper()
 
     init {
         buildBootstrap {
