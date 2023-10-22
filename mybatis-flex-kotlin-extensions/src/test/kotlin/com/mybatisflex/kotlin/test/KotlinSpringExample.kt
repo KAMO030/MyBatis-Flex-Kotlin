@@ -17,13 +17,13 @@ package com.mybatisflex.kotlin.test
 
 import com.mybatisflex.kotlin.test.config.AppConfig
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import kotlin.test.Test
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [AppConfig::class])
 open class KotlinSpringExample  {

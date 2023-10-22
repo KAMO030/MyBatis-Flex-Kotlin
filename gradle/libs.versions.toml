@@ -1,0 +1,26 @@
+[versions]
+kotlin = "1.8.20"
+mybatisflex = "1.6.8"
+mybatisflex-kotlin-extensions = "1.0.2"
+mybatisflex-kotlin-ksp = "1.0.0"
+junit-jupiter = "5.8.1"
+mysql = "8.0.33"
+h2 = "2.1.214"
+spring = "5.3.27"
+
+[libraries]
+mybatisflex-core = { group = "com.mybatis-flex", name = "mybatis-flex-core", version.ref = "mybatisflex" }
+mybatisflex-spring = { group = "com.mybatis-flex", name = "mybatis-flex-spring", version.ref = "mybatisflex" }
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
+mysql = { group = "com.mysql", name = "mysql-connector-j", version.ref = "mysql" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+spring-test = { group = "org.springframework", name = "spring-test", version.ref = "spring" }
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+
+
+
+[bundles]

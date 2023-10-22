@@ -29,12 +29,12 @@ import com.mybatisflex.kotlin.test.entity.Account
 import com.mybatisflex.kotlin.test.mapper.AccountMapper
 import com.mybatisflex.kotlin.vec.*
 import org.apache.ibatis.logging.stdout.StdOutImpl
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
-import kotlin.test.assertEquals
 
 
 class VecExample {
