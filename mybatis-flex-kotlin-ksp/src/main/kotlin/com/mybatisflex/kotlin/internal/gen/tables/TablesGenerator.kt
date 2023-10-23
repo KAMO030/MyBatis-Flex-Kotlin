@@ -1,13 +1,13 @@
-package internal.gen.tables
+package com.mybatisflex.kotlin.internal.gen.tables
 
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import internal.config.flex.AllInTablesClassName
-import internal.config.flex.AllInTablesPackage
-import internal.util.suppressDefault
-import internal.util.write
-import logger
+import com.mybatisflex.kotlin.internal.config.flex.AllInTablesClassName
+import com.mybatisflex.kotlin.internal.config.flex.AllInTablesPackage
+import com.mybatisflex.kotlin.internal.util.suppressDefault
+import com.mybatisflex.kotlin.internal.util.write
+import com.mybatisflex.kotlin.logger
 
 
 class TablesGenerator {
@@ -22,7 +22,7 @@ class TablesGenerator {
     }
 
     private fun generate() {
-        // 到这一步时，AllInTablesPackage.value 已确定非空。这里的可空性已由 MybatisFlexKSP 中进行判断。
+        // 到这一步时，AllInTablesPackage.value 已确定非空。这里的可空性已由 com.mybatisflex.kotlin.MybatisFlexKSP 中进行判断。
         val packageName = AllInTablesPackage.value ?: return logger.warn("指定了生成类 Tables 但没有指定生成在哪个包下，不予生成。")
         if (isExists) return logger.warn("Tables has exists.")
         val fileSpec = FileSpec.builder(packageName, AllInTablesClassName.value)

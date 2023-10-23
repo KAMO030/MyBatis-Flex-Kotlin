@@ -1,13 +1,13 @@
-package internal.gen.visitor
+package com.mybatisflex.kotlin.internal.gen.visitor
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
-import internal.config.flex.AllInTablesEnable
-import internal.config.flex.AllInTablesPackage
-import internal.gen.obj.ObjectGenerator
-import internal.gen.tables.TablesGenerator
-import logger
-import options
+import com.mybatisflex.kotlin.internal.config.flex.AllInTablesEnable
+import com.mybatisflex.kotlin.internal.config.flex.AllInTablesPackage
+import com.mybatisflex.kotlin.internal.gen.obj.ObjectGenerator
+import com.mybatisflex.kotlin.internal.gen.tables.TablesGenerator
+import com.mybatisflex.kotlin.logger
+import com.mybatisflex.kotlin.options
 
 internal class TableDefVisitor : KSVisitorVoid() {
     // 需要生成代码的类

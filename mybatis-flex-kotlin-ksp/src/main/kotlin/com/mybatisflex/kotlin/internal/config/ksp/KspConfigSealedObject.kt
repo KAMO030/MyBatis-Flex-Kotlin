@@ -1,10 +1,10 @@
-package internal.config.ksp
+package com.mybatisflex.kotlin.internal.config.ksp
 
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
-import illegalValueWarning
-import internal.util.QUERY_COLUMN
+import com.mybatisflex.kotlin.illegalValueWarning
+import com.mybatisflex.kotlin.internal.util.QUERY_COLUMN
 
 /**
  * 指定 default columns 的类型。默认情况下为 [List] 。
@@ -44,6 +44,6 @@ internal object DefaultColumnsType : KspConfiguration<ParameterizedTypeName> {
             return
         }
         fnName = value
-        this._value = type
+        _value = type
     }
 }

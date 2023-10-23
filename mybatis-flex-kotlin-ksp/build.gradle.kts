@@ -11,14 +11,14 @@ group = providers.gradleProperty("group")
 version = libs.versions.mybatisflex.kotlin.ksp
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+    testCompileOnly(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
     // https://mvnrepository.com/artifact/com.google.devtools.ksp/symbol-processing-api
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.8.20-1.0.11")
-    implementation("com.squareup:kotlinpoet:1.12.0")
-    implementation("com.squareup:kotlinpoet-ksp:1.12.0")
-    compileOnly("com.mybatis-flex:mybatis-flex-annotation:1.6.8")
-    implementation(kotlin("reflect"))
+    implementation(libs.kotlinpoet)
+    implementation(libs.kotlinpoet.ksp)
+    compileOnly(libs.mybatisflex.annotation)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.ksp.api)
 }
 
 tasks.getByName<Test>("test") {
@@ -83,8 +83,8 @@ publishing {
 
         // Provide artifacts information requited by Maven Central
         pom {
-            name.set("mybatis-flex-kotlin")
-            description.set("Expanding Mybatis-Flex on Kotlin")
+            name.set("mybatis-flex-kotlin-ksp")
+            description.set("MyBatis-Flex KSP extension to help generate boilerplate code, just like MyBatis Flex Processor.")
             url.set("https://github.com/KAMO030/MyBatis-Flex-Kotlin")
 
             licenses {
@@ -94,12 +94,6 @@ publishing {
                 }
             }
             developers {
-                developer {
-                    id.set("KAMO030")
-                    name.set("KAMOsama")
-                    email.set("837080904@qq.com")
-                }
-
                 developer {
                     id.set("CloudPlayer")
                     name.set("CloudPlayer")

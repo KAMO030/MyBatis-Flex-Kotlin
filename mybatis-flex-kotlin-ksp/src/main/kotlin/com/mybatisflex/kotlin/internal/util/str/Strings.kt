@@ -1,8 +1,8 @@
-package internal.util.str
+package com.mybatisflex.kotlin.internal.util.str
 
-import internal.config.flex.PropertiesNameStyle.*
-import internal.config.flex.TableDefIgnoreEntitySuffixes
-import internal.config.flex.TableDefPropertiesNameStyle
+import com.mybatisflex.kotlin.internal.config.flex.PropertiesNameStyle.*
+import com.mybatisflex.kotlin.internal.config.flex.TableDefIgnoreEntitySuffixes
+import com.mybatisflex.kotlin.internal.config.flex.TableDefPropertiesNameStyle
 import java.lang.StringBuilder
 
 fun String.asPropertyName(): String = when (TableDefPropertiesNameStyle.value) {
@@ -10,6 +10,7 @@ fun String.asPropertyName(): String = when (TableDefPropertiesNameStyle.value) {
     lowerCase -> toLowerCase()
     upperCamelCase -> toUpperCamelCase()
     lowerCamelCase -> toLowerCamelCase()
+    original -> this
 }
 
 fun String.toUpperCase(): String {

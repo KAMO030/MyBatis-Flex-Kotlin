@@ -1,6 +1,6 @@
-package internal.util
+package com.mybatisflex.kotlin.internal.util
 
-import codeGenerator
+import com.mybatisflex.kotlin.codeGenerator
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.getAnnotationsByType
@@ -8,15 +8,19 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.mybatisflex.annotation.Column
 import com.mybatisflex.annotation.Table
+import com.mybatisflex.kotlin.internal.config.flex.FlexCharset
+import com.mybatisflex.kotlin.internal.config.flex.MapperPackage
+import com.mybatisflex.kotlin.internal.config.flex.TableDefClassSuffix
+import com.mybatisflex.kotlin.internal.config.flex.TableDefInstanceSuffix
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.jvm.jvmField
 import com.squareup.kotlinpoet.ksp.kspDependencies
-import internal.config.flex.*
-import internal.config.ksp.DefaultColumnsType
-import internal.util.str.asColumnName
-import internal.util.str.asPropertyName
-import internal.util.str.filterInstanceSuffix
-import options
+import com.mybatisflex.kotlin.internal.config.flex.*
+import com.mybatisflex.kotlin.internal.config.ksp.DefaultColumnsType
+import com.mybatisflex.kotlin.internal.util.str.asColumnName
+import com.mybatisflex.kotlin.internal.util.str.asPropertyName
+import com.mybatisflex.kotlin.internal.util.str.filterInstanceSuffix
+import com.mybatisflex.kotlin.options
 import java.util.*
 
 /**

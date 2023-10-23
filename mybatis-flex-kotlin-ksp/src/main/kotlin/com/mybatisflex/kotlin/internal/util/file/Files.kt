@@ -1,6 +1,7 @@
-package internal.util.file
+package com.mybatisflex.kotlin.internal.util.file
 
-import options
+import com.mybatisflex.kotlin.internal.config.flex.StopBubbling
+import com.mybatisflex.kotlin.options
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -39,12 +40,14 @@ internal val flexConfigs: List<File> by lazy {
             val rootDirFile = File(rootPath)
             var thisFile = projectDirFile
             val res = ArrayList<File>()
-            while (thisFile != rootDirFile) {
-                val file = File(thisFile, "mybatis-flex.config")
-                if (file.isFlexConfigFile) {
-                    res += file
+            if (!StopBubbling.value) {  // 如果禁止向上合并，则无需递归
+                while (thisFile != rootDirFile) {
+                    val file = File(thisFile, "mybatis-flex.config")
+                    if (file.isFlexConfigFile) {
+                        res += file
+                    }
+                    thisFile = thisFile.parentFile ?: break
                 }
-                thisFile = thisFile.parentFile ?: break
             }
 
             val file = File(thisFile, "mybatis-flex.config")

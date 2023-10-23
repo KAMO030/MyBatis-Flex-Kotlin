@@ -1,7 +1,7 @@
-package internal.config.flex
+package com.mybatisflex.kotlin.internal.config.flex
 
-import illegalValueWarning
-import logger
+import com.mybatisflex.kotlin.illegalValueWarning
+import com.mybatisflex.kotlin.logger
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.UnsupportedCharsetException
@@ -16,7 +16,7 @@ internal object Enable : MybatisFlexConfiguration<Boolean> {
     override var value: Boolean = true
 
     override fun initValue(value: String) {
-        this.value = value.toBoolean()
+        Enable.value = value.toBoolean()
     }
 }
 
@@ -46,18 +46,19 @@ internal object StopBubbling : MybatisFlexConfiguration<Boolean> {
     override var value: Boolean = false
 
     override fun initValue(value: String) {
-        this.value = value.toBoolean()
+        StopBubbling.value = value.toBoolean()
     }
 }
 
 // 暂不支持
+@Suppress("unused")
 internal object GenPath : MybatisFlexConfiguration<String> {
     override val key: String = "processor.genPath"
 
     override var value: String = "target/generated-sources/annotations"
 
     override fun initValue(value: String) {
-        this.value = value
+        GenPath.value = value
         val file = File(value)
         if (!file.exists()) {
             logger.warn("Generated source folder does not exist: `${file.absolutePath}`")
@@ -101,7 +102,7 @@ internal object AllInTablesEnable : MybatisFlexConfiguration<Boolean> {
     override var value: Boolean = false
 
     override fun initValue(value: String) {
-        this.value = value.toBoolean()
+        AllInTablesEnable.value = value.toBoolean()
     }
 }
 
@@ -144,7 +145,7 @@ internal object MapperGenerateEnable : MybatisFlexConfiguration<Boolean> {
     override var value: Boolean = false
 
     override fun initValue(value: String) {
-        this.value = value.toBoolean()
+        MapperGenerateEnable.value = value.toBoolean()
     }
 }
 
@@ -159,7 +160,7 @@ internal object MapperAnnotation : MybatisFlexConfiguration<Boolean> {
     override var value: Boolean = false
 
     override fun initValue(value: String) {
-        this.value = value.toBoolean()
+        MapperAnnotation.value = value.toBoolean()
     }
 }
 
@@ -191,7 +192,7 @@ internal object MapperBaseClass : MybatisFlexConfiguration<String> {
         get() = value.substringBeforeLast(".")
 
     override fun initValue(value: String) {
-        this.value = value
+        MapperBaseClass.value = value
     }
 
     val isOriginalBaseMapper: Boolean
@@ -259,7 +260,7 @@ internal object TableDefInstanceSuffix : MybatisFlexConfiguration<String> {
     override var value = ""
 
     override fun initValue(value: String) {
-        this.value = value
+        TableDefInstanceSuffix.value = value
     }
 }
 
@@ -280,7 +281,7 @@ internal object TableDefClassSuffix : MybatisFlexConfiguration<String> {
     override var value: String = "TableDef"
 
     override fun initValue(value: String) {
-        this.value = value
+        TableDefClassSuffix.value = value
     }
 }
 

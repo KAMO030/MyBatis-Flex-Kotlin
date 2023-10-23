@@ -1,6 +1,6 @@
 @file:Suppress("EnumEntryName")
 
-package internal.config.flex
+package com.mybatisflex.kotlin.internal.config.flex
 
 /**
  * 生成的代码的属性风格。
@@ -13,6 +13,7 @@ package internal.config.flex
  *
  * [lowerCamelCase]：首字母小写的驼峰命名，例如：userName
  *
+ * [original]：原始属性名，不做任何修改。
  */
 enum class PropertiesNameStyle {
     /**
@@ -33,5 +34,10 @@ enum class PropertiesNameStyle {
     /**
      * 首字母小写的驼峰命名，例如：userName
      */
-    lowerCamelCase
+    lowerCamelCase,
+
+    /**
+     * 原始的属性名，不做任何更改。
+     */
+    original
 }

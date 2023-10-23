@@ -1,10 +1,12 @@
+package com.mybatisflex.kotlin
+
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
-import internal.config.flex.MybatisFlexConfiguration
-import internal.config.ksp.KspConfiguration
-import internal.util.file.isFlexConfigFile
-import internal.util.file.properties
+import com.mybatisflex.kotlin.internal.config.flex.MybatisFlexConfiguration
+import com.mybatisflex.kotlin.internal.config.ksp.KspConfiguration
+import com.mybatisflex.kotlin.internal.util.file.isFlexConfigFile
+import com.mybatisflex.kotlin.internal.util.file.properties
 import java.io.File
 
 /**
