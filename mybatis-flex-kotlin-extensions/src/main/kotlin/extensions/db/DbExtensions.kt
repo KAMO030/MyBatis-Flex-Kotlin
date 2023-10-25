@@ -61,10 +61,10 @@ val <E : Any> KClass<E>.tableInfo: TableInfo
 //    query-----------
 inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
-    schema: String? = null,
-    tableName: String? = null,
     init: QueryScope.() -> Unit
-): T? = queryRow(schema = schema, tableName = tableName, columns = columns, init = init)?.toEntity(T::class.java)
+): T? = T::class.tableInfo.run {
+    queryRow(schema = schema, tableName = tableName, columns = columns, init = init)?.toEntity(T::class.java)
+}
 
 inline fun queryRow(
     vararg columns: QueryColumn,
@@ -78,9 +78,9 @@ inline fun queryRow(
         queryScope(columns = columns, init = init)
     )
 
-inline fun <reified T> query(
+inline fun <reified T : Any> query(
     init: QueryScope.() -> Unit
-): List<T> = TableInfoFactory.ofEntityClass(T::class.java).run {
+): List<T> = T::class.tableInfo.run {
     queryRows(schema = schema, tableName = tableName, init = init).toEntities()
 }
 
