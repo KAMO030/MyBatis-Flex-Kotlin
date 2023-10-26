@@ -226,6 +226,8 @@ internal object MapperPackage : MybatisFlexConfiguration<String?> {
  *
  * 4，lowerCamelCase：首字母小写的驼峰命名，例如：userName
  *
+ * 5，original：原始字符串，不做任何改动。
+ *
  * @author CloudPlayer
  */
 internal object TableDefPropertiesNameStyle : MybatisFlexConfiguration<PropertiesNameStyle> {

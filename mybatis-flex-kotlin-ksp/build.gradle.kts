@@ -7,16 +7,15 @@ plugins {
     signing
 }
 
-group = providers.gradleProperty("group")
-version = libs.versions.mybatisflex.kotlin.ksp
+group = providers.gradleProperty("group").get()
+version = libs.versions.mybatisflex.kotlin.ksp.get()
 
 dependencies {
     testCompileOnly(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
-    // https://mvnrepository.com/artifact/com.google.devtools.ksp/symbol-processing-api
     implementation(libs.kotlinpoet)
     implementation(libs.kotlinpoet.ksp)
-    compileOnly(libs.mybatisflex.annotation)
+    implementation(libs.mybatisflex.annotation)
     implementation(libs.kotlin.reflect)
     implementation(libs.ksp.api)
 }

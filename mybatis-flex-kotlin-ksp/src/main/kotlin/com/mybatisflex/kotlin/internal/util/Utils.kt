@@ -93,27 +93,23 @@ internal fun isLazy(): Boolean = options["flex.generate.lazy"]?.toBoolean() == t
  *
  * 其中的列名已经由 [KSPropertyDeclaration.columnName] 中解析获得。
  *
- * @param propertyDeclaration 实体类中对应的属性声明，用于获取列名。
+ * @param initBlock 需要被初始化的块。
  * @receiver 需要被初始化的属性。
  * @see KSPropertyDeclaration.columnName
  * @return 已初始化后的属性。
  * @author CloudPlayer
  */
-internal fun PropertySpec.Builder.initByLazyOrDefault(propertyDeclaration: KSPropertyDeclaration): PropertySpec.Builder {
+internal fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): PropertySpec.Builder {
     return if (isLazy()) {
         delegate(
             """
             |lazy {
-            |    QueryColumn(this, "${propertyDeclaration.columnName}") 
+            |    $initBlock
             |}
             """.trimMargin()
         )
     } else {
-        initializer(
-            """
-                QueryColumn(this, "${propertyDeclaration.columnName}")
-            """.trimIndent()
-        )
+        initializer(initBlock).jvmField()
     }
 }
 
@@ -137,7 +133,7 @@ internal val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
         docString?.let {
             builder.addKdoc(it.trimIndent())
         }
-        return builder.initByLazyOrDefault(this)
+        return builder.initByLazyOrDefault("QueryColumn(this,  \"$name\")")
     }
 
 /**
@@ -217,21 +213,7 @@ internal val allColumns: PropertySpec.Builder
             "allColumns".asPropertyName(),
             QUERY_COLUMN
         )
-        if (isLazy()) {
-            builder.delegate(
-                """
-                    |lazy {
-                    |    QueryColumn(this, "*") 
-                    |}
-                """.trimMargin()
-            )
-        } else {
-            builder.initializer(
-                """
-                    QueryColumn(this, "*")
-                """.trimIndent()
-            )
-        }
+        builder.initByLazyOrDefault("QueryColumn(this, \"*\")")
         return builder
     }
 
@@ -252,23 +234,9 @@ internal fun getDefaultColumns(iterable: Sequence<KSPropertyDeclaration>): Prope
     val fnName = DefaultColumnsType.fnName
     val columns = StringJoiner(",")
     iterable.forEach {
-        if (!it.isLarge) columns.add(it.propertyName)
+        if (!it.isLarge) columns.add("`${it.propertyName}`")
     }
-    if (isLazy()) {
-        builder.delegate(
-            """
-                |lazy {
-                |    $fnName($columns) 
-                |}
-            """.trimMargin()
-        )
-    } else {
-        builder.initializer(
-            """
-                $fnName($columns)
-            """.trimIndent()
-        )
-    }
+    builder.initByLazyOrDefault("$fnName($columns)")
     return builder
 }
 
@@ -337,13 +305,15 @@ fun invokeFunction(): FunSpec.Builder {
  *
  * 3，从未使用xxx的警告。
  *
+ * 4，冗余反引号。
+ *
  * @author CloudPlayer
  * @receiver 要压制警告的文件
  * @see Suppress
  */
 fun FileSpec.Builder.suppressDefault(): FileSpec.Builder = addAnnotation(
     AnnotationSpec.builder(SUPPRESS)
-        .addMember("\"RedundantVisibilityModifier\", \"MemberVisibilityCanBePrivate\", \"unused\"")
+        .addMember("\"RedundantVisibilityModifier\", \"MemberVisibilityCanBePrivate\", \"unused\", \"RemoveRedundantBackticks\"")
         .build()
 )
 

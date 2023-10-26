@@ -20,6 +20,7 @@ import com.mybatisflex.kotlin.internal.util.file.flexConfigs
 
 internal class MybatisFlexKSP : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (options["flex.ksp.enable"]?.toBoolean() == false) return emptyList()
         initConfigs(flexConfigs)
         if (!Enable.value) return emptyList()
         logger.warn("mybatis flex kotlin symbol processor run start...")
