@@ -22,7 +22,9 @@ import java.util.*
 
 /**
  * 测试用数据类
+ *
  * （最好不要写成 data class ，否则没有无参构造某些情况下会报错）
+ *
  * （如有需要可以安装官方 noArg 插件）
  *
  * @author 卡莫sama

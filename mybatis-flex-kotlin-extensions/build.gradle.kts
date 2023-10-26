@@ -7,8 +7,8 @@ plugins {
     signing
 }
 
-group = providers.gradleProperty("group")
-version = libs.versions.mybatisflex.kotlin.extensions
+group = providers.gradleProperty("group").get()
+version = libs.versions.mybatisflex.kotlin.extensions.get()
 
 
 dependencies {
