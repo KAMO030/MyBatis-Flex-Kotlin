@@ -1,9 +1,8 @@
-package com.mybatisflex.kotlin.internal.util.str
+package com.mybatisflex.kotlin.ksp.internal.util.str
 
-import com.mybatisflex.kotlin.internal.config.flex.PropertiesNameStyle.*
-import com.mybatisflex.kotlin.internal.config.flex.TableDefIgnoreEntitySuffixes
-import com.mybatisflex.kotlin.internal.config.flex.TableDefPropertiesNameStyle
-import java.lang.StringBuilder
+import com.mybatisflex.kotlin.ksp.internal.config.flex.PropertiesNameStyle.*
+import com.mybatisflex.kotlin.ksp.internal.config.flex.TableDefIgnoreEntitySuffixes
+import com.mybatisflex.kotlin.ksp.internal.config.flex.TableDefPropertiesNameStyle
 
 fun String.asPropertyName(): String = when (TableDefPropertiesNameStyle.value) {
     upperCase -> toUpperCase()

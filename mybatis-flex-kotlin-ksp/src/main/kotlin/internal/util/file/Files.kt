@@ -1,10 +1,9 @@
-package com.mybatisflex.kotlin.internal.util.file
+package com.mybatisflex.kotlin.ksp.internal.util.file
 
-import com.mybatisflex.kotlin.internal.config.flex.StopBubbling
-import com.mybatisflex.kotlin.options
+import com.mybatisflex.kotlin.ksp.internal.config.flex.StopBubbling
+import com.mybatisflex.kotlin.ksp.options
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * 从配置文件中获取 [Properties] 实例，以解析其中的配置项。

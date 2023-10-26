@@ -1,4 +1,4 @@
-package com.mybatisflex.kotlin
+package com.mybatisflex.kotlin.ksp
 
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
@@ -10,13 +10,12 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.validate
 import com.mybatisflex.annotation.Table
-import com.mybatisflex.kotlin.internal.config.flex.Enable
-import com.mybatisflex.kotlin.internal.config.flex.MapperBaseClass
-import com.mybatisflex.kotlin.internal.config.flex.MapperGenerateEnable
-import com.mybatisflex.kotlin.internal.config.flex.*
-import com.mybatisflex.kotlin.internal.gen.visitor.MapperVisitor
-import com.mybatisflex.kotlin.internal.gen.visitor.TableDefVisitor
-import com.mybatisflex.kotlin.internal.util.file.flexConfigs
+import com.mybatisflex.kotlin.ksp.internal.config.flex.Enable
+import com.mybatisflex.kotlin.ksp.internal.config.flex.MapperBaseClass
+import com.mybatisflex.kotlin.ksp.internal.config.flex.MapperGenerateEnable
+import com.mybatisflex.kotlin.ksp.internal.gen.visitor.MapperVisitor
+import com.mybatisflex.kotlin.ksp.internal.gen.visitor.TableDefVisitor
+import com.mybatisflex.kotlin.ksp.internal.util.file.flexConfigs
 
 internal class MybatisFlexKSP : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
