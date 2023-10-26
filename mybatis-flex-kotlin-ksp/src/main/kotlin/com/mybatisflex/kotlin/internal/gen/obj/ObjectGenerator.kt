@@ -36,7 +36,6 @@ class ObjectGenerator {
                 "${it.scheme}", "${it.tableName}"
             """.trimIndent()
                 )
-                .addFunction(invokeFunction().build())
                 .addProperty(instanceProperty.build())
                 .build()
         )
