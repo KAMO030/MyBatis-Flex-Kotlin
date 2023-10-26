@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.kotlin.test.entity
+package com.mybatisflex.kotlin.example.entity
 
 import com.mybatisflex.annotation.Id
 import com.mybatisflex.annotation.Table
@@ -34,10 +34,5 @@ data class Account(
     var userName: String? = null,
     var age: Int? = null,
     var birthday: Date? = null,
-) : Model<Account>() {
-    override fun toString(): String {
-        return """Account(id=$id, userName="$userName", birthday="$birthday", age=$age)"""
-    }
-
-}
+) : Model<Account>()
 

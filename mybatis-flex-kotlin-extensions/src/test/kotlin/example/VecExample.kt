@@ -1,21 +1,8 @@
-/*
- *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
- *  <p>
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *  <p>
- *  http://www.apache.org/licenses/LICENSE-2.0
- *  <p>
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-package com.mybatisflex.kotlin.test
+package com.mybatisflex.kotlin.example
 
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.kotlin.example.entity.Account
+import com.mybatisflex.kotlin.example.mapper.AccountMapper
 import com.mybatisflex.kotlin.extensions.db.mapper
 import com.mybatisflex.kotlin.extensions.kproperty.`as`
 import com.mybatisflex.kotlin.extensions.kproperty.column
@@ -25,17 +12,14 @@ import com.mybatisflex.kotlin.extensions.vec.vecOf
 import com.mybatisflex.kotlin.extensions.wrapper.from
 import com.mybatisflex.kotlin.extensions.wrapper.select
 import com.mybatisflex.kotlin.scope.buildBootstrap
-import com.mybatisflex.kotlin.test.entity.Account
-import com.mybatisflex.kotlin.test.mapper.AccountMapper
 import com.mybatisflex.kotlin.vec.*
 import org.apache.ibatis.logging.stdout.StdOutImpl
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
-
 
 class VecExample {
 
@@ -60,7 +44,7 @@ class VecExample {
         val date = Date.from(Instant.parse("2020-01-10T16:00:00Z"))
         val vecAccount = vec.first { it::age eq 18 }
         val cmp = Account(id = 1, userName = "张三", age = 18, birthday = date)
-        assertEquals(vecAccount, cmp)
+        Assertions.assertEquals(vecAccount, cmp)
     }
 
     @Test
@@ -71,8 +55,8 @@ class VecExample {
         val query = QueryWrapper()
         query.where(Account::id ge 100).from(Account::class)
 
-        assertEquals(filter.sql, query.toSQL())
-        assertEquals(filter.toList(), accountMapper.selectListByQuery(query))
+        Assertions.assertEquals(filter.sql, query.toSQL())
+        Assertions.assertEquals(filter.toList(), accountMapper.selectListByQuery(query))
     }
 
     @Test
@@ -81,12 +65,12 @@ class VecExample {
         val filterColumn = vec.filterProperties { listOf(it::id, it::userName) }
 
         val query = QueryWrapper().also {
-            it.select{ listOf(Account::id, Account::userName) }.from(Account::class)
+            it.select { listOf(Account::id, Account::userName) } from Account::class
         }
 
-        assertEquals(filterColumn.sql, query.toSQL())
-        assertEquals(filterColumn.toList(), accountMapper.selectListByQuery(query))
-        assertEquals(filterColumn.toRows(), accountMapper.selectRowsByQuery(query))
+        Assertions.assertEquals(filterColumn.sql, query.toSQL())
+        Assertions.assertEquals(filterColumn.toList(), accountMapper.selectListByQuery(query))
+        Assertions.assertEquals(filterColumn.toRows(), accountMapper.selectRowsByQuery(query))
     }
 
     @Test
@@ -99,9 +83,7 @@ class VecExample {
             )
             .from(Account::class).`as`("a")
 
-        assertEquals(aggregation.sql, query.toSQL())
+        Assertions.assertEquals(aggregation.sql, query.toSQL())
 
     }
 }
-
-

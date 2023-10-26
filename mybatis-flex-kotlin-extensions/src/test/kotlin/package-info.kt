@@ -13,15 +13,4 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.kotlin.test.entity
-
-import com.mybatisflex.annotation.SetListener
-
-
-class AccountOnSetListener : SetListener {
-	override fun onSet(entity: Any, property: String, value: Any): Any {
-		println(">>>>>>> property: $property value:$value")
-		return value
-	}
-}
-
+package com.mybatisflex.kotlin

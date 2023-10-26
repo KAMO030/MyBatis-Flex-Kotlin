@@ -13,15 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.kotlin.test.mapper
+package com.mybatisflex.kotlin.example.mapper
 
 import com.mybatisflex.core.BaseMapper
+import com.mybatisflex.kotlin.example.entity.Account
 import com.mybatisflex.kotlin.extensions.kproperty.eq
 import com.mybatisflex.kotlin.extensions.kproperty.`in`
 import com.mybatisflex.kotlin.extensions.mapper.query
 import com.mybatisflex.kotlin.extensions.wrapper.and
 import com.mybatisflex.kotlin.extensions.wrapper.where
-import com.mybatisflex.kotlin.test.entity.Account
 
 
 @JvmDefaultWithCompatibility

@@ -21,6 +21,8 @@ inline fun QueryWrapper.from(init: QueryScope.() -> Unit = {}): QueryWrapper = t
 
 fun QueryWrapper.from(vararg entities: KClass<*>): QueryWrapper = this.from(*entities.map { it.java }.toTypedArray())
 
+infix fun QueryWrapper.from(entity: KClass<*>): QueryWrapper = this.from(entity.java)
+
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
     this.select(*properties().toQueryColumns())
 

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.mybatisflex.kotlin.test.config
+package com.mybatisflex.kotlin.example.config
 
 import com.mybatisflex.core.mybatis.FlexConfiguration
 import com.mybatisflex.spring.FlexSqlSessionFactoryBean
@@ -30,7 +30,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import javax.sql.DataSource
 
 @Configuration
-@MapperScan("com.mybatisflex.kotlin.test.mapper")
+@MapperScan("com.mybatisflex.kotlin.example.mapper")
 open class AppConfig {
 
 
