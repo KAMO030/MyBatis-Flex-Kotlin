@@ -1,4 +1,4 @@
-package com.mybatisflex.kotlin
+package com.mybatisflex.kotlin.ksp
 
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment

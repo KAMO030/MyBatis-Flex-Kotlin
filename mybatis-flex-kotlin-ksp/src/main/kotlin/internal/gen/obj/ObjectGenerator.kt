@@ -1,10 +1,8 @@
-package com.mybatisflex.kotlin.internal.gen.obj
+package com.mybatisflex.kotlin.ksp.internal.gen.obj
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import com.mybatisflex.kotlin.internal.util.*
-import com.mybatisflex.kotlin.internal.util.allColumns
-import com.mybatisflex.kotlin.internal.util.getDefaultColumns
+import com.mybatisflex.kotlin.ksp.internal.util.*
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.PropertySpec

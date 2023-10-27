@@ -1,4 +1,4 @@
-package com.mybatisflex.kotlin.internal.config
+package com.mybatisflex.kotlin.ksp.internal.config
 
 /**
  * 从 mybatis-flex.config 配置文件中读取到的配置。

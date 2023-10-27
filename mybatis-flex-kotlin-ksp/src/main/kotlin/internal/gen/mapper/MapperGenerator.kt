@@ -1,14 +1,16 @@
-package com.mybatisflex.kotlin.internal.gen.mapper
+package com.mybatisflex.kotlin.ksp.internal.gen.mapper
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.mybatisflex.kotlin.internal.util.*
-import com.mybatisflex.kotlin.internal.util.interfaceName
-import com.squareup.kotlinpoet.*
+import com.mybatisflex.kotlin.ksp.internal.config.flex.MapperAnnotation
+import com.mybatisflex.kotlin.ksp.internal.config.flex.MapperBaseClass
+import com.mybatisflex.kotlin.ksp.internal.util.*
+import com.mybatisflex.kotlin.ksp.logger
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.ksp.toClassName
-import com.mybatisflex.kotlin.internal.config.flex.MapperAnnotation
-import com.mybatisflex.kotlin.internal.config.flex.MapperBaseClass
-import com.mybatisflex.kotlin.logger
 import org.apache.ibatis.annotations.Mapper
 import java.nio.charset.Charset
 

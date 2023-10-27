@@ -1,7 +1,8 @@
-package com.mybatisflex.kotlin.internal.config.flex
+package com.mybatisflex.kotlin.ksp.internal.config.flex
 
-import com.mybatisflex.kotlin.illegalValueWarning
-import com.mybatisflex.kotlin.logger
+import com.mybatisflex.kotlin.ksp.illegalValueWarning
+import com.mybatisflex.kotlin.ksp.internal.config.flex.Enable.value
+import com.mybatisflex.kotlin.ksp.logger
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.charset.UnsupportedCharsetException

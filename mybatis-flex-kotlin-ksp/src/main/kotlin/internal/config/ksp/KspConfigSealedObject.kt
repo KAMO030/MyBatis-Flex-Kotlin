@@ -1,10 +1,10 @@
-package com.mybatisflex.kotlin.internal.config.ksp
+package com.mybatisflex.kotlin.ksp.internal.config.ksp
 
+import com.mybatisflex.kotlin.ksp.illegalValueWarning
+import com.mybatisflex.kotlin.ksp.internal.util.QUERY_COLUMN
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
-import com.mybatisflex.kotlin.illegalValueWarning
-import com.mybatisflex.kotlin.internal.util.QUERY_COLUMN
 
 /**
  * 指定 default columns 的类型。默认情况下为 [List] 。

@@ -1,15 +1,15 @@
-package com.mybatisflex.kotlin.internal.config.ksp
+package com.mybatisflex.kotlin.ksp.internal.config.flex
 
-import com.mybatisflex.kotlin.internal.config.Configuration
+import com.mybatisflex.kotlin.ksp.internal.config.Configuration
 
 /**
  * mybatis-flex.config 中，专门配置 ksp 的相关配置。
  *
- * 这种配置的键多半是 `ksp` 以开头的。
+ * 这种配置的键均是 `processor` 以开头的。
  *
  * @author CloudPlayer
  */
-internal sealed interface KspConfiguration<out T> : Configuration<T> {
+internal sealed interface MybatisFlexConfiguration<out T> : Configuration<T> {
     override val key: String
 
     override val value: T
@@ -23,20 +23,21 @@ internal sealed interface KspConfiguration<out T> : Configuration<T> {
 
     companion object {
         /**
-         * ksp 对应的所有配置类。这些类均是单例。
+         * apt 设置中对应的所有配置类。这些类均是单例。ksp 对 apt 设置大部分均兼容。
          *
          * @author CloudPlayer
          */
         val configs by lazy {
-            KspConfiguration::class.sealedSubclasses.map {
+            MybatisFlexConfiguration::class.sealedSubclasses.map {
                 requireNotNull(it.objectInstance) {
                     "${it.qualifiedName} is not an object."
                 }
             }
         }
 
-        operator fun get(key: String) = configs.find {
+        operator fun get(key: String): MybatisFlexConfiguration<*>? = configs.find {
             it.key == key
         }
     }
 }
+

@@ -1,6 +1,6 @@
 @file:Suppress("EnumEntryName")
 
-package com.mybatisflex.kotlin.internal.config.flex
+package com.mybatisflex.kotlin.ksp.internal.config.flex
 
 /**
  * 生成的代码的属性风格。
