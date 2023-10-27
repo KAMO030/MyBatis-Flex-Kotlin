@@ -170,49 +170,66 @@ KSP 几乎完全兼容 APT 的配置。此外，我们针对一些配置还做�
 
 #### processor.enable
 
-    此配置用于指定是否启用 KSP 。我们的 KSP 对此配置实现了完全的支持。
-    但我们不建议您这样做，而是更推荐您**直接将依赖项中我们的 KSP 行注释掉它或者直接删除它**。这样做最为简单省事，也能更好地节省性能开销。
-    
-    如果您不想这么做，那么我们推荐您在 `build.gradle` 文件中进行如下配置，以决定是否启用 KSP：
-    
-    【Groovy】/【Kotlin】
-    ```
-    ksp {
-        arg("flex.ksp.enable", "false")
-    }
-    ```
-    
-    我们知道，如果我们不想让 KSP 为 flex 生成代码，那么 `mybatis-flex.config` 配置文件中的内容对于 KSP 来说也是毫无意义的。
-    在 `build.gradle` 文件中进行配置，可以使得 KSP 在一开始时便知道不需要为 flex 生成代码，因此可以避免很多诸如读取配置文件等不必要的操作以节省性能开销。
+此配置用于指定是否启用 KSP 。我们的 KSP 对此配置实现了完全的支持。
+但我们不建议您这样做，而是更推荐您**直接将依赖项中我们的 KSP 行注释掉它或者直接删除它**。这样做最为简单省事，也能更好地节省性能开销。
+
+如果您不想这么做，那么我们推荐您在 `build.gradle` 文件中进行如下配置，以决定是否启用 KSP：
+
+【Groovy】/【Kotlin】
+```
+ksp {
+    arg("flex.ksp.enable", "false")
+}
+```
+
+我们知道，如果我们不想让 KSP 为 flex 生成代码，那么 `mybatis-flex.config` 配置文件中的内容对于 KSP 来说也是毫无意义的。
+在 `build.gradle` 文件中进行配置，可以使得 KSP 在一开始时便知道不需要为 flex 生成代码，因此可以避免很多诸如读取配置文件等不必要的操作以节省性能开销。
 
 #### processor.stopBubbling
 
-    此配置用于指定是否停止向上级合并配置。KSP 对此完全支持。
-    
-    对于所有 `mybatis-flex.config` 中的配置，在向上合并时，对于重复的键，KSP 会采取以下策略：
-    
-    1. 对于仅能指定一个值的键，KSP 会覆盖原有的值。
-    2. 对于能够指定多个值的键，例如 `processor.tableDef.ignoreEntitySuffixes`，KSP 会将原有的值与新指定的值进行合并。即这些键的值最终都会成为处理的一部分。
+此配置用于指定是否停止向上级合并配置。KSP 对此完全支持。
+
+对于所有 `mybatis-flex.config` 中的配置，在向上合并时，对于重复的键，KSP 会采取以下策略：
+
+1. 对于仅能指定一个值的键，KSP 会覆盖原有的值。
+2. 对于能够指定多个值的键，例如 `processor.tableDef.ignoreEntitySuffixes`，KSP 会将原有的值与新指定的值进行合并。即这些键的值最终都会成为处理的一部分。
 
 #### processor.genPath
 
-    不支持。
+不支持。
 
 #### processor.allInTables.className
 
-    KSP 对此生成的是单例对象，即 `object` ，而不是普通类。
+KSP 对此生成的是单例对象，即 `object` ，而不是普通类。
 
 #### processor.allInTables.enable, processor.allInTables.package
 
-    如果您指定 KSP 为您生成 `Tables` 单例（即 `processor.allInTables.enable` 的值为 `true`），而又不指定其包名或指定了包名但包名非法，
-    那么 KSP 会向您发出警告，并且不会生成 `Tables` 类。
+如果您指定 KSP 为您生成 `Tables` 单例（即 `processor.allInTables.enable` 的值为 `true`），而又不指定其包名或指定了包名但包名非法，
+那么 KSP 会向您发出警告，并且不会生成 `Tables` 类。
 
 #### processor.tableDef.propertiesNameStyle
 
-    除了原本的四种风格外，KSP 还支持原始风格。这种风格可以使得 KSP 生成的字段对比于实体类不做任何改变。
-    假设您在实体类中定义的其中一个属性的名字为 `<!-- 非法的属性名 --!>`，那么 KSP 生成的对应字段的名字也是 `<!-- 非法的属性名 --!>`。
+除了原本的四种风格外，KSP 还支持原始风格。这种风格可以使得 KSP 生成的字段对比于实体类不做任何改变。
+假设您在实体类中定义的其中一个属性的名字为 `<!-- 非法的属性名 --!>`，那么 KSP 生成的对应字段的名字也是 `<!-- 非法的属性名 --!>`。
 
-### KSP 特有配置
+### KSP 配置
 
 KSP 在兼容 APT 配置的基础上，还增添了一些自己独有的配置。下面我们来一起看一看。
 
+#### ksp.type.defaultColumns
+
+在前面 KSP 和 APT 的产物对比中，我们知道 KSP 生成的 `DEFAULT_COLUMNS` 属性的类型由 APT 的 `Array` 变为了 `List`。
+如果您确实需要一个 `Array` ，或是其他的类型，您可以在此配置。
+
+我们可以在 `mybatis-flex.config` 配置文件中进行如下配置：
+
+ksp.type.defaultColumns=array
+
+我们一共支持以下四种配置：
+1. array，即 `Array`。
+2. list，即 `List`。
+3. set，即 `Set`。
+4. sequence，即 `Sequence`。
+
+> 需要注意的是，如果你选择的是 array ，那么其泛型将会是**协变的**。
+即 `Array` 完整的类型将是 `Array<out QueryColumn>` 。因此，您可能需要在源代码中进行一些调整。

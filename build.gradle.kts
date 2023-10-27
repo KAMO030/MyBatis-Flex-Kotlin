@@ -11,6 +11,7 @@ plugins {
     signing
 }
 
+// 在 subprojets 处，不要使用属性 libs ，而是改为在此文件中定义的属性 lib。
 subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
@@ -31,7 +32,7 @@ subprojects {
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
-            freeCompilerArgs += "-Xjvm-default=all"  // 允许Java不重写接口中非抽象方法
+            freeCompilerArgs += "-Xjvm-default=all"  // 允许 Java 不重写 Kotlin 接口中非抽象方法
         }
     }
 
