@@ -1,14 +1,14 @@
-package com.mybatisflex.kotlin.internal.gen.tables
+package com.mybatisflex.kotlin.ksp.internal.gen.tables
 
+import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesClassName
+import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesEnable
+import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesPackage
+import com.mybatisflex.kotlin.ksp.internal.util.suppressDefault
+import com.mybatisflex.kotlin.ksp.internal.util.write
+import com.mybatisflex.kotlin.ksp.logger
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import com.mybatisflex.kotlin.internal.config.flex.AllInTablesClassName
-import com.mybatisflex.kotlin.internal.config.flex.AllInTablesEnable
-import com.mybatisflex.kotlin.internal.config.flex.AllInTablesPackage
-import com.mybatisflex.kotlin.internal.util.suppressDefault
-import com.mybatisflex.kotlin.internal.util.write
-import com.mybatisflex.kotlin.logger
 
 
 class TablesGenerator {
