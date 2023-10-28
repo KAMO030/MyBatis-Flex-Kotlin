@@ -2,10 +2,10 @@ package com.mybatisflex.kotlin.ksp.internal.gen.visitor
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.mybatisflex.kotlin.ksp.internal.gen.tables.TablesGenerator
 import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesEnable
 import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesPackage
 import com.mybatisflex.kotlin.ksp.internal.gen.obj.ObjectGenerator
-import com.mybatisflex.kotlin.ksp.internal.gen.tables.TablesGenerator
 import com.mybatisflex.kotlin.ksp.logger
 import com.mybatisflex.kotlin.ksp.options
 

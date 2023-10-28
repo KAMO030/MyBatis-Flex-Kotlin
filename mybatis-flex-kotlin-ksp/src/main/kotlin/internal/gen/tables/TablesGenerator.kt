@@ -1,6 +1,7 @@
 package com.mybatisflex.kotlin.ksp.internal.gen.tables
 
 import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesClassName
+import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesEnable
 import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesPackage
 import com.mybatisflex.kotlin.ksp.internal.util.suppressDefault
 import com.mybatisflex.kotlin.ksp.internal.util.write
@@ -22,8 +23,14 @@ class TablesGenerator {
     }
 
     private fun generate() {
+        if (!AllInTablesEnable.value) return
         // 到这一步时，AllInTablesPackage.value 已确定非空。这里的可空性已由 com.mybatisflex.kotlin.MybatisFlexKSP 中进行判断。
-        val packageName = AllInTablesPackage.value ?: return logger.warn("指定了生成类 Tables 但没有指定生成在哪个包下，不予生成。")
+        val packageName = AllInTablesPackage.value
+            ?: return logger.warn(
+                "The KSP needs to generate the class Tables " +
+                        "(you have configured 'processor.allInTables.enable' located in the 'mybatis-flex.config' file)" +
+                        " but does not specify under which package it will be generated, and cannot be generated."
+            )
         if (isExists) return logger.warn("Tables has exists.")
         val fileSpec = FileSpec.builder(packageName, AllInTablesClassName.value)
             .addType(

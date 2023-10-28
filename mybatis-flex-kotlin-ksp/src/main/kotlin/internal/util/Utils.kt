@@ -276,6 +276,7 @@ val KSClassDeclaration.mapperPackageName: String
  * ```
  * @author CloudPlayer
  */
+@Suppress("unused")
 fun invokeFunction(): FunSpec.Builder {
     val func = FunSpec.builder("invoke")
     func.modifiers += KModifier.OPERATOR
