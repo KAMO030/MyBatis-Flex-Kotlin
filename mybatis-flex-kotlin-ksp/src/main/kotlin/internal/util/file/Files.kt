@@ -11,10 +11,10 @@ import java.util.*
  * @author CloudPlayer
  */
 val File.properties: Properties
-    inline get() {
-        val properties = Properties()
-        properties.load(inputStream())
-        return properties
+    inline get() = inputStream().use {
+        Properties().apply {
+            load(it)
+        }
     }
 
 /**

@@ -30,23 +30,12 @@ fun String.toUpperCase(): String {
 
 fun String.toLowerCase(): String = toUpperCase().lowercase()
 
-fun String.toUpperCamelCase(): String = replaceFirstChar {
-    it.uppercaseChar()
-}
+fun String.toUpperCamelCase(): String = replaceFirstChar(Char::uppercaseChar)
 
-fun String.toLowerCamelCase(): String = replaceFirstChar {
-    it.lowercaseChar()
-}
+fun String.toLowerCamelCase(): String = replaceFirstChar(Char::lowercaseChar)
 
 val String.filterInstanceSuffix: String
-    get() {
-        TableDefIgnoreEntitySuffixes.value.forEach {
-            if (endsWith(it)) {
-                return this.substring(0, this.length - it.length)
-            }
-        }
-        return this
-    }
+    get() = TableDefIgnoreEntitySuffixes.value.find(::endsWith)?.let(::removeSuffix) ?: this
 
 
 fun String.asColumnName(toUnderLine: Boolean): String = if (toUnderLine) {

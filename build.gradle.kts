@@ -94,8 +94,6 @@ subprojects {
 
             // Provide artifacts information requited by Maven Central
             pom {
-                name.set("mybatis-flex-kotlin-ksp")
-                description.set("MyBatis-Flex KSP extension to help generate boilerplate code, just like MyBatis Flex Processor.")
                 url.set("https://github.com/KAMO030/MyBatis-Flex-Kotlin")
 
                 licenses {
