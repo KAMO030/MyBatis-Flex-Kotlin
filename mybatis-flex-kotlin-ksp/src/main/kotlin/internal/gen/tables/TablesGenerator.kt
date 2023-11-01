@@ -11,7 +11,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
 
-class TablesGenerator {
+internal class TablesGenerator {
     companion object {
         private var isExists = false  // 此属性用于判断是否已经生成了 Tables 类。
     }

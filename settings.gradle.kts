@@ -17,3 +17,4 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+include("mybatis-flex-kotlin-codegen")
