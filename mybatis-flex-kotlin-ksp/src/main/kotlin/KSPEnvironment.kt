@@ -20,17 +20,17 @@ internal fun initKspEnvironment(environment: SymbolProcessorEnvironment) {
     options = environment.options
 }
 
-internal lateinit var codeGenerator: CodeGenerator
+lateinit var codeGenerator: CodeGenerator
 
-internal lateinit var logger: KSPLogger
+lateinit var logger: KSPLogger
 
-internal lateinit var options: Map<String, String>
+lateinit var options: Map<String, String>
 
 /**
  * 初始化Flex配置文件对应的单例，使得配置文件中的配置项可以被方便地读取.
  * @param configFile Flex 配置文件，即 mybatis-flex.config.
  */
-internal fun initFlexConfigs(configFile: File) {
+fun initFlexConfigs(configFile: File) {
     if (!configFile.isFlexConfigFile) {
         logger.warn("${configFile.absolutePath} not exist.")
         return
@@ -50,7 +50,7 @@ internal fun initFlexConfigs(configFile: File) {
  * @param configFiles 需要初始化的配置文件列表。
  * @author CloudPlayer
  */
-internal fun initConfigs(configFiles: List<File>) {
+fun initConfigs(configFiles: List<File>) {
     for (i in configFiles.lastIndex downTo 0) {
         val value = configFiles[i]
         initFlexConfigs(value)
@@ -58,7 +58,7 @@ internal fun initConfigs(configFiles: List<File>) {
     }
 }
 
-internal fun initKspConfigs(configFile: File) {
+fun initKspConfigs(configFile: File) {
     if (!configFile.isFlexConfigFile) {
         logger.warn("${configFile.absolutePath} not exist.")
         return
@@ -75,7 +75,7 @@ internal fun initKspConfigs(configFile: File) {
  *
  * @author CloudPlayer
  */
-internal fun illegalValueWarning(key: String, value: String) {
+fun illegalValueWarning(key: String, value: String) {
     logger.warn(
         "Illegal value: `$value` for mybatis-flex configuration key: `$key`," +
                 " please check the file `mybatis-flex.config`."

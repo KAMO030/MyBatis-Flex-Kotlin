@@ -15,7 +15,7 @@ import org.apache.ibatis.annotations.Mapper
 import java.nio.charset.Charset
 
 
-class MapperGenerator(private val mapper: KSClassDeclaration) {
+internal class MapperGenerator(private val mapper: KSClassDeclaration) {
     private val superTypeParam = mapper.superTypes.first().element?.typeArguments?.firstOrNull()
 
     /**

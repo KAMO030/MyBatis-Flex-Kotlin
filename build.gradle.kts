@@ -1,11 +1,15 @@
-import java.util.Properties
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
 
 // 不要修改或内联此属性，否则 subporjcts 处将无法正常使用。
-val lib: org.gradle.accessors.dm.LibrariesForLibs = libs
+val lib: LibrariesForLibs = libs
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.dokka) apply false
+    alias(libs.plugins.noarg) apply false
     `maven-publish`
     `kotlin-dsl`
     signing
@@ -16,6 +20,7 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
     apply(plugin = lib.plugins.kotlin.jvm.get().pluginId)
+    apply(plugin = lib.plugins.dokka.get().pluginId)
     apply(plugin = "org.gradle.kotlin.kotlin-dsl")
 
     group = providers.gradleProperty("group").get()
@@ -24,13 +29,14 @@ subprojects {
         implementation(lib.kotlin.reflect)
         testCompileOnly(lib.junit.jupiter.api)
         testRuntimeOnly(lib.junit.jupiter.engine)
+        implementation(lib.dokka)
     }
 
     tasks.getByName<Test>("test") {
         useJUnitPlatform()
     }
 
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    tasks.withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs += "-Xjvm-default=all"  // 允许 Java 不重写 Kotlin 接口中非抽象方法
         }

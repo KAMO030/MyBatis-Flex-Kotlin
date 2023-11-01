@@ -5,41 +5,32 @@ import com.mybatisflex.kotlin.ksp.internal.config.flex.TableDefIgnoreEntitySuffi
 import com.mybatisflex.kotlin.ksp.internal.config.flex.TableDefPropertiesNameStyle
 
 fun String.asPropertyName(): String = when (TableDefPropertiesNameStyle.value) {
-    upperCase -> toUpperCase()
-    lowerCase -> toLowerCase()
+    upperCase -> toUpperSnakeCase()
+    lowerCase -> toLowerSnakeCase()
     upperCamelCase -> toUpperCamelCase()
     lowerCamelCase -> toLowerCamelCase()
     original -> this
 }
 
-fun String.toUpperCase(): String {
-    if (isBlank()) return ""
-    val sb = StringBuilder()
-    forEachIndexed { index, c ->
-        if (c.isUpperCase()) {
-            if (index != 0) {
-                sb.append('_')
-            }
-            sb.append(c)
-        } else {
-            sb.append(c.uppercaseChar())
-        }
+fun String.toUpperSnakeCase(): String = mapIndexed { index: Int, c: Char ->
+    when {
+        c.isUpperCase() -> if (index != 0) "_$c" else c
+        else -> c.uppercaseChar()
     }
-    return sb.toString()
-}
+}.joinToString("")
 
-fun String.toLowerCase(): String = toUpperCase().lowercase()
+
+fun String.toLowerSnakeCase(): String = toUpperSnakeCase().lowercase()
 
 fun String.toUpperCamelCase(): String = replaceFirstChar(Char::uppercaseChar)
 
 fun String.toLowerCamelCase(): String = replaceFirstChar(Char::lowercaseChar)
 
-val String.filterInstanceSuffix: String
-    get() = TableDefIgnoreEntitySuffixes.value.find(::endsWith)?.let(::removeSuffix) ?: this
-
+fun String.filterInstanceSuffix(): String =
+    TableDefIgnoreEntitySuffixes.value.find(::endsWith)?.let(::removeSuffix) ?: this
 
 fun String.asColumnName(toUnderLine: Boolean): String = if (toUnderLine) {
-    toLowerCase()
+    toLowerSnakeCase()
 } else {
     this
 }

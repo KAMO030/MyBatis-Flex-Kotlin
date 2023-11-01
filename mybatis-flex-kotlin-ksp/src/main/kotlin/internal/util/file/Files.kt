@@ -22,7 +22,7 @@ val File.properties: Properties
  *
  * @author CloudPlayer
  */
-internal val File.isFlexConfigFile: Boolean
+val File.isFlexConfigFile: Boolean
     get() = isFile && name == "mybatis-flex.config"
 
 /**
@@ -30,7 +30,7 @@ internal val File.isFlexConfigFile: Boolean
  *
  * @author CloudPlayer
  */
-internal val flexConfigs: List<File> by lazy {
+val flexConfigs: List<File> by lazy {
     val projectPath = options["flex.project.path"]
     val rootPath = options["flex.root.project.path"]
     when {

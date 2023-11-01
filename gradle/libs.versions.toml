@@ -3,13 +3,15 @@ kotlin = "1.8.20"
 mybatisflex = "1.6.8"
 mybatisflex-kotlin-extensions = "1.0.2"
 mybatisflex-kotlin-ksp = "1.0.0"
+mybatisflex-kotlin-codegen = "1.0.0"
 junit-jupiter = "5.8.1"
 mysql = "8.0.33"
 h2 = "2.1.214"
 spring = "5.3.27"
 ksp-api = "1.8.20-1.0.11"
 kotlinpoet = "1.12.0"
-dokka = "1.7.0"
+dokka = "1.8.20"
+noarg = "1.8.20"
 
 [libraries]
 mybatisflex-core = { group = "com.mybatis-flex", name = "mybatis-flex-core", version.ref = "mybatisflex" }
@@ -24,10 +26,13 @@ ksp-api = { group = "com.google.devtools.ksp", name = "symbol-processing-api", v
 mybatisflex-annotation = { group = "com.mybatis-flex", name = "mybatis-flex-annotation", version.ref = "mybatisflex" }
 kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-ksp = { group = "com.squareup", name = "kotlinpoet-ksp", version.ref = "kotlinpoet" }
+mybatisflex-codegen = { group = "com.mybatis-flex", name = "mybatis-flex-codegen", version.ref = "mybatisflex" }
+dokka = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version.ref = "dokka" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-api" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "noarg" }
 
 [bundles]

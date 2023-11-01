@@ -166,19 +166,60 @@ inline fun <E : Any> QueryVector<E>.groupBy(keySelector: (E) -> KProperty<*>): Q
 }
 
 /**
- * [keySelector] 的复数形式，其可以通过 [Iterable] 对象来一次性指定分组的多个列。
+ * [groupBy] 的复数形式，其可以通过 [Iterable] 对象来一次性指定分组的多个列。
  *
  * @author CloudPlayer
  * @see keySelector
  */
 @OptIn(ExperimentalContracts::class)
-inline fun <E : Any> QueryVector<E>.groupsBy(keySelector: (E) -> Iterable<KProperty<*>>): QueryVector<E> {
+inline fun <E : Any> QueryVector<E>.groupByMultiKProp(keySelector: (E) -> Iterable<KProperty<*>>): QueryVector<E> {
     contract {
         callsInPlace(keySelector, InvocationKind.EXACTLY_ONCE)
     }
     return copy(data = data.copy(groupBy = data.groupBy + keySelector(entity).map { it.column }))
 }
 
+/**
+ * [groupBy] 的复数形式，其可以通过 [Sequence] 对象来一次性指定分组的多个列。
+ *
+ * @author CloudPlayer
+ * @see keySelector
+ */
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+@JvmName("groupByMultipleColumnsBySequence")
+inline fun <E : Any> QueryVector<E>.groupByMultiKProp(keySelector: (E) -> Sequence<KProperty<*>>): QueryVector<E> {
+    contract {
+        callsInPlace(keySelector, InvocationKind.EXACTLY_ONCE)
+    }
+    return copy(data = data.copy(groupBy = data.groupBy + keySelector(entity).map { it.column }))
+}
+
+/**
+ * [groupBy] 的复数形式，其可以通过 [Array] 对象来一次性指定分组的多个列。
+ *
+ * @author CloudPlayer
+ * @see keySelector
+ */
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+@JvmName("groupByMultipleColumnsByArray")
+inline fun <E : Any> QueryVector<E>.groupByMultiKProp(keySelector: (E) -> Array<out KProperty<*>>): QueryVector<E> {
+    contract {
+        callsInPlace(keySelector, InvocationKind.EXACTLY_ONCE)
+    }
+    return copy(data = data.copy(groupBy = data.groupBy + keySelector(entity).map { it.column }))
+}
+
+/**
+ * 排序。调用此函数后，生成的 SQL 语句将额外包含 `ORDER BY` 子句。
+ *
+ * 其会将闭包中的返回值作为排序的依据之一。
+ *
+ * @author CloudPlayer
+ * @param order 排序的枚举，用于指定是升序还是降序。
+ * @param selector 此闭包返回值即为排序的依据的列。
+ */
 @OptIn(ExperimentalContracts::class)
 inline fun <E : Any, V : Comparable<V>> QueryVector<E>.sortedBy(
     order: Order = Order.ASC,
@@ -190,22 +231,106 @@ inline fun <E : Any, V : Comparable<V>> QueryVector<E>.sortedBy(
     return copy(data = data.copy(orderBy = data.orderBy + selector(entity).column.toOrd(order)))
 }
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-@OverloadResolutionByLambdaReturnType
-@JvmName("sortedByIter")
-inline fun <E : Any> QueryVector<E>.sortedBy(selector: (E) -> Iterable<QueryOrderBy>): QueryVector<E> {
+/**
+ * 排序。调用此函数后，生成的 SQL 语句将额外包含 `ORDER BY` 子句。
+ *
+ * 其会将闭包中的返回值作为排序的依据之一。
+ *
+ * 与 [sortedBy] 不同的是，此函数的闭包返回值将默认以倒序进行排列。
+ *
+ * @author CloudPlayer
+ * @param selector 此闭包返回值即为排序的依据的列。
+ */
+@OptIn(ExperimentalContracts::class)
+inline fun <E : Any, V : Comparable<V>> QueryVector<E>.sortedByDescending(
+    selector: (E) -> KProperty<V?>
+): QueryVector<E> {
     contract {
         callsInPlace(selector, InvocationKind.EXACTLY_ONCE)
     }
-    return copy(data = data.copy(orderBy = data.orderBy + selector(entity)))
+    return copy(data = data.copy(orderBy = data.orderBy + selector(entity).column.toOrd(Order.DESC)))
 }
 
-fun <E : Any> QueryVector<E>.drop(index: Long): QueryVector<E> {
-    return copy(data = data.copy(offset = index))
+/**
+ * [sortedBy] 的复数形式，可以一次性指定多个需要排序的列。
+ *
+ * 换言之，以下代码是等价的：
+ * ```kotlin
+ * vec.sortedBy {
+ *     it::id
+ * }.sortedBy {
+ *     it::name
+ * }
+ *
+ * vec.sortedByMultiOrd {
+ *     listOf(it::id, it::name)
+ * }
+ * ```
+ *
+ * @author CloudPlayer
+ * @param selectors 此闭包返回值即为排序的依据的列。
+ */
+@OptIn(ExperimentalContracts::class)
+inline fun <E : Any> QueryVector<E>.sortedByMultiOrd(selectors: (E) -> Iterable<QueryOrderBy>): QueryVector<E> {
+    contract {
+        callsInPlace(selectors, InvocationKind.EXACTLY_ONCE)
+    }
+    return copy(data = data.copy(orderBy = data.orderBy + selectors(entity)))
 }
 
-fun <E : Any> QueryVector<E>.take(index: Long): QueryVector<E> {
-    return copy(data = data.copy(rows = index))
+/**
+ * [sortedBy] 的复数形式，可以通过 [Sequence] 一次性指定多个排序的依据 [QueryOrderBy] 。
+ *
+ * 其是 [sortedByMultiOrd] 的重载形式。
+ *
+ * @author CloudPlayer
+ * @see sortedByMultiOrd
+ */
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+@JvmName("sortedBySequence")
+inline fun <E : Any> QueryVector<E>.sortedByMultiOrd(selectors: (E) -> Sequence<QueryOrderBy>): QueryVector<E> {
+    contract {
+        callsInPlace(selectors, InvocationKind.EXACTLY_ONCE)
+    }
+    return copy(data = data.copy(orderBy = data.orderBy + selectors(entity)))
+}
+
+/**
+ * [sortedBy] 的复数形式，可以通过 [Array] 一次性指定多个排序的依据 [QueryOrderBy] 。
+ *
+ * 其是 [sortedByMultiOrd] 的重载形式。
+ *
+ * @author CloudPlayer
+ * @see sortedByMultiOrd
+ */
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+@JvmName("sortedByArray")
+inline fun <E : Any> QueryVector<E>.sortedByMultiOrd(selectors: (E) -> Array<out QueryOrderBy>): QueryVector<E> {
+    contract {
+        callsInPlace(selectors, InvocationKind.EXACTLY_ONCE)
+    }
+    return copy(data = data.copy(orderBy = data.orderBy + selectors(entity)))
+}
+
+/**
+ * 抛弃前 [n] 个元素。在 SQL 中相当于指定了行偏移量。
+ *
+ * @author CloudPlayer
+ * @param n 要抛弃的前 n 个元素，或是行偏移量。
+ */
+fun <E : Any> QueryVector<E>.drop(n: Long): QueryVector<E> {
+    return copy(data = data.copy(offset = n))
+}
+
+/**
+ * 只取前 [n] 个元素。在 SQL 中相当于指定了行数。
+ *
+ * 仅调用此函数而不调用 [drop] 是不会生效的，因为你无法在 SQL 中仅
+ */
+fun <E : Any> QueryVector<E>.take(n: Long): QueryVector<E> {
+    return copy(data = data.copy(rows = n))
 }
 
 fun <E : Any> QueryVector<E>.limit(offset: Long, rows: Long): QueryVector<E> {

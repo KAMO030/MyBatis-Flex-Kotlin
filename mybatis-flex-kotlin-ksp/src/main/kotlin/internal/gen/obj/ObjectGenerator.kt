@@ -8,7 +8,7 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
-class ObjectGenerator {
+internal class ObjectGenerator {
     operator fun invoke(it: KSClassDeclaration): PropertySpec.Builder {
         val tableClassName = it.tableClassName
         val generateClassName = ClassName("${it.packageName.asString()}.table", it.tableClassName)  // 将要生成的类的ClassName
@@ -21,7 +21,7 @@ class ObjectGenerator {
         fileSpec.addType(
             TypeSpec.objectBuilder(tableClassName)
                 .addProperties(list)
-                .addProperty(allColumns.build())
+                .addProperty(allColumnsBuilder.build())
                 .addProperty(getDefaultColumns(it.getAllProperties()).build())
                 .addKdoc(
                     """

@@ -28,7 +28,7 @@ import java.util.*
  * @receiver 实体类中对应的属性声明。
  * @author CloudPlayer
  */
-internal val KSPropertyDeclaration.propertyName: String
+val KSPropertyDeclaration.propertyName: String
     get() = simpleName.asString().asPropertyName()
 
 /**
@@ -44,7 +44,7 @@ internal val KSPropertyDeclaration.propertyName: String
  * @author CloudPlayer
  */
 @OptIn(KspExperimental::class)
-internal val KSPropertyDeclaration.columnName: String
+val KSPropertyDeclaration.columnName: String
     get() {
         // 从属性声明中获取最近的类声明（即该属性所在的类），并从类声明获得 Table 注解
         val table = closestClassDeclaration()!!.getAnnotationsByType(Table::class).first()
@@ -62,7 +62,7 @@ internal val KSPropertyDeclaration.columnName: String
  * @see Column.isLarge
  */
 @OptIn(KspExperimental::class)
-internal val KSPropertyDeclaration.isLarge: Boolean
+val KSPropertyDeclaration.isLarge: Boolean
     get() {
         val column = getAnnotationsByType(Column::class).firstOrNull()
         return column?.isLarge == true
@@ -82,7 +82,7 @@ internal val KSPropertyDeclaration.isLarge: Boolean
  * @author CloudPlayer
  * @see lazy
  */
-internal fun isLazy(): Boolean = options["flex.generate.lazy"]?.toBoolean() == true
+fun isLazy(): Boolean = options["flex.generate.lazy"]?.toBoolean() == true
 
 /**
  * 用于默认初始化或延迟初始化，根据 [KSPropertyDeclaration] 中指示的列名来初始化。
@@ -95,7 +95,7 @@ internal fun isLazy(): Boolean = options["flex.generate.lazy"]?.toBoolean() == t
  * @return 已初始化后的属性。
  * @author CloudPlayer
  */
-internal fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): PropertySpec.Builder {
+fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): PropertySpec.Builder {
     return if (isLazy()) {
         delegate(
             """
@@ -119,7 +119,7 @@ internal fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): Proper
  * @see KSPropertyDeclaration.propertyName
  * @author CloudPlayer
  */
-internal val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
+val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
     get() {
         val name = propertyName
         val builder = PropertySpec.builder(
@@ -139,10 +139,10 @@ internal val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
  * @see String.filterInstanceSuffix
  * @author CloudPlayer
  */
-internal val KSClassDeclaration.tableClassName: String
+val KSClassDeclaration.tableClassName: String
     get() {
         val suffix = TableDefClassSuffix.value
-        return "${simpleName.asString().filterInstanceSuffix}$suffix"
+        return "${simpleName.asString().filterInstanceSuffix()}$suffix"
     }
 
 /**
@@ -153,7 +153,7 @@ internal val KSClassDeclaration.tableClassName: String
  * @see String.asPropertyName
  * @author CloudPlayer
  */
-internal val KSClassDeclaration.instanceName: String
+val KSClassDeclaration.instanceName: String
     get() {
         val value = TableDefInstanceSuffix.value
         return "${simpleName.asString()}$value".asPropertyName()
@@ -164,10 +164,10 @@ internal val KSClassDeclaration.instanceName: String
  *
  * @author CloudPlayer
  */
-internal val KSClassDeclaration.interfaceName: String
+val KSClassDeclaration.interfaceName: String
     get() {
         val value = simpleName.asString()
-        return "${value.filterInstanceSuffix}Mapper"
+        return "${value.filterInstanceSuffix()}Mapper"
     }
 
 /**
@@ -177,7 +177,7 @@ internal val KSClassDeclaration.interfaceName: String
  * @author CloudPlayer
  */
 @OptIn(KspExperimental::class)
-internal val KSClassDeclaration.scheme: String
+val KSClassDeclaration.scheme: String
     get() {
         val table = getAnnotationsByType(Table::class).first()
         return table.schema
@@ -190,7 +190,7 @@ internal val KSClassDeclaration.scheme: String
  * @author CloudPlayer
  */
 @OptIn(KspExperimental::class)
-internal val KSClassDeclaration.tableName: String
+val KSClassDeclaration.tableName: String
     get() {
         val table = getAnnotationsByType(Table::class).first()
         return table.value
@@ -203,15 +203,12 @@ internal val KSClassDeclaration.tableName: String
  *
  * @author CloudPlayer
  */
-internal val allColumns: PropertySpec.Builder
-    get() {
-        val builder = PropertySpec.builder(
-            "allColumns".asPropertyName(),
-            QUERY_COLUMN
-        )
-        builder.initByLazyOrDefault("QueryColumn(this, \"*\")")
-        return builder
-    }
+val allColumnsBuilder: PropertySpec.Builder by lazy {
+    PropertySpec.builder(
+        "allColumns".asPropertyName(),
+        QUERY_COLUMN
+    ).initByLazyOrDefault("QueryColumn(this, \"*\")")
+}
 
 /**
  * 生成 default columns 属性。
@@ -222,7 +219,7 @@ internal val allColumns: PropertySpec.Builder
  * @return 已构建好的 default columns 。
  * @author CloudPlayer
  */
-internal fun getDefaultColumns(iterable: Sequence<KSPropertyDeclaration>): PropertySpec.Builder {
+fun getDefaultColumns(iterable: Sequence<KSPropertyDeclaration>): PropertySpec.Builder {
     val builder = PropertySpec.builder(
         "defaultColumns".asPropertyName(),
         DefaultColumnsType.value,
@@ -243,7 +240,7 @@ internal fun getDefaultColumns(iterable: Sequence<KSPropertyDeclaration>): Prope
  * @author CloudPlayer
  */
 
-internal fun FileSpec.write() {
+fun FileSpec.write() {
     val dependencies = kspDependencies(false)
     val outputStream = codeGenerator.createNewFile(dependencies, packageName, name)
     outputStream.writer(FlexCharset.value).use(::writeTo)
