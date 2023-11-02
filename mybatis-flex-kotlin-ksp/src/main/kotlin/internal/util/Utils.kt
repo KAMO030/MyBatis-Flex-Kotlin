@@ -129,7 +129,7 @@ val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
         docString?.let {
             builder.addKdoc(it.trimIndent())
         }
-        return builder.initByLazyOrDefault("QueryColumn(this,  \"$name\")")
+        return builder.initByLazyOrDefault("QueryColumn(this,  \"$columnName\")")
     }
 
 /**

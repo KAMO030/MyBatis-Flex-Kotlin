@@ -10,6 +10,7 @@ import java.util.*
 @Table("emp")
 data class Emp(
     @Id
+    @Column("id")
     var id: Int,
     var username: String,
     var password: String,

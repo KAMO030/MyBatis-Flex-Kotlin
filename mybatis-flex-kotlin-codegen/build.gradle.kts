@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.mybatisflex.codegen)
     implementation(libs.mybatisflex.core)
     testImplementation(libs.mysql)
+    kspTest(project(":mybatis-flex-kotlin-ksp"))
 }
 
 noArg {

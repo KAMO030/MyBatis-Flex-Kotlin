@@ -2,9 +2,10 @@ import com.mybatisflex.codegen.Generator
 import com.mybatisflex.codegen.config.GlobalConfig
 import com.mybatisflex.codegen.generator.GeneratorFactory
 import com.mybatisflex.kotlin.ksp.config.KTableDefGenerator
+import com.mybatisflex.kotlin.ksp.internal.asQualifiedNames
+import com.mybatisflex.kotlin.ksp.internal.asTypedString
 import com.mysql.cj.jdbc.MysqlDataSource
 import org.junit.jupiter.api.Test
-import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
 class CodegenTest {
@@ -40,34 +41,4 @@ class CodegenTest {
         println(type.asQualifiedNames())
         println(type)
     }
-
-    /**
-     * 去除全名中的包名，只携带类名。
-     * 例如 "kotlin.String" 变为 "String"，
-     * "kotlin.collections.List<kotlin.String>" 变为 "List<String>"，
-     *
-     * “java.util.HashMap<kotlin.collections.List<kotlin.String>, kotlin.collections.Iterable<kotlin.Int>>”
-     * 变为 “HashMap<List<String>, Iterable<Int>>”。
-     *
-     *
-     */
-    private fun KType.asTypedString(): String {
-        val name = toString()
-        val regex = Regex("""\w+\.""")
-        return name.replace(regex, "")
-    }
-
-    /**
-     * 将全名中的全名提取出来。
-     *
-     * typeOf<HashMap<List<String>, ArrayList<in String>>>()
-     * 变为 [
-     * java.util.HashMap,
-     * kotlin.collections.List,
-     * kotlin.String,
-     * java.util.ArrayList,
-     * kotlin.String]。
-     */
-    private fun KType.asQualifiedNames(): List<String> =
-        Regex("""(\w+\.?)+""").findAll(toString()).mapTo(ArrayList()) { it.value }
 }
