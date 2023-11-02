@@ -50,7 +50,11 @@ val KSPropertyDeclaration.columnName: String
         val table = closestClassDeclaration()!!.getAnnotationsByType(Table::class).first()
         val column = getAnnotationsByType(Column::class).firstOrNull()
         // 如果没有 Column 注解，则使用属性名作为列名
-        return (column?.value ?: simpleName.asString()).asColumnName(table.camelToUnderline)
+        val columnName = column?.value
+        if (columnName === null || columnName.isBlank()) {
+            return simpleName.asString().asColumnName(table.camelToUnderline)
+        }
+        return columnName.asColumnName(table.camelToUnderline)
     }
 
 /**
