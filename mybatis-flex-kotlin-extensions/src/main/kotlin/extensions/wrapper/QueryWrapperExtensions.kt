@@ -2,6 +2,7 @@ package com.mybatisflex.kotlin.extensions.wrapper
 
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.util.MapperUtil
+import com.mybatisflex.kotlin.extensions.kproperty.allColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
@@ -28,6 +29,9 @@ inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryW
 
 fun QueryWrapper.select(vararg properties: KProperty<*>): QueryWrapper =
     this.select(*properties.toQueryColumns())
+
+fun QueryWrapper.select(entityType: KClass<*>): QueryWrapper =
+    this.select(*entityType.allColumns)
 
 val QueryWrapper.self
     get() = QueryWrapperDevelopEntry(this)

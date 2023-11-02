@@ -35,6 +35,8 @@ class QueryScope : QueryWrapper() {
     fun select(vararg properties: KProperty<*>): QueryWrapper =
         this.select(*(properties.map { it.column }.toTypedArray()))
 
+    fun hasSelect(): Boolean = this.selectColumns != null && this.selectColumns.isNotEmpty()
+
 }
 
 

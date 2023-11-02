@@ -3,6 +3,7 @@ package com.mybatisflex.kotlin.example
 import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
+import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.kotlin.example.entity.Account
 import com.mybatisflex.kotlin.example.mapper.AccountMapper
@@ -86,12 +87,12 @@ class KotlinExample {
     fun contrastOriginal() {
         // 【原生】
         val queryWrapper = QueryWrapper.create()
-            .select(Account::id.column(), Account::userName.column())
-            .where(Account::age.column().isNotNull()).and(Account::age.column().ge(17))
-            .orderBy(Account::id.column().desc())
+            .select(QueryColumn("id"), QueryColumn("userName"))
+            .where(QueryColumn("age").isNotNull()).and(QueryColumn("age").ge(17))
+            .orderBy(QueryColumn("id").desc())
         mapper<AccountMapper>().selectListByQuery(queryWrapper)
         // 【扩展后】
-        // 无需注册Mapper即可查询操作
+        // 无需注册Mapper与APT/KSP即可查询操作
         val accountList: List<Account> = query {
             select(Account::id, Account::userName)
             where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
@@ -113,7 +114,7 @@ class KotlinExample {
      */
     @Test
     fun testFilter() {
-        val accounts: List<Account> = filter(Account::class.allColumns) {
+        val accounts: List<Account> = filter {
             (Account::id.isNotNull)
                 .and {
                     (Account::id to Account::userName to Account::age).inTriple(
@@ -137,6 +138,7 @@ class KotlinExample {
                 and(Account::age `in` (17..19))
                 and(Account::birthday between (start to end))
             } orderBy -Account::id
+            limit(2)
         }
         accounts.forEach(::println)
     }
