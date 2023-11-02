@@ -28,7 +28,7 @@
        // 或者 Account::class.all (需要注册Mapper接口)
       ```
 
-2. `filter<实体类>(vararg KProperty<*>, QueryCondition.() -> Unit)`: 按条件查泛型对应的表的数据
+2. `filter<实体类>(vararg KProperty<*>, () -> QueryCondition)`: 按条件查泛型对应的表的数据
     
       ```kotlin
         // a and b and (c or d)
@@ -39,7 +39,7 @@
             }
       ```
 
-3. `query<实体类>(QueryScope.()->Unit)`: 较复杂查泛型对应的表的数据 (如分组,分页,排序等)
+3. `query<实体类>(QueryScope.() -> Unit)`: 较复杂查泛型对应的表的数据 (如分组,分页,排序等)
    > 可以使用queryOne快速查询一个实体对象
 
       ```kotlin
