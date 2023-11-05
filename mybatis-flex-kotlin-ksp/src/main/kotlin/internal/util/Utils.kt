@@ -6,6 +6,7 @@ import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.mybatisflex.annotation.Column
+import com.mybatisflex.annotation.ColumnAlias
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.kotlin.ksp.codeGenerator
 import com.mybatisflex.kotlin.ksp.internal.config.flex.*
@@ -123,6 +124,7 @@ fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): PropertySpec.Bu
  * @see KSPropertyDeclaration.propertyName
  * @author CloudPlayer
  */
+@OptIn(KspExperimental::class)
 val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
     get() {
         val name = propertyName
@@ -133,7 +135,13 @@ val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
         docString?.let {
             builder.addKdoc(it.trimIndent())
         }
-        return builder.initByLazyOrDefault("QueryColumn(this,  \"$columnName\")")
+        val columnAlias = getAnnotationsByType(ColumnAlias::class).firstOrNull()
+        val res = if (columnAlias !== null) {
+            """QueryColumn(this, "$name", "${columnAlias.value[0]}")"""
+        } else {
+            """QueryColumn(this,  "$name")"""
+        }
+        return builder.initByLazyOrDefault(res)
     }
 
 /**

@@ -52,9 +52,11 @@ inline fun <reified T, V> KProperty1<T, V>.column(): QueryColumn =
         "The attribute $this of class ${T::class.java} could not find the corresponding QueryColumn"
     )
 
-val KClass<*>.allColumns: Array<out QueryColumn>
+val KClass<*>.defaultColumns: Array<out QueryColumn>
     get() = tableInfo.defaultQueryColumn.toTypedArray()
 
+val <T: Any> KClass<T>.allColumns: QueryColumn
+    get() = tableInfo.buildQueryColumn("*")
 
 fun Field.toQueryColumn(): QueryColumn {
     val from = declaringClass

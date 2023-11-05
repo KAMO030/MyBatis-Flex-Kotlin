@@ -158,7 +158,7 @@ ksp {
 
 这里我们将两个参数传入至 KSP 中。其中第一个参数 `flex.project.path` 用于告诉 KSP 当前项目根目录的路径。
 
-而第二个参数 `flex.root.project.path` 用于指定您的项目最外层的项目所在。
+而第二个参数 `flex.root.project.path` 用于指定您的根项目的绝对路径。
 这个参数的作用是用于 `processor.stopBubbling` 配置以告知 KSP 向上级合并配置时应该到哪里结束合并，
 因此如果您没有合并配置的需求，您不必写此参数。
 
@@ -166,7 +166,9 @@ ksp {
 
 KSP 几乎完全兼容 APT 的配置。此外，我们针对一些配置还做了进一步地改善和增强。
 
-接下来我们来一起看看对于 KSP 而言不支持和做了改动的配置。对于下面未曾提到的 APT 配置，KSP 均完全支持。
+接下来我们来一起看看对于 KSP 而言不支持的或做了改动的配置。
+
+> 对于下面未曾提到的 APT 配置，KSP 均完全支持。
 
 #### processor.enable
 
@@ -200,7 +202,7 @@ ksp {
 
 #### processor.allInTables.className
 
-KSP 对此生成的是单例对象，即 `object` ，而不是普通类。
+KSP 为 `Tables` 类生成的是单例对象，即 `object` ，而不是普通类。此配置 KSP 对此完全支持。
 
 #### processor.allInTables.enable, processor.allInTables.package
 
@@ -226,10 +228,10 @@ KSP 在兼容 APT 配置的基础上，还增添了一些自己独有的配置�
 ksp.type.defaultColumns=array
 
 我们一共支持以下四种配置：
-1. array，即 `Array`。
-2. list，即 `List`。
-3. set，即 `Set`。
-4. sequence，即 `Sequence`。
+1. array，KSP 为此生成的类型将变为 `Array`。
+2. list，KSP 为此生成的类型将变为 `List`。
+3. set，KSP 为此生成的类型将变为 `Set`。
+4. sequence，KSP 为此生成的类型将变为 `Sequence`。
 
 > 需要注意的是，如果你选择的是 array ，那么其泛型将会是**协变的**。
-即 `Array` 完整的类型将是 `Array<out QueryColumn>` 。因此，您可能需要在源代码中进行一些调整。
+即 `DEFAULT_COLUMNS` 完整的类型描述是 `Array<out QueryColumn>` 。因此，您可能需要在源代码中进行一些调整。
