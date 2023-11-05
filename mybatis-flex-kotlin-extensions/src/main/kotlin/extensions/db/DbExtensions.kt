@@ -20,10 +20,12 @@ import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.core.row.Db.*
+import com.mybatisflex.core.row.Db.selectListByQuery
+import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.kotlin.extensions.kproperty.allColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.extensions.model.toEntities
 import com.mybatisflex.kotlin.scope.QueryScope
@@ -63,7 +65,11 @@ inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
 ): T? = T::class.tableInfo.run {
-    queryRow(schema = schema, tableName = tableName, columns = columns, init = init)?.toEntity(T::class.java)
+    queryRow(schema = schema, tableName = tableName, columns = columns, init = {
+        init()
+        // 如果未调用select方法，则默认查询所有列
+        if (this.hasSelect().not()) select(*T::class.allColumns)
+    })?.toEntity(T::class.java)
 }
 
 inline fun queryRow(
@@ -81,8 +87,14 @@ inline fun queryRow(
 inline fun <reified T : Any> query(
     init: QueryScope.() -> Unit
 ): List<T> = T::class.tableInfo.run {
-    queryRows(schema = schema, tableName = tableName, init = init).toEntities()
+    queryRows(schema = schema, tableName = tableName, init = {
+        init()
+        // 如果未调用select方法，则默认查询所有列
+        if (this.hasSelect().not()) select(*T::class.allColumns)
+    }
+    ).toEntities()
 }
+
 
 inline fun queryRows(
     schema: String? = null,
@@ -105,7 +117,7 @@ inline fun <reified E> filter(
 ).toEntities()
 
 inline fun <reified E : Any> filterColumn(
-    vararg columns: QueryColumn,
+    vararg columns: QueryColumn = E::class.tableInfo.defaultQueryColumn.toTypedArray(),
     init: () -> QueryCondition
 ): List<E> = E::class.tableInfo.run {
     filter(
@@ -117,7 +129,7 @@ inline fun <reified E : Any> filterColumn(
 }
 
 inline fun <reified E : Any> filter(
-    columns: Array<out QueryColumn>,
+    columns: Array<out QueryColumn> = E::class.allColumns,
     init: () -> QueryCondition
 ): List<E> =
     filterColumn(
@@ -135,8 +147,7 @@ inline fun <reified E : Any> filter(
     )
 
 //    all----------
-inline fun <reified E : Any> all(): List<E> =
-    E::class.tableInfo.run { selectAll(schema, tableName).toEntities() }
+inline fun <reified E : Any> all(): List<E> = filter<E>(E::class.allColumns, QueryCondition::createEmpty)
 
 
 

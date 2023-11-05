@@ -22,13 +22,13 @@ import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryOrderBy
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.condition.and
+import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.vec.Order
 import java.lang.reflect.Field
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 
 /*
@@ -53,7 +53,7 @@ inline fun <reified T, V> KProperty1<T, V>.column(): QueryColumn =
     )
 
 val KClass<*>.allColumns: Array<out QueryColumn>
-    get() = this.memberProperties.toQueryColumns()
+    get() = tableInfo.defaultQueryColumn.toTypedArray()
 
 
 fun Field.toQueryColumn(): QueryColumn {
