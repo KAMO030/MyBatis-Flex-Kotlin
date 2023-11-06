@@ -29,7 +29,8 @@
       ```
 
 2. `filter<实体类>(vararg KProperty<*>, () -> QueryCondition)`: 按条件查泛型对应的表的数据
-    
+   > 默认查所有列，可通过 vararg KProperty<*> 指定要查的列
+
       ```kotlin
         // a and b and (c or d)
         val accounts: List<Account> = filter(Account::id,Account::userName) {

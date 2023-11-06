@@ -32,19 +32,20 @@
   * **【对比原生】**
     * **原生**
       ```kotlin
-      val queryWrapper = QueryWrapper.create()
-          .select(Account::id.column(), Account::userName.column())
-          .where(Account::age.column().isNotNull()).and(Account::age.column().ge(17))
-          .orderBy(Account::id.column().desc())
-      mapper<AccountMapper>().selectListByQuery(queryWrapper)
+        val queryWrapper = QueryWrapper.create()
+            .select(QueryColumn("id"), QueryColumn("user_name"))
+            .where(QueryColumn("age").isNotNull()).and(QueryColumn("age").ge(17))
+            .orderBy(QueryColumn("id").desc())
+        mapper<AccountMapper>().selectListByQuery(queryWrapper)
       ```
 
     * **扩展后**
       ```kotlin
-      query<Account> {
-          select(Account::id, Account::userName)
-          where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
-      }
+        // 无需注册Mapper与APT/KSP即可查询操作
+        val accountList: List<Account> = query {
+            select(Account::id, Account::userName)
+            where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
+        }
       ```
     执行的SQL:
     ```sql
@@ -112,7 +113,7 @@
 ```kotlin
 dependencies {
   //kotlin扩展库
-  implementation("com.mybatis-flex:mybatis-flex-kotlin:1.0.1")
+  implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:1.0.3")
   //核心库
   implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
@@ -125,8 +126,8 @@ dependencies {
   <!--kotlin扩展库-->
   <dependency>
     <groupId>com.mybatis-flex</groupId>
-    <artifactId>mybatis-flex-kotlin</artifactId>
-    <version>1.0.2</version>
+    <artifactId>mybatis-flex-kotlin-extensions</artifactId>
+    <version>1.0.3</version>
   </dependency>
   <!--核心库-->
   <dependency>
@@ -145,7 +146,7 @@ dependencies {
 **第 3 步：编写实体类**
 
 ```kotlin
-  @Table("tb_account")
+@Table("tb_account")
 data class Account(
   @Id var id: Int = -1,
   var userName: String? = null,
@@ -177,7 +178,7 @@ data class Account(
   val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
   val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
   // 查泛型对应的表的所有数据
-  all<Account>.forEach(::println)
+  all<Account>().forEach(::println)
   // 条件过滤查询并打印
   filter<Account> {
     (Account::id.isNotNull)
@@ -188,10 +189,11 @@ data class Account(
 ```
 执行的SQL：
 ```sql
-  SELECT * FROM `tb_account`
+  SELECT `age`, `birthday`, `id`, `user_name` 
+  FROM `tb_account`
 ```
 ```sql
-  SELECT *
+  SELECT `age`, `birthday`, `id`, `user_name`
   FROM `tb_account`
   WHERE `id` IS NOT NULL
     AND (`id` = 1 AND `user_name` = '张三' OR (`id` = 2 AND `user_name` = '李四'))
@@ -209,5 +211,6 @@ Account(id=2, userName="李四", birthday="2021-03-21 00:00:00.0", age=19)
 - 功能 1：[Bootstrap简化配置](docs/bootstrapExt.md)
 - 功能 2：[简单查询与扩展](docs/extensions.md)
 - 功能 3：[向量查询](docs/vecSimple.md) (实验性)
+- 功能 4：[KSP](docs/ksp.md)
 
 [comment]: <> (###### TODO ...)

@@ -28,6 +28,8 @@ import kotlin.reflect.KProperty
 class QueryScope : QueryWrapper() {
     companion object CurrentQueryScope : ThreadLocal<QueryScope>()
 
+    val prentQueryScope: QueryScope? = CurrentQueryScope.get()
+
     operator fun String.get(name: String): QueryColumn = QueryColumn(this, name)
 
     operator fun String.unaryMinus(): QueryColumn = QueryColumn(this)
@@ -47,10 +49,9 @@ inline fun queryScope(vararg columns: QueryColumn, init: QueryScope.() -> Unit =
         builder.select(*columns)
     }
     //用于嵌套查询拿到上层查询包装对象
-    val prentQueryScope = QueryScope.get()
     QueryScope.set(builder)
     init(builder)
-    QueryScope.set(prentQueryScope)
+    QueryScope.set(builder.prentQueryScope)
 
     return builder
 }

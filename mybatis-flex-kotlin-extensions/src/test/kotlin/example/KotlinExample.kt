@@ -87,7 +87,7 @@ class KotlinExample {
     fun contrastOriginal() {
         // 【原生】
         val queryWrapper = QueryWrapper.create()
-            .select(QueryColumn("id"), QueryColumn("userName"))
+            .select(QueryColumn("id"), QueryColumn("user_name"))
             .where(QueryColumn("age").isNotNull()).and(QueryColumn("age").ge(17))
             .orderBy(QueryColumn("id").desc())
         mapper<AccountMapper>().selectListByQuery(queryWrapper)
