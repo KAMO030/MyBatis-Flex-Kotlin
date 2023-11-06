@@ -25,14 +25,14 @@ import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
-import com.mybatisflex.kotlin.extensions.kproperty.allColumns
+import com.mybatisflex.kotlin.extensions.kproperty.defaultColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.extensions.model.toEntities
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.full.isSubclassOf
 
 
 /*
@@ -54,11 +54,18 @@ val <E : Any> KClass<E>.baseMapper: BaseMapper<E>
     get() = Mappers.ofEntityClass(java)
 
 val <E : Any> KClass<E>.tableInfo: TableInfo
-    get() = if (isSuperclassOf(BaseMapper::class)) {
+    get() = tableInfoOrNull ?: error(
+        "The class TableInfo cannot be found through $this" +
+                " because the entity class corresponding to the generic used by this interface to inherit from BaseMapper cannot be found."
+    )
+
+
+val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
+    get() = if (isSubclassOf(BaseMapper::class)) {
         TableInfoFactory.ofMapperClass(java)
     } else {
         TableInfoFactory.ofEntityClass(java)
-    } ?: error("QueryVector cannot be initialized by class $this, which does not have a corresponding TableInfo.")
+    }
 
 //    query-----------
 inline fun <reified T : Any> queryOne(
@@ -68,7 +75,7 @@ inline fun <reified T : Any> queryOne(
     queryRow(schema = schema, tableName = tableName, columns = columns, init = {
         init()
         // 如果未调用select方法，则默认查询所有列
-        if (this.hasSelect().not()) select(*T::class.allColumns)
+        if (this.hasSelect().not()) select(*T::class.defaultColumns)
     })?.toEntity(T::class.java)
 }
 
@@ -90,7 +97,7 @@ inline fun <reified T : Any> query(
     queryRows(schema = schema, tableName = tableName, init = {
         init()
         // 如果未调用select方法，则默认查询所有列
-        if (this.hasSelect().not()) select(*T::class.allColumns)
+        if (this.hasSelect().not()) select(*T::class.defaultColumns)
     }
     ).toEntities()
 }
@@ -129,7 +136,7 @@ inline fun <reified E : Any> filterColumn(
 }
 
 inline fun <reified E : Any> filter(
-    columns: Array<out QueryColumn> = E::class.allColumns,
+    columns: Array<out QueryColumn> = E::class.defaultColumns,
     init: () -> QueryCondition
 ): List<E> =
     filterColumn(
@@ -147,7 +154,7 @@ inline fun <reified E : Any> filter(
     )
 
 //    all----------
-inline fun <reified E : Any> all(): List<E> = filter<E>(E::class.allColumns, QueryCondition::createEmpty)
+inline fun <reified E : Any> all(): List<E> = filter<E>(E::class.defaultColumns, QueryCondition::createEmpty)
 
 
 

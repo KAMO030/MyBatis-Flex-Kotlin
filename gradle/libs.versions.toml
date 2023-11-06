@@ -12,6 +12,7 @@ ksp-api = "1.8.20-1.0.11"
 kotlinpoet = "1.12.0"
 dokka = "1.8.20"
 noarg = "1.8.20"
+allopen = "1.8.20"
 
 [libraries]
 mybatisflex-core = { group = "com.mybatis-flex", name = "mybatis-flex-core", version.ref = "mybatisflex" }
@@ -34,5 +35,6 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-api" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "noarg" }
+allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "allopen" }
 
 [bundles]

@@ -6,6 +6,7 @@ import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.mybatisflex.annotation.Column
+import com.mybatisflex.annotation.ColumnAlias
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.kotlin.ksp.codeGenerator
 import com.mybatisflex.kotlin.ksp.internal.config.flex.*
@@ -50,7 +51,11 @@ val KSPropertyDeclaration.columnName: String
         val table = closestClassDeclaration()!!.getAnnotationsByType(Table::class).first()
         val column = getAnnotationsByType(Column::class).firstOrNull()
         // 如果没有 Column 注解，则使用属性名作为列名
-        return (column?.value ?: simpleName.asString()).asColumnName(table.camelToUnderline)
+        val columnName = column?.value
+        if (columnName === null || columnName.isBlank()) {
+            return simpleName.asString().asColumnName(table.camelToUnderline)
+        }
+        return columnName.asColumnName(table.camelToUnderline)
     }
 
 /**
@@ -119,6 +124,7 @@ fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): PropertySpec.Bu
  * @see KSPropertyDeclaration.propertyName
  * @author CloudPlayer
  */
+@OptIn(KspExperimental::class)
 val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
     get() {
         val name = propertyName
@@ -129,7 +135,13 @@ val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
         docString?.let {
             builder.addKdoc(it.trimIndent())
         }
-        return builder.initByLazyOrDefault("QueryColumn(this,  \"$name\")")
+        val columnAlias = getAnnotationsByType(ColumnAlias::class).firstOrNull()
+        val res = if (columnAlias !== null) {
+            """QueryColumn(this, "$name", "${columnAlias.value[0]}")"""
+        } else {
+            """QueryColumn(this,  "$name")"""
+        }
+        return builder.initByLazyOrDefault(res)
     }
 
 /**
