@@ -16,6 +16,7 @@
 package com.mybatisflex.kotlin.extensions.db
 
 import com.mybatisflex.core.BaseMapper
+import com.mybatisflex.core.exception.MybatisFlexException
 import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
@@ -71,13 +72,18 @@ val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
 inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
-): T? = T::class.tableInfo.run {
-    queryRow(schema = schema, tableName = tableName, columns = columns, init = {
-        init()
-        // 如果未调用select方法，则默认查询所有列
-        if (this.hasSelect().not()) select(*T::class.defaultColumns)
-    })?.toEntity(T::class.java)
-}
+): T? =
+    try {
+        T::class.baseMapper.selectOneByQuery(queryScope(columns = columns, init = init))
+    } catch (e: MybatisFlexException) {
+        T::class.tableInfo.run {
+            queryRow(schema = schema, tableName = tableName, columns = columns, init = {
+                init()
+                // 如果未调用select方法，则默认查询所有列
+                if (this.hasSelect().not()) select(*T::class.defaultColumns)
+            })?.toEntity(T::class.java)
+        }
+    }
 
 inline fun queryRow(
     vararg columns: QueryColumn,
@@ -93,14 +99,18 @@ inline fun queryRow(
 
 inline fun <reified T : Any> query(
     init: QueryScope.() -> Unit
-): List<T> = T::class.tableInfo.run {
-    queryRows(schema = schema, tableName = tableName, init = {
-        init()
-        // 如果未调用select方法，则默认查询所有列
-        if (this.hasSelect().not()) select(*T::class.defaultColumns)
+): List<T> =
+    try {
+        T::class.baseMapper.selectListByQuery(queryScope(init = init))
+    } catch (e: MybatisFlexException) {
+        T::class.tableInfo.run {
+            queryRows(schema = schema, tableName = tableName, init = {
+                init()
+                // 如果未调用select方法，则默认查询所有列
+                if (this.hasSelect().not()) select(*T::class.defaultColumns)
+            }).toEntities()
+        }
     }
-    ).toEntities()
-}
 
 
 inline fun queryRows(
@@ -112,28 +122,31 @@ inline fun queryRows(
 )
 
 //    filter-----------
-inline fun <reified E> filter(
-    tableName: String,
-    schema: String,
+inline fun <reified E : Any> filter(
     vararg columns: QueryColumn,
     queryCondition: QueryCondition = QueryCondition.createEmpty()
-): List<E> = selectListByQuery(
-    schema,
-    tableName,
-    QueryWrapper().select(*columns).where(queryCondition)
-).toEntities()
+): List<E> =
+    try {
+        E::class.baseMapper.selectListByCondition(queryCondition)
+    } catch (e: MybatisFlexException) {
+        E::class.tableInfo.run {
+            selectListByQuery(
+                schema,
+                tableName,
+                QueryWrapper().select(*columns).where(queryCondition)
+            ).toEntities()
+        }
+    }
+
 
 inline fun <reified E : Any> filterColumn(
     vararg columns: QueryColumn = E::class.tableInfo.defaultQueryColumn.toTypedArray(),
     init: () -> QueryCondition
-): List<E> = E::class.tableInfo.run {
+): List<E> =
     filter(
         columns = columns,
-        schema = schema,
-        tableName = tableName,
         queryCondition = init()
     )
-}
 
 inline fun <reified E : Any> filter(
     columns: Array<out QueryColumn> = E::class.defaultColumns,

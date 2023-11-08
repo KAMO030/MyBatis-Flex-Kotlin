@@ -3,7 +3,7 @@ version = libs.versions.mybatisflex.kotlin.codegen.get()
 plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.noarg)
-    alias(libs.plugins.allopen)
+//    alias(libs.plugins.allopen)
 }
 
 ksp {
@@ -22,6 +22,6 @@ noArg {
     annotation("com.mybatisflex.annotation.Table")
 }
 
-allOpen {
-    annotation("com.mybatisflex.annotation.Table")
-}
+//allOpen {
+//    annotation("com.mybatisflex.annotation.Table")
+//}

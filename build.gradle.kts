@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.noarg) apply false
-    alias(libs.plugins.allopen) apply false
+//    alias(libs.plugins.allopen) apply false
     `maven-publish`
     `kotlin-dsl`
     signing
