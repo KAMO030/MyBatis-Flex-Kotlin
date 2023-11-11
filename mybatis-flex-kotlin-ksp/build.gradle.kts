@@ -7,6 +7,7 @@ dependencies {
     implementation(libs.ksp.api)
 }
 
+
 publishing {
     publications.withType<MavenPublication> {
         // Provide artifacts information requited by Maven Central
