@@ -19,7 +19,7 @@ import com.mybatisflex.core.query.QueryCondition
 
 /*
  * QueryCondition连接逻辑操作扩展
- * @author 卡莫sama
+ * @author KAMOsama
  */
 
 fun QueryCondition.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryCondition =

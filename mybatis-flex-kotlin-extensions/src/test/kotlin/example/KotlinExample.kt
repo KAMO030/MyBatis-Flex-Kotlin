@@ -9,11 +9,11 @@ import com.mybatisflex.kotlin.example.entity.Account
 import com.mybatisflex.kotlin.example.mapper.AccountMapper
 import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.condition.or
-import com.mybatisflex.kotlin.extensions.db.all
-import com.mybatisflex.kotlin.extensions.db.filter
-import com.mybatisflex.kotlin.extensions.db.mapper
-import com.mybatisflex.kotlin.extensions.db.query
+import com.mybatisflex.kotlin.extensions.db.*
 import com.mybatisflex.kotlin.extensions.kproperty.*
+import com.mybatisflex.kotlin.extensions.mapper.insert
+import com.mybatisflex.kotlin.extensions.mapper.remove
+import com.mybatisflex.kotlin.extensions.mapper.update
 import com.mybatisflex.kotlin.extensions.model.batchDeleteById
 import com.mybatisflex.kotlin.extensions.model.batchInsert
 import com.mybatisflex.kotlin.extensions.model.batchUpdateById
@@ -107,6 +107,40 @@ class KotlinExample {
         val accounts: List<Account> = all()
         accounts.forEach(::println)
         // 或者 Account::class.all.forEach(::println) (需要注册Mapper接口)
+    }
+
+    @Test
+    fun testInsert() {
+        insert<Account> {
+            id = 3
+            userName = "kamo"
+            age = 20
+            birthday = Date()
+        }
+
+        filterOne<Account> { Account::id eq 3 }?.also(::println)
+    }
+
+    @Test
+    fun testUpdate() {
+        // 通过条件更新
+        filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.update {
+            Account::userName eq it.userName
+        }
+        // 通过id更新
+        // filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.updateById()
+        filterOne<Account> { Account::id eq 2 }?.also(::println)
+    }
+
+    @Test
+    fun testDelete() {
+        // 通过条件删除
+        filterOne<Account> { Account::id eq 2 }?.remove {
+            Account::userName eq it.userName
+        }
+        // 通过id删除
+        // filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.removeById()
+        all<Account>().forEach(::println)
     }
 
     /**

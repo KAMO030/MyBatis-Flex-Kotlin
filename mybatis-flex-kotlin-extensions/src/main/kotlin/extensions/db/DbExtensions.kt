@@ -38,18 +38,18 @@ import kotlin.reflect.full.isSubclassOf
 
 /*
  * 数据库简单操作扩展
- * @author 卡莫sama
+ * @author KAMOsama
  */
 
 /**
  * 把泛型类型当作mapper类型拿到mapper实例
- * @author 卡莫sama
+ * @author KAMOsama
  */
 inline fun <reified M> mapper(): M = Mappers.ofMapperClass(M::class.java)
 
 /**
  * 把泛型类型当作实体类型拿到mapper实例
- * @author 卡莫sama
+ * @author KAMOsama
  */
 val <E : Any> KClass<E>.baseMapper: BaseMapper<E>
     get() = Mappers.ofEntityClass(java)
@@ -69,6 +69,11 @@ val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
     }
 
 //    query-----------
+/**
+ * 通过条件查询一条数据
+ * @param columns 查询的列
+ * @param init 查询作用域初始化函数
+ */
 inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
@@ -85,10 +90,36 @@ inline fun <reified T : Any> queryOne(
         }
     }
 
-inline fun queryRow(
+/**
+ * 通过条件查询多条数据
+ * @param columns 查询的列
+ * @param init 查询作用域初始化函数
+ */
+inline fun <reified T : Any> query(
     vararg columns: QueryColumn,
+    init: QueryScope.() -> Unit
+): List<T> =
+    try {
+        T::class.baseMapper.selectListByQuery(queryScope(init = init))
+    } catch (e: MybatisFlexException) {
+        T::class.tableInfo.run {
+            queryRows(schema = schema, tableName = tableName, columns = columns, init = {
+                init()
+                // 如果未调用select方法，则默认查询所有列
+                if (this.hasSelect().not()) select(*T::class.defaultColumns)
+            }).toEntities()
+        }
+    }
+
+/**
+ * 通过条件查询一条数据
+ * @param columns 查询的列
+ * @param init 查询作用域初始化函数
+ */
+inline fun queryRow(
     schema: String? = null,
     tableName: String? = null,
+    vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
 ): Row? =
     selectOneByQuery(
@@ -97,31 +128,26 @@ inline fun queryRow(
         queryScope(columns = columns, init = init)
     )
 
-inline fun <reified T : Any> query(
-    init: QueryScope.() -> Unit
-): List<T> =
-    try {
-        T::class.baseMapper.selectListByQuery(queryScope(init = init))
-    } catch (e: MybatisFlexException) {
-        T::class.tableInfo.run {
-            queryRows(schema = schema, tableName = tableName, init = {
-                init()
-                // 如果未调用select方法，则默认查询所有列
-                if (this.hasSelect().not()) select(*T::class.defaultColumns)
-            }).toEntities()
-        }
-    }
-
-
+/**
+ * 通过条件查询多条数据
+ * @param columns 查询的列
+ * @param init 查询作用域初始化函数
+ */
 inline fun queryRows(
     schema: String? = null,
     tableName: String? = null,
+    vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
 ): List<Row> = selectListByQuery(
-    schema, tableName, queryScope(init = init)
+    schema, tableName, queryScope(columns = columns, init = init)
 )
 
 //    filter-----------
+/**
+ * 通过条件查询多条数据
+ * @param columns 查询的列
+ * @param queryCondition 查询条件
+ */
 inline fun <reified E : Any> filter(
     vararg columns: QueryColumn,
     queryCondition: QueryCondition = QueryCondition.createEmpty()
@@ -138,35 +164,63 @@ inline fun <reified E : Any> filter(
         }
     }
 
-
+/**
+ * 通过条件查询多条数据
+ * @param columns 查询的列
+ * @param condition 查询条件
+ */
 inline fun <reified E : Any> filterColumn(
     vararg columns: QueryColumn = E::class.tableInfo.defaultQueryColumn.toTypedArray(),
-    init: () -> QueryCondition
+    condition: () -> QueryCondition
 ): List<E> =
     filter(
         columns = columns,
-        queryCondition = init()
+        queryCondition = condition()
     )
 
+/**
+ * 通过条件查询多条数据
+ * @param columns 查询的列
+ * @param condition 查询条件
+ */
 inline fun <reified E : Any> filter(
     columns: Array<out QueryColumn> = E::class.defaultColumns,
-    init: () -> QueryCondition
+    condition: () -> QueryCondition
 ): List<E> =
     filterColumn(
         columns = columns,
-        init = init
+        condition = condition
     )
 
+/**
+ * 通过条件查询一条数据
+ * @param columns 查询的列
+ * @param condition 查询条件
+ * @since 1.0.5
+ */
+inline fun <reified E : Any> filterOne(
+    vararg columns: KProperty<*>,
+    condition: () -> QueryCondition
+): E? = queryOne(init = { select(*columns);and(condition()) })
+
+/**
+ * 通过条件查询多条数据
+ * @param columns 查询的列
+ * @param condition 查询条件
+ */
 inline fun <reified E : Any> filter(
     vararg columns: KProperty<*>,
-    init: () -> QueryCondition
+    condition: () -> QueryCondition
 ): List<E> =
     filter(
         columns = columns.toQueryColumns(),
-        init = init
+        condition = condition
     )
 
 //    all----------
+/**
+ * 查询泛型对应的表的所有数据
+ */
 inline fun <reified E : Any> all(): List<E> = filter<E>(E::class.defaultColumns, QueryCondition::createEmpty)
 
 

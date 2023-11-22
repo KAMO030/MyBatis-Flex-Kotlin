@@ -16,6 +16,7 @@
 package com.mybatisflex.kotlin.extensions.mapper
 
 import com.mybatisflex.core.BaseMapper
+import com.mybatisflex.core.activerecord.MapperModel
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.kotlin.extensions.db.baseMapper
 import com.mybatisflex.kotlin.scope.QueryScope
@@ -24,7 +25,7 @@ import kotlin.reflect.KClass
 
 /*
  * 映射器操作扩展
- * @author 卡莫sama
+ * @author KAMOsama
  */
 
 fun <T> BaseMapper<T>.query(init: QueryScope.() -> Unit): List<T> =
@@ -50,18 +51,16 @@ val <E : Any> KClass<E>.all: List<E>
     get() = baseMapper.selectAll()
 
 //    insert-----------
-inline fun <reified E : Any> insert(build: E.() -> Unit): Int {
-    val entity = E::class.java.newInstance()
-    entity.build()
-    return E::class.baseMapper.insert(entity)
-}
+inline fun <reified E : MapperModel<E>> insert(build: E.() -> Unit): Int =
+    E::class.java.newInstance().apply(build).run { insert() }
 
-inline fun <reified E : Any> E.insert(): Int = E::class.baseMapper.insert(this)
+
+inline fun <reified E : MapperModel<E>> E.insert(): Int = baseMapper().insert(this)
 
 //    update-----------
-inline fun <reified E : Any> E.update(conditionBlock: (E) -> QueryCondition): Int =
-    E::class.baseMapper.updateByCondition(this, conditionBlock(this))
+inline fun <reified E : MapperModel<E>> E.update(conditionBlock: (E) -> QueryCondition): Int =
+    baseMapper().updateByCondition(this, conditionBlock(this))
 
 //    delete-----------
-inline fun <reified E : Any> E.delete(conditionBlock: (E) -> QueryCondition): Int =
-    E::class.baseMapper.deleteByCondition(conditionBlock(this))
+inline fun <reified E : MapperModel<E>> E.remove(conditionBlock: (E) -> QueryCondition): Int =
+    baseMapper().deleteByCondition(conditionBlock(this))

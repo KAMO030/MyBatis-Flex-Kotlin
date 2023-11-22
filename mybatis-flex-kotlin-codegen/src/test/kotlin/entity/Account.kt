@@ -27,7 +27,7 @@ import java.util.*
  *
  * （如有需要可以安装官方 noArg 插件）
  *
- * @author 卡莫sama
+ * @author KAMOsama
  * @date 2023/8/7
  */
 @Table("tb_account")

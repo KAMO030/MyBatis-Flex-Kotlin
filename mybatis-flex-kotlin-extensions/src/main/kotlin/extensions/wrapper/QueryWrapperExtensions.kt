@@ -15,7 +15,7 @@ import kotlin.reflect.KProperty
 
 /*
  * QueryWrapper操作扩展
- * @author 卡莫sama
+ * @author KAMOsama
  */
 
 inline fun QueryWrapper.from(init: QueryScope.() -> Unit = {}): QueryWrapper = this.from(queryScope(init = init))

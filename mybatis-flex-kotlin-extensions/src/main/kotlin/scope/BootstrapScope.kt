@@ -23,7 +23,7 @@ import kotlin.reflect.KClass
 
 /**
  * Bootstrap构建配置作用域
- * @author 卡莫sama
+ * @author KAMOsama
  * @date 2023/8/7
  */
 class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance()) {

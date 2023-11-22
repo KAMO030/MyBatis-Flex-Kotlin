@@ -15,7 +15,7 @@
  */
 package com.mybatisflex.kotlin.extensions.model
 
-import com.mybatisflex.core.activerecord.Model
+import com.mybatisflex.core.activerecord.MapperModel
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.row.RowUtil
 import com.mybatisflex.core.util.SqlUtil
@@ -24,7 +24,7 @@ import java.io.Serializable
 
 /*
  * 实体操作扩展
- * @author 卡莫sama
+ * @author KAMOsama
  */
 
 inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
@@ -32,11 +32,11 @@ inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
 inline fun <reified E> Collection<Row>.toEntities(): MutableList<E> =
     RowUtil.toEntityList(this.toMutableList(), E::class.java)
 
-inline fun <reified E : Model<E>> List<E>.batchInsert() = E::class.baseMapper.insertBatch(this)
+inline fun <reified E : MapperModel<E>> List<E>.batchInsert() = E::class.baseMapper.insertBatch(this)
 
-fun <E : Model<E>> List<E>.batchUpdateById(): Boolean = all(Model<E>::updateById)
+fun <E : MapperModel<E>> List<E>.batchUpdateById(): Boolean = all(MapperModel<E>::updateById)
 
-inline fun <reified E : Model<E>> List<E>.batchDeleteById(): Boolean {
+inline fun <reified E : MapperModel<E>> List<E>.batchDeleteById(): Boolean {
     val tableInfo = E::class.tableInfo
     //拿到集合中所有实体的主键
     val primaryValues = this.map { tableInfo.getPkValue(it) as Serializable }

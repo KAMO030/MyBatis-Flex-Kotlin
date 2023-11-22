@@ -24,7 +24,7 @@ import kotlin.reflect.KProperty
 
 /*
  * sql操作扩展
- * @author 卡莫sama
+ * @author KAMOsama
  * @date 2023/8/7
  */
 

@@ -33,7 +33,7 @@ import kotlin.reflect.jvm.javaField
 
 /*
  * KProperty操作扩展
- * @author 卡莫sama,CloudPlayer
+ * @author KAMOsama,CloudPlayer
  */
 
 /**
