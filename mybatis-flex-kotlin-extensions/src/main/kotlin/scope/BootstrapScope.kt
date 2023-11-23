@@ -78,6 +78,8 @@ inline fun buildBootstrap(
 /**
  * 启动MybatisFlex
  * 如果未配置dataSource，则使用默认的PooledDataSource
+ * @author KAMOsama
+ * @since 1.0.5
  */
 @MybatisFlexDsl
 inline fun runFlex(
