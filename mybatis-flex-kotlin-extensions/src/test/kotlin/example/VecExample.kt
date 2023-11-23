@@ -11,7 +11,7 @@ import com.mybatisflex.kotlin.extensions.kproperty.ge
 import com.mybatisflex.kotlin.extensions.vec.vecOf
 import com.mybatisflex.kotlin.extensions.wrapper.from
 import com.mybatisflex.kotlin.extensions.wrapper.select
-import com.mybatisflex.kotlin.scope.buildBootstrap
+import com.mybatisflex.kotlin.scope.runFlex
 import com.mybatisflex.kotlin.vec.*
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Assertions
@@ -26,7 +26,7 @@ class VecExample {
     private val accountMapper: AccountMapper get() = mapper()
 
     init {
-        buildBootstrap {
+        runFlex {
             +AccountMapper::class
             +EmbeddedDatabaseBuilder().run {
                 setType(EmbeddedDatabaseType.H2)
@@ -35,7 +35,7 @@ class VecExample {
                 build()
             }
             logImpl = StdOutImpl::class
-        }.start()
+        }
     }
 
     @Test

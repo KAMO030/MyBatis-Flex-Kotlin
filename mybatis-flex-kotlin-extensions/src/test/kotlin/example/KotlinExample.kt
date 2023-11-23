@@ -20,7 +20,7 @@ import com.mybatisflex.kotlin.extensions.model.batchUpdateById
 import com.mybatisflex.kotlin.extensions.sql.orderBy
 import com.mybatisflex.kotlin.extensions.wrapper.and
 import com.mybatisflex.kotlin.extensions.wrapper.from
-import com.mybatisflex.kotlin.scope.buildBootstrap
+import com.mybatisflex.kotlin.scope.runFlex
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
@@ -43,7 +43,7 @@ class KotlinExample {
     private val end: Date = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
 
     init {
-        buildBootstrap {
+        runFlex {
 //            此方法体 it 是 MybatisFlexBootstrap 实例
 //            配置Mapper
 //            1.通过+（重写自增）的方式
@@ -73,7 +73,7 @@ class KotlinExample {
 
 //          配置日志打印在控制台
             logImpl = StdOutImpl::class
-        }.start()
+        }
 
         // 开启sql审计，设置为打印在控制台
         AuditManager.setAuditEnable(true)

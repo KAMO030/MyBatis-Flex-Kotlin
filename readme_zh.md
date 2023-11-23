@@ -13,14 +13,14 @@
 
 - 快速构建启动：通过DSL➕重载运算符，快速配置 MybatisFlexBootstrap 实例并启动：
     ```kotlin
-    buildBootstrap {
+    runFlex {
         // 配置数据源 相当于 setDataSource(dataSource)
         +dataSource
         // 配置Mapper 相当于 addMapper(AccountMapper::class.java)
         +AccountMapper::class
         // 配置日志输出 相当于 setLogImpl(StdOutImpl::class.java)
         logImpl = StdOutImpl::class
-      }.start()
+      }
     ```
 - 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供三个函数：all, filter 和 query )
   >- `all<实体类>()` 查泛型对应的表的所有数据
@@ -174,7 +174,7 @@ data class Account(
     build()
   }
   // 启动并配入数据源
-  buildBootstrap { +dataSource }.start()
+  runFlex { +dataSource }
   val start = Date.from(Instant.parse("2020-01-10T00:00:00Z"))
   val end = Date.from(Instant.parse("2020-01-12T00:00:00Z"))
   // 查泛型对应的表的所有数据

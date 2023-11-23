@@ -16,6 +16,8 @@
 package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.MybatisFlexBootstrap
+import com.mybatisflex.kotlin.annotation.MybatisFlexDsl
+import org.apache.ibatis.datasource.pooled.PooledDataSource
 import org.apache.ibatis.logging.Log
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -27,6 +29,14 @@ import kotlin.reflect.KClass
  * @date 2023/8/7
  */
 class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance()) {
+
+    var url: String? = null
+
+    var username: String? = null
+
+    var password: String? = null
+
+    var driver: String? = null
 
     fun dataSources(dataSourceScope: DataSourceScope.() -> Unit) =
         dataSourceScope(DataSourceScope(instant))
@@ -58,12 +68,29 @@ class DataSourceScope(private val bootstrap: MybatisFlexBootstrap) {
 
 }
 
-
+@Deprecated("Use runFlex instead", ReplaceWith("runFlex(instant, scope)"))
 inline fun buildBootstrap(
     instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance(),
     scope: BootstrapScope.(MybatisFlexBootstrap) -> Unit
 ): MybatisFlexBootstrap =
     instant.also { BootstrapScope(it).scope(it) }
+
+/**
+ * 启动MybatisFlex
+ * 如果未配置dataSource，则使用默认的PooledDataSource
+ */
+@MybatisFlexDsl
+inline fun runFlex(
+    instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance(),
+    scope: BootstrapScope.(MybatisFlexBootstrap) -> Unit
+): MybatisFlexBootstrap =
+    instant.also {
+        BootstrapScope(it).run {
+            scope(it)
+            if (it.dataSource != null) return@run
+            it.setDataSource(PooledDataSource(driver, url, username, password))
+        }
+    }.start()
 
 
 

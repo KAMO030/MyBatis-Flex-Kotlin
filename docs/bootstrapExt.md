@@ -1,7 +1,7 @@
 ## Bootstrap简化配置
 利用Kotlin的Dsl，重载运算符和中缀表达式，简化了MybatisFlexBootstrap的配置，用起来更加简单方便：
 ```kotlin
-buildBootstrap {
+runFlex {
     // 此方法体 it 是 MybatisFlexBootstrap 实例
     // 配置Mapper
     // 1.通过+（重写自增）的方式
@@ -30,5 +30,5 @@ buildBootstrap {
     // it.addDataSource(FlexConsts.NAME,dataSource)
     // 配置日志打印在控制台
     logImpl = StdOutImpl::class
-}.start()
+}
 ```
