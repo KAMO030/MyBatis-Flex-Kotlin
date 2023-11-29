@@ -17,10 +17,12 @@ package com.mybatisflex.kotlin.extensions.mapper
 
 import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.activerecord.MapperModel
+import com.mybatisflex.core.field.FieldQueryBuilder
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.kotlin.extensions.db.baseMapper
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
+import java.util.function.Consumer
 import kotlin.reflect.KClass
 
 /*
@@ -45,6 +47,31 @@ fun <T> BaseMapper<T>.deleteByQuery(init: QueryScope.() -> Unit): Int =
 
 fun <T> BaseMapper<T>.deleteByCondition(init: () -> QueryCondition): Int =
     init().let(this::deleteByCondition)
+
+inline fun <T, reified R> BaseMapper<T>.selectListByQueryAs(init: QueryScope.() -> Unit): List<R> =
+    queryScope(init = init).let { this.selectListByQueryAs(it, R::class.java) }
+
+inline fun <T, reified R> BaseMapper<T>.selectListByQueryAs(
+    vararg consumers: Consumer<FieldQueryBuilder<R>>,
+    init: QueryScope.() -> Unit
+): List<R> = queryScope(init = init).let { this.selectListByQueryAs(it, R::class.java, *consumers) }
+
+inline fun <T, reified R> BaseMapper<T>.selectObjectListByQueryAs(
+    init: QueryScope.() -> Unit
+): List<R> = queryScope(init = init).let { this.selectObjectListByQueryAs(it, R::class.java) }
+
+inline fun <T, reified R> BaseMapper<T>.selectObjectByQueryAs(
+    init: QueryScope.() -> Unit
+): R = queryScope(init = init).let { this.selectObjectByQueryAs(it, R::class.java) }
+
+inline fun <T, reified R> BaseMapper<T>.selectListWithRelationsByQueryAs(
+    init: QueryScope.() -> Unit
+): List<R> = queryScope(init = init).let { this.selectListWithRelationsByQueryAs(it, R::class.java) }
+
+inline fun <T, reified R> BaseMapper<T>.selectListWithRelationsByQueryAs(
+    vararg consumers: Consumer<FieldQueryBuilder<R>>,
+    init: QueryScope.() -> Unit
+): List<R> = queryScope(init = init).let { this.selectListWithRelationsByQueryAs(it, R::class.java, *consumers) }
 
 //    all-----------
 val <E : Any> KClass<E>.all: List<E>
