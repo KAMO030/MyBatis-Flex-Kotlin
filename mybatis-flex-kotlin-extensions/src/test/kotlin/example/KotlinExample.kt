@@ -56,6 +56,12 @@ class KotlinExample {
             +dataSource
 //            2.通过原始的方式
 //            it.setDataSource(dataSource)
+//            3.通过dsl（中缀）的方式
+//            dataSources {
+//                url="xxx"
+//                username="xxx"
+//                password="xxx"
+//            }
 
 //            配置多dataSource
 //            1.通过of（中缀）的方式
@@ -63,11 +69,11 @@ class KotlinExample {
 //            "dataSource1" of dataSource
 //            "dataSource2" of dataSource
 //            2.通过dsl（中缀）的方式
-            dataSources {
-//            dataSource(FlexConsts.NAME,dataSource)
-//            dataSource("dataSource1",dataSource)
-//            dataSource("dataSource2",dataSource)
-            }
+//            dataSources("name") {
+//                url="xxx"
+//                username="xxx"
+//                password="xxx"
+//            }
 //          3.通过原始的方式
 //          it.addDataSource(FlexConsts.NAME,dataSource)
 
