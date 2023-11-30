@@ -79,7 +79,7 @@ class VecExample {
         val aggregation = vec.filterColumns { listOf(it::id `as` "accountId", it::userName.column) }
         val query: QueryWrapper = QueryWrapper()
             .select(
-                Account::id.`as`("accountId"), Account::userName.column()
+                Account::id.`as`("accountId"), Account::userName.column
             )
             .from(Account::class).`as`("a")
 

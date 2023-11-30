@@ -1,14 +1,14 @@
-package com.mybatisflex.kotlin.ksp.config
+package com.mybatisflex.kotlin.codegen.config
 
 import com.mybatisflex.codegen.config.GlobalConfig
 import com.mybatisflex.codegen.entity.Table
 import com.mybatisflex.codegen.generator.IGenerator
 import java.io.File
 
-class KTableDefGenerator : IGenerator {
+class ClassTableDefGenerator : IGenerator {
     @get:JvmName("getTemplatePathInKotlin")
     @set:JvmName("setTemplatePathInKotlin")
-    var templatePath: String = "templates/enjoy/KTableDef.tpl"
+    var templatePath: String = "templates/enjoy/classTableDef.tpl"
 
     override fun generate(table: Table, globalConfig: GlobalConfig) {
 
