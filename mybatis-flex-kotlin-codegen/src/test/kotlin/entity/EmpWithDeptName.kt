@@ -1,6 +1,5 @@
 package entity
 
-import com.mybatisflex.annotation.RelationOneToOne
 import java.time.LocalDateTime
 import java.util.*
 
@@ -16,6 +15,4 @@ data class EmpWithDeptName(
     var deptId: Int?,
     var createTime: LocalDateTime,
     var updateTime: LocalDateTime,
-    @RelationOneToOne(selfField = "id", targetField = "deptId")
-    var deptName: String,
 )

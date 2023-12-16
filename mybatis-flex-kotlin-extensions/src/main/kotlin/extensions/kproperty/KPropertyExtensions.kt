@@ -15,6 +15,7 @@
  */
 package com.mybatisflex.kotlin.extensions.kproperty
 
+import com.mybatisflex.annotation.Column
 import com.mybatisflex.core.constant.SqlConsts
 import com.mybatisflex.core.query.Brackets
 import com.mybatisflex.core.query.QueryColumn
@@ -25,42 +26,106 @@ import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.vec.Order
+import org.apache.ibatis.type.UnknownTypeHandler
 import java.lang.reflect.Field
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty1
+import java.lang.reflect.Modifier
+import kotlin.reflect.*
 import kotlin.reflect.full.instanceParameter
+import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmErasure
 
 /*
  * KProperty操作扩展
  * @author KAMOsama,CloudPlayer
  */
+
+/**
+ * 根据 [KProperty] 解析 [QueryColumn]，用于弥补 Kotlin 中无法直接获取 Java 中的方法引用的问题。
+ *
+ * 特指 XXX::getId 这种直接意义上的方法引用。
+ *
+ * @author CloudPlayer
+ * @exception IllegalArgumentException 当此属性没有 backing field 时抛出，或找不到其 [instanceParameter] 时抛出。
+ * @exception NoSuchElementException 此属性不是枚举类中的属性，返回值类型不在 [TableInfoFactory.defaultSupportColumnTypes] 之中，且其 [Column.typeHandler] 为 [UnknownTypeHandler] 时。
+ */
 val KProperty<*>.column: QueryColumn
-    get() = requireNotNull(instanceParameter) {
-        "Unable to find the entity class in which property $this is located."
-    }.type.jvmErasure.tableInfo.getQueryColumnByProperty(name) ?: throw NoSuchElementException(
-        "The attribute $this of class $instanceParameter could not find the corresponding QueryColumn"
-    )
-
-
-val KProperty<*>.columnOrBuild: QueryColumn
-    get() = requireNotNull(instanceParameter) {
-        "Unable to find the entity class in which property $this is located."
-    }.type.jvmErasure.tableInfo.let {
-        it.getQueryColumnByProperty(name) ?: it.buildQueryColumn(name)
+    get() = if (this is KProperty0<*>) {
+        requireNotNull(javaField) {
+            "Unable to find the corresponding QueryColumn from `$this` without a java field."
+        }.column
+    } else {
+        requireNotNull(instanceParameter) {
+            "Unable to find the entity class in which property $this is located."
+        }.type.jvmErasure.tableInfo.getQueryColumnByProperty(name) ?: throwNoSuchElementException()
     }
 
+/**
+ * 同 [KProperty.column] ，但是在找不到对应的 [QueryColumn] 时，使用属性名构建 [QueryColumn] 。
+ *
+ * 注意：以此构建的 [QueryColumn] 不会遵循驼峰转蛇形的命名规则。
+ *
+ * @see KProperty.column
+ * @author CloudPlayer
+ */
+val KProperty<*>.columnOrBuiltIn: QueryColumn
+    get() = if (this is KProperty0<*>) {
+        requireNotNull(javaField) {
+            "Unable to find the corresponding QueryColumn from `$this` without a java field."
+        }.columnOrBuiltIn
+    } else {
+        requireNotNull(instanceParameter) {
+            "Unable to find the entity class in which property $this is located."
+        }.type.jvmErasure.tableInfo.let {
+            it.getQueryColumnByProperty(name) ?: it.buildQueryColumn(name)
+        }
+    }
+
+/**
+ * 同 [KProperty.column] ，但是在没有找到对应 [QueryColumn] 时不会抛出异常，而是返回 null。
+ *
+ * @author CloudPlayer
+ * @see KProperty.column
+ */
 val KProperty<*>.columnOrNull: QueryColumn?
     get() = instanceParameter?.let {
         TableInfoFactory.ofEntityClass(it.type.jvmErasure.java).getQueryColumnByProperty(name)
+    } ?: javaField?.columnOrNull
+
+private fun KProperty<*>.throwNoSuchElementException(): Nothing = requireNotNull(javaField) {
+    "Unable to find the corresponding QueryColumn from `$this` without a java field."
+}.throwNoSuchElementException(toString(), returnType.toString())
+
+private fun Column?.throwNoSuchElementException(from: String, typeName: String): Nothing {
+    val baseReason = "The corresponding QueryColumn cannot be found by field `$from` because the field's type `$typeName` is an illegal type"
+    if (this === null) {
+        throw NoSuchElementException(baseReason)
     }
+    if (ignore) {
+        throw NoSuchElementException("$baseReason and the value of this property in the `${Column::class.java}` is true.")
+    }
+    if (typeHandler.java == UnknownTypeHandler::class.java) {
+        throw NoSuchElementException("$baseReason and the property of the typeHandler is UnknownTypeHandler.")
+    }
+    throw NoSuchElementException(baseReason)
+}
 
-@Deprecated("KProperty可以获取其实例参数，其已无必要存在。", replaceWith = ReplaceWith("column"))
-inline fun <reified T : Any, V> KProperty1<T, V>.column(): QueryColumn =
-    TableInfoFactory.ofEntityClass(T::class.java).getQueryColumnByProperty(name)
-        ?: throw NoSuchElementException("The attribute $this of class ${T::class.java} could not find the corresponding QueryColumn")
+/**
+ * [KProperty1.column] 的内联形式。
+ *
+ * @see KProperty1.column
+ * @author CloudPlayer
+ */
+inline fun <reified T : Any> KProperty1<T, *>.column(): QueryColumn = column(T::class.java)
 
+/**
+ * 通过 [KProperty1] 来构建 [QueryColumn] ，明确指定类来避免父类继承问题。
+ *
+ * @throws NoSuchElementException 找不到对应的 [QueryColumn] 时。具体规则详见 [KProperty.column]。
+ * @author CloudPlayer
+ */
+fun <T : Any> KProperty1<T, *>.column(entityClass: Class<T>): QueryColumn =
+    TableInfoFactory.ofEntityClass(entityClass).getQueryColumnByProperty(name)
+        ?: throw NoSuchElementException("The attribute $this of class $entityClass could not find the corresponding QueryColumn")
 
 val KClass<*>.defaultColumns: Array<out QueryColumn>
     get() = tableInfo.defaultQueryColumn.toTypedArray()
@@ -68,13 +133,26 @@ val KClass<*>.defaultColumns: Array<out QueryColumn>
 val <T : Any> KClass<T>.allColumns: QueryColumn
     get() = tableInfo.buildQueryColumn("*")
 
-@Deprecated("KProperty可以获取其实例参数，其已无必要存在。")
-fun Field.toQueryColumn(): QueryColumn {
-    val from = declaringClass
-    val tableInfo = TableInfoFactory.ofEntityClass(from)
-    return tableInfo.getQueryColumnByProperty(name) ?: throw NoSuchElementException(
-        "The attribute $this of class $from could not find the corresponding QueryColumn"
-    )
+/**
+ * 通过 [Field] 来构建 [QueryColumn] 。用于在 [KProperty0] 这种特殊情况下的
+ */
+val Field.column: QueryColumn
+    get() = columnOrNull ?: if (Modifier.isStatic(modifiers)) {
+        throw IllegalArgumentException("QueryColumn cannot be found via field because field is static.")
+    } else {
+        throwNoSuchElementException()
+    }
+
+val Field.columnOrNull: QueryColumn?
+    get() = TableInfoFactory.ofEntityClass(declaringClass).getQueryColumnByProperty(name)
+
+val Field.columnOrBuiltIn: QueryColumn
+    get() = TableInfoFactory.ofEntityClass(declaringClass).let {
+        it.getQueryColumnByProperty(name) ?: it.buildQueryColumn(name)
+    }
+
+private fun Field.throwNoSuchElementException(from: String? = null, typeName: String? = null): Nothing {
+    getAnnotation(Column::class.java).throwNoSuchElementException(from ?: toGenericString(), typeName ?: genericType.typeName)
 }
 
 fun <T : KProperty<*>> Array<T>.toQueryColumns(): Array<out QueryColumn> =
@@ -150,7 +228,6 @@ fun <T : Comparable<T>, E : Comparable<E>> Pair<KProperty<T?>, KProperty<E?>>.in
 infix fun <T : Comparable<T>, E : Comparable<E>> Pair<KProperty<T?>, KProperty<E?>>.inPair(others: Iterable<Pair<T, E>>): QueryCondition =
     others.map { this.first.eq(it.first) and this.second.eq(it.second) }
         .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
-
 
 fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KProperty<A?>, KProperty<B?>>, KProperty<C?>>.inTriple(
     vararg others: Pair<Pair<A, B>, C>

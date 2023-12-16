@@ -31,6 +31,6 @@ noArg {
     annotation("com.mybatisflex.annotation.Table")
 }
 
-//allOpen {
-//    annotation("com.mybatisflex.annotation.Table")
-//}
+allOpen {
+    annotation("com.mybatisflex.annotation.Table")
+}
