@@ -1,1 +1,1 @@
-package com.mybatisflex.kotlin.ksp
+package com.mybatisflex.kotlin.codegen

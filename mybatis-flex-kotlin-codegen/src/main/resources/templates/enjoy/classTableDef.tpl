@@ -1,9 +1,9 @@
 #set(tableDefClassName = table.buildTableDefClassName())
 #set(schema = table.schema == null ? "" : table.schema)
-package #(packageConfig.tableDefPackage);
+package #(packageConfig.tableDefPackage)
 
-import com.mybatisflex.core.query.QueryColumn;
-import com.mybatisflex.core.table.TableDef;
+import com.mybatisflex.core.query.QueryColumn
+import com.mybatisflex.core.table.TableDef
 
 /**
  * #(table.getComment()) 表定义层。

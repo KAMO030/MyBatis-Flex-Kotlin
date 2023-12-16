@@ -50,9 +50,9 @@ val KSPropertyDeclaration.columnName: String
         // 从属性声明中获取最近的类声明（即该属性所在的类），并从类声明获得 Table 注解
         val table = closestClassDeclaration()!!.getAnnotationsByType(Table::class).first()
         val column = getAnnotationsByType(Column::class).firstOrNull()
-        // 如果没有 Column 注解，则使用属性名作为列名
+        // 如果没有 Column 注解，或者注解的名字是没有长度的（就是没有主动设置过列名），则使用属性名作为列名
         val columnName = column?.value
-        if (columnName === null || columnName.isBlank()) {
+        if (columnName === null || columnName.isEmpty()) {
             return simpleName.asString().asColumnName(table.camelToUnderline)
         }
         return columnName.asColumnName(table.camelToUnderline)
@@ -135,11 +135,12 @@ val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
         docString?.let {
             builder.addKdoc(it.trimIndent())
         }
+        val columnName = columnName
         val columnAlias = getAnnotationsByType(ColumnAlias::class).firstOrNull()
         val res = if (columnAlias !== null) {
-            """QueryColumn(this, "$name", "${columnAlias.value[0]}")"""
+            """QueryColumn(this, "$columnName", "${columnAlias.value[0]}")"""
         } else {
-            """QueryColumn(this,  "$name")"""
+            """QueryColumn(this,  "$columnName")"""
         }
         return builder.initByLazyOrDefault(res)
     }

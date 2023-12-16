@@ -29,35 +29,46 @@ import java.lang.reflect.Field
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
-import kotlin.reflect.jvm.javaField
+import kotlin.reflect.full.instanceParameter
+import kotlin.reflect.jvm.jvmErasure
 
 /*
  * KProperty操作扩展
  * @author KAMOsama,CloudPlayer
  */
-
-/**
- * 实例引用时只能用此属性，（如：it::id.column）
- */
 val KProperty<*>.column: QueryColumn
-    get() = requireNotNull(javaField) {
-        "Cannot convert to ${Field::class.java.canonicalName} because the property has no backing field."
-    }.toQueryColumn()
-
-/**
- * 类型直接引用用此方法更好，（如：Account::id.column()）
- */
-inline fun <reified T, V> KProperty1<T, V>.column(): QueryColumn =
-    TableInfoFactory.ofEntityClass(T::class.java).getQueryColumnByProperty(name) ?: throw NoSuchElementException(
-        "The attribute $this of class ${T::class.java} could not find the corresponding QueryColumn"
+    get() = requireNotNull(instanceParameter) {
+        "Unable to find the entity class in which property $this is located."
+    }.type.jvmErasure.tableInfo.getQueryColumnByProperty(name) ?: throw NoSuchElementException(
+        "The attribute $this of class $instanceParameter could not find the corresponding QueryColumn"
     )
+
+
+val KProperty<*>.columnOrBuild: QueryColumn
+    get() = requireNotNull(instanceParameter) {
+        "Unable to find the entity class in which property $this is located."
+    }.type.jvmErasure.tableInfo.let {
+        it.getQueryColumnByProperty(name) ?: it.buildQueryColumn(name)
+    }
+
+val KProperty<*>.columnOrNull: QueryColumn?
+    get() = instanceParameter?.let {
+        TableInfoFactory.ofEntityClass(it.type.jvmErasure.java).getQueryColumnByProperty(name)
+    }
+
+@Deprecated("KProperty可以获取其实例参数，其已无必要存在。", replaceWith = ReplaceWith("column"))
+inline fun <reified T : Any, V> KProperty1<T, V>.column(): QueryColumn =
+    TableInfoFactory.ofEntityClass(T::class.java).getQueryColumnByProperty(name)
+        ?: throw NoSuchElementException("The attribute $this of class ${T::class.java} could not find the corresponding QueryColumn")
+
 
 val KClass<*>.defaultColumns: Array<out QueryColumn>
     get() = tableInfo.defaultQueryColumn.toTypedArray()
 
-val <T: Any> KClass<T>.allColumns: QueryColumn
+val <T : Any> KClass<T>.allColumns: QueryColumn
     get() = tableInfo.buildQueryColumn("*")
 
+@Deprecated("KProperty可以获取其实例参数，其已无必要存在。")
 fun Field.toQueryColumn(): QueryColumn {
     val from = declaringClass
     val tableInfo = TableInfoFactory.ofEntityClass(from)
@@ -66,10 +77,10 @@ fun Field.toQueryColumn(): QueryColumn {
     )
 }
 
-fun <T : KProperty<*>> Array<T>.toQueryColumns(): Array<QueryColumn> =
+fun <T : KProperty<*>> Array<T>.toQueryColumns(): Array<out QueryColumn> =
     map { it.column }.toTypedArray()
 
-fun <T : KProperty<*>> Iterable<T>.toQueryColumns(): Array<QueryColumn> =
+fun <T : KProperty<*>> Iterable<T>.toQueryColumns(): Array<out QueryColumn> =
     map { it.column }.toTypedArray()
 
 fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = column.toOrd(order)
@@ -211,3 +222,4 @@ operator fun <T : Comparable<T>> KProperty<T?>.unaryMinus(): QueryOrderBy = this
 val KProperty<*>.isNull: QueryCondition get() = column.isNull
 
 val KProperty<*>.isNotNull: QueryCondition get() = column.isNotNull
+

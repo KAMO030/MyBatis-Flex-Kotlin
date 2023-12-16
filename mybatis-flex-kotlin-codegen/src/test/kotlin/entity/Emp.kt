@@ -12,7 +12,7 @@ data class Emp(
     @Id
     @Column("id")
     @ColumnAlias("id1", "id2")
-    var id: Int,
+    var id: UInt,
     var username: String,
     var password: String,
     var name: String,
