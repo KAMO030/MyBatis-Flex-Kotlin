@@ -50,7 +50,7 @@ infix fun QueryWrapper.and(queryColumn: QueryCondition): QueryWrapper = this.and
 infix fun QueryWrapper.or(queryColumn: QueryCondition): QueryWrapper = this.or(queryColumn)
 
 @Deprecated("Use `KtWhere` instead.", ReplaceWith("KtWhere{ queryCondition }"))
-fun QueryWrapper.where(queryCondition: QueryCondition, consumer: Consumer<QueryWrapper>): QueryWrapper =
+fun QueryWrapper.where(queryCondition: QueryCondition, consumer: (QueryWrapper) -> Unit): QueryWrapper =
     and(queryCondition).where(consumer)
 
 inline fun QueryWrapper.ktWhere(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
