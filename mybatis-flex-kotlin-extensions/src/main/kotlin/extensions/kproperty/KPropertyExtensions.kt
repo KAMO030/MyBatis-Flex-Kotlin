@@ -95,6 +95,16 @@ private fun KProperty<*>.throwNoSuchElementException(): Nothing = requireNotNull
     "Unable to find the corresponding QueryColumn from `$this` without a java field."
 }.throwNoSuchElementException(toString(), returnType.toString())
 
+/**
+ * 通过解析 [Column] 以抛出附上详细信息的 [NoSuchElementException] 。
+ *
+ * 具体报错原因请见 [KProperty.column] 。
+ *
+ * @param from 这个 [Column] 从哪里（字段，属性）来。
+ * @param typeName 对应的字段或属性的类型签名（即 [Field.getGenericType] 或 [KProperty.returnType]）。
+ * @see KProperty.column
+ * @author CloudPlayer
+ */
 private fun Column?.throwNoSuchElementException(from: String, typeName: String): Nothing {
     val baseReason = "The corresponding QueryColumn cannot be found by field `$from` because the field's type `$typeName` is an illegal type"
     if (this === null) {
@@ -123,7 +133,7 @@ inline fun <reified T : Any> KProperty1<T, *>.column(): QueryColumn = column(T::
  * @throws NoSuchElementException 找不到对应的 [QueryColumn] 时。具体规则详见 [KProperty.column]。
  * @author CloudPlayer
  */
-fun <T : Any> KProperty1<T, *>.column(entityClass: Class<T>): QueryColumn =
+fun <T : Any> KProperty1<T, *>.column(entityClass: Class<out T>): QueryColumn =
     TableInfoFactory.ofEntityClass(entityClass).getQueryColumnByProperty(name)
         ?: throw NoSuchElementException("The attribute $this of class $entityClass could not find the corresponding QueryColumn")
 
@@ -134,7 +144,12 @@ val <T : Any> KClass<T>.allColumns: QueryColumn
     get() = tableInfo.buildQueryColumn("*")
 
 /**
- * 通过 [Field] 来构建 [QueryColumn] 。用于在 [KProperty0] 这种特殊情况下的
+ * 通过 [Field] 来构建 [QueryColumn] 。用于在 [KProperty] 是 [KProperty0] 时这种已实例化属性特殊情况下获取声明该属性所在的类。
+ *
+ * @author CloudPlayer
+ * @see KProperty.column
+ * @throws NoSuchElementException 如果无法通过其获取 [QueryColumn] 。详情请见 [KProperty.column] 。
+ * @throws IllegalArgumentException 当字段为静态时。
  */
 val Field.column: QueryColumn
     get() = columnOrNull ?: if (Modifier.isStatic(modifiers)) {
@@ -143,9 +158,19 @@ val Field.column: QueryColumn
         throwNoSuchElementException()
     }
 
+/**
+ * 同 [Field.column] ，但在其是静态或无法获取 [QueryColumn] 时，返回 null。
+ * @see Field.column
+ * @author CloudPlayer
+ */
 val Field.columnOrNull: QueryColumn?
     get() = TableInfoFactory.ofEntityClass(declaringClass).getQueryColumnByProperty(name)
 
+/**
+ * 同 [Field.column] ，但在获取不到其 [QueryColumn] 时，构建对应的 [QueryColumn] 。
+ * @author CloudPlayer
+ * @see Field.column
+ */
 val Field.columnOrBuiltIn: QueryColumn
     get() = TableInfoFactory.ofEntityClass(declaringClass).let {
         it.getQueryColumnByProperty(name) ?: it.buildQueryColumn(name)

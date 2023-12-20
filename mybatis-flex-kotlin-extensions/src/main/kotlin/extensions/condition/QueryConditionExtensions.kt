@@ -22,11 +22,11 @@ import com.mybatisflex.core.query.QueryCondition
  * @author KAMOsama
  */
 
-fun QueryCondition.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryCondition =
+inline fun QueryCondition.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryCondition =
     if (isEffective) and(predicate()) else this
 
 
-fun QueryCondition.or(isEffective: Boolean, predicate: () -> QueryCondition): QueryCondition =
+inline fun QueryCondition.or(isEffective: Boolean, predicate: () -> QueryCondition): QueryCondition =
     if (isEffective) this.or(predicate()) else this
 
 inline infix fun QueryCondition.and(predicate: () -> QueryCondition): QueryCondition = this.and(predicate())

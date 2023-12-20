@@ -6,6 +6,7 @@ import com.mybatisflex.kotlin.extensions.kproperty.defaultColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
+import java.util.function.Consumer
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -26,7 +27,7 @@ infix fun QueryWrapper.from(entity: KClass<*>): QueryWrapper = this.from(entity.
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
     this.select(*properties().toQueryColumns())
 
-fun QueryWrapper.select(vararg properties: KProperty<*>): QueryWrapper =
+fun QueryWrapper.selectProperties(vararg properties: KProperty<*>): QueryWrapper =
     this.select(*properties.toQueryColumns())
 
 fun QueryWrapper.select(entityType: KClass<*>): QueryWrapper =
@@ -53,7 +54,7 @@ infix fun QueryWrapper.or(queryColumn: QueryCondition): QueryWrapper = this.or(q
 fun QueryWrapper.where(queryCondition: QueryCondition, consumer: Consumer<QueryWrapper>): QueryWrapper =
     and(queryCondition).where(consumer)
 
-inline fun QueryWrapper.ktWhere(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
+inline fun QueryWrapper.whereWith(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
 
 /**
  * wrapper的内部实现的访问，基于官方CPI而编写。其目的用于简化开发时的

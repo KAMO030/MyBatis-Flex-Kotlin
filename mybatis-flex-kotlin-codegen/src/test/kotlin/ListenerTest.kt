@@ -1,26 +1,25 @@
-import com.alibaba.druid.pool.DruidDataSource
 import com.mybatisflex.core.BaseMapper
-import com.mybatisflex.core.MybatisFlexBootstrap
 import com.mybatisflex.core.query.QueryColumnBehavior
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.kotlin.extensions.db.mapper
+import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.kproperty.isNull
+import com.mybatisflex.kotlin.extensions.wrapper.selectProperties
+import com.mybatisflex.kotlin.scope.runFlex
+import com.mysql.cj.jdbc.MysqlDataSource
 import entity.Account
-import mapper.AccountMapper
 import org.apache.ibatis.io.ResolverUtil
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
 
 object ListenerTest {
-
-    private val dataSource = DruidDataSource().apply {
-        url = "jdbc:mysql://localhost:3306/homo"
-        username = "root"
+    private val dataSource = MysqlDataSource().apply {
+        setUrl("jdbc:mysql://localhost:3306/homo")
+        user = "root"
         password = "123456"
     }
 
     init {
-        MybatisFlexBootstrap.getInstance().also {
+        runFlex {
             println("mybatis-flex location: ${System.getProperty("user.dir")}")
             val resolverUtil = ResolverUtil<BaseMapper<*>>()
             resolverUtil.find(ResolverUtil.IsA(BaseMapper::class.java), "mapper")
@@ -29,19 +28,19 @@ object ListenerTest {
             }
             it.dataSource = dataSource
             it.logImpl = StdOutImpl::class.java
-        }.start()
+        }
     }
 
     @Test
-    fun insertAccount() {
+    fun testSelectProperties() {
         val account = Account()
-        val mapper = mapper<AccountMapper>()
-        println(mapper.insertSelective(account))
-        println(account)
+        val wrapper = QueryWrapper()
+        wrapper.selectProperties(account::id, Account::id)
+        println(wrapper.toSQL())
     }
 
     @Test
-    fun updateWrapper() {
+    fun testBehavior() {
         QueryColumnBehavior.setIgnoreFunction {
             requireNotNull(it)
             if (it is Collection<*> && it.isEmpty()) {
@@ -50,7 +49,7 @@ object ListenerTest {
             false
         }
         val wrapper = QueryWrapper()
-        wrapper.where(Account::id.isNull)
+        wrapper.where(Account::id.isNull).select(Account::id.column())
         println(wrapper.toSQL())
     }
 }
