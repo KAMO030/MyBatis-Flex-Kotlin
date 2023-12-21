@@ -3,6 +3,7 @@ package com.mybatisflex.kotlin.example
 import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
+import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.kotlin.example.entity.Account
@@ -231,6 +232,17 @@ class KotlinExample {
 
         println("批量更新后————————")
         all<Account>().forEach(::println)
+    }
+
+    @Test
+    fun testPaginate() {
+        paginate<Account>(Page(1, 10)) {
+            select(Account::id, Account::userName)
+            orderBy(-Account::id)
+        }.let {
+            println("${it.pageNumber} - ${it.pageSize} - ${it.totalRow}")
+            it.records.forEach(::println)
+        }
     }
 
 }
