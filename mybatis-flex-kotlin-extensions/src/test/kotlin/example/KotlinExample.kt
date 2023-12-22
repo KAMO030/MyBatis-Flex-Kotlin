@@ -56,11 +56,13 @@ class KotlinExample {
             +dataSource
 //            2.通过原始的方式
 //            it.setDataSource(dataSource)
-//            3.通过dsl（中缀）的方式
-//            dataSources {
-//                url="xxx"
-//                username="xxx"
-//                password="xxx"
+//            3.通过dsl的方式配置简易的内置数据源
+//            defaultPooledDataSources {
+//                driver可以不写，默认为第一个注册的驱动
+//                driver = com.mysql.cj.jdbc.Driver::class
+//                url = "xxx"
+//                username = "xxx"
+//                password = "xxx"
 //            }
 
 //            配置多dataSource
@@ -68,14 +70,16 @@ class KotlinExample {
 //            FlexConsts.NAME of dataSource
 //            "dataSource1" of dataSource
 //            "dataSource2" of dataSource
-//            2.通过dsl（中缀）的方式
-//            dataSources("name") {
-//                url="xxx"
-//                username="xxx"
-//                password="xxx"
+//            2.通过dsl的方式配置简易的内置数据源
+//            defaultPooledDataSources("name") {
+//                driver可以不写，默认为第一个注册的驱动
+//                driver = com.mysql.cj.jdbc.Driver::class
+//                url = "xxx"
+//                username = "xxx"
+//                password = "xxx"
 //            }
 //          3.通过原始的方式
-//          it.addDataSource(FlexConsts.NAME,dataSource)
+//            it.addDataSource(FlexConsts.NAME, dataSource)
 
 //          配置日志打印在控制台
             logImpl = StdOutImpl::class
