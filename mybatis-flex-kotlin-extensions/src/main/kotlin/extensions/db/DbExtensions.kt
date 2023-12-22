@@ -18,9 +18,11 @@ package com.mybatisflex.kotlin.extensions.db
 import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.exception.MybatisFlexException
 import com.mybatisflex.core.mybatis.Mappers
+import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Db.selectListByQuery
 import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
@@ -220,5 +222,47 @@ inline fun <reified E : Any> filter(
  */
 inline fun <reified E : Any> all() = filter<E>(condition = QueryCondition::createEmpty)
 
+//    paginate----------
+inline fun <reified E : Any> paginate(
+    pageNumber: Number,
+    pageSize: Number,
+    totalRow: Number? = null,
+    init: QueryScope.() -> Unit
+): Page<E> = paginate(
+    totalRow?.let { Page(pageNumber, pageSize, it) } ?: Page<E>(pageNumber, pageSize),
+    init)
 
+inline fun <reified E : Any> paginateWith(
+    pageNumber: Number,
+    pageSize: Number,
+    totalRow: Number? = null,
+    queryConditionGet: () -> QueryCondition
+): Page<E> = paginate(
+    totalRow?.let { Page(pageNumber, pageSize, it) } ?: Page<E>(pageNumber, pageSize)
+) { where(queryConditionGet()) }
+
+
+inline fun <reified E : Any> paginate(
+    page: Page<E>,
+    init: QueryScope.() -> Unit
+): Page<E> = try {
+    E::class.baseMapper.paginate(page, queryScope(init = init))
+} catch (e: MybatisFlexException) {
+    E::class.tableInfo.run {
+        queryPage(schema, tableName, Page(page.pageNumber, page.pageSize), init = {
+            init()
+            if (this.hasSelect().not()) select(*E::class.defaultColumns)
+        }).let {
+            Page(it.records.toEntities(), it.pageNumber, it.pageSize, it.totalRow)
+        }
+    }
+}
+
+
+inline fun queryPage(
+    schema: String? = null,
+    tableName: String? = null,
+    page: Page<Row>? = null,
+    init: QueryScope.() -> Unit
+): Page<Row> = Db.paginate(schema, tableName, page, queryScope(init = init))
 

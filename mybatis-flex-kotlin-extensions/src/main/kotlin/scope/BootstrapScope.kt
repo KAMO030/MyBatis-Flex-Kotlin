@@ -20,6 +20,7 @@ import com.mybatisflex.core.MybatisFlexBootstrap
 import com.mybatisflex.kotlin.annotation.MybatisFlexDsl
 import org.apache.ibatis.datasource.pooled.PooledDataSource
 import org.apache.ibatis.logging.Log
+import java.sql.Driver
 import java.sql.DriverManager
 import javax.sql.DataSource
 import kotlin.reflect.KClass
@@ -33,22 +34,21 @@ import kotlin.reflect.KClass
 class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBootstrap.getInstance()) {
 
 
-    fun dataSources(
+    /**
+     * 配置简易内置数据源
+     */
+    fun defaultPooledDataSources(
         dataSourceKey: String = FlexConsts.NAME,
         dataSourcePropScope: DataSourcePropScope.() -> Unit
-    ): MybatisFlexBootstrap =
-        DataSourcePropScope().run {
-            dataSourcePropScope()
-            instant.addDataSource(
-                dataSourceKey,
-                PooledDataSource(
-                    driver ?: DriverManager.drivers().findFirst().orElseThrow().javaClass.name,
-                    url,
-                    username,
-                    password
-                )
+    ): MybatisFlexBootstrap = DataSourcePropScope().apply(dataSourcePropScope).run {
+        instant.addDataSource(
+            dataSourceKey,
+            PooledDataSource(
+                ((driver?.java) ?: DriverManager.drivers().findFirst().orElseThrow().javaClass).name,
+                url, username, password
             )
-        }
+        )
+    }
 
     var logImpl: KClass<out Log>
         get() = instant.logImpl.kotlin
@@ -78,7 +78,7 @@ class DataSourcePropScope {
 
     var password: String? = null
 
-    var driver: String? = null
+    var driver: KClass<Driver>? = null
 
 }
 
