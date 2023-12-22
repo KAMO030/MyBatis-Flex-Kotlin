@@ -49,11 +49,11 @@ infix fun QueryWrapper.and(queryColumn: QueryCondition): QueryWrapper = this.and
 
 infix fun QueryWrapper.or(queryColumn: QueryCondition): QueryWrapper = this.or(queryColumn)
 
-@Deprecated("Use `KtWhere` instead.", ReplaceWith("KtWhere{ queryCondition }"))
+@Deprecated("Use `whereWith` instead.", ReplaceWith("whereWith{ queryCondition }"))
 fun QueryWrapper.where(queryCondition: QueryCondition, consumer: (QueryWrapper) -> Unit): QueryWrapper =
     and(queryCondition).where(consumer)
 
-inline fun QueryWrapper.ktWhere(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
+inline fun QueryWrapper.whereWith(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
 
 /**
  * wrapper的内部实现的访问，基于官方CPI而编写。其目的用于简化开发时的
