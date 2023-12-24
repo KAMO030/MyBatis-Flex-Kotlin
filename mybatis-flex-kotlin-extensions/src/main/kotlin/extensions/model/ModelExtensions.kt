@@ -16,6 +16,7 @@
 package com.mybatisflex.kotlin.extensions.model
 
 import com.mybatisflex.core.activerecord.MapperModel
+import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.row.RowUtil
 import com.mybatisflex.core.util.SqlUtil
@@ -31,6 +32,8 @@ inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
 
 inline fun <reified E> Collection<Row>.toEntities(): MutableList<E> =
     RowUtil.toEntityList(this.toMutableList(), E::class.java)
+
+inline fun <reified T> Page<Row>.toEntityPage(): Page<T> = Page(records.toEntities(), pageNumber, pageSize, totalRow)
 
 inline fun <reified E : MapperModel<E>> List<E>.batchInsert() = E::class.baseMapper.insertBatch(this)
 

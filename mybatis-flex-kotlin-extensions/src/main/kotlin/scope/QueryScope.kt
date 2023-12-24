@@ -48,7 +48,7 @@ class QueryScope : QueryWrapperAdapter<QueryScope>() {
         return super.groupBy(column)
     }
 
-    fun <T: Any?> groupBy(column: KProperty<T>): QueryScope = groupBy(column.column)
+    fun <T : Any?> groupBy(column: KProperty<T>): QueryScope = groupBy(column.column)
 }
 
 

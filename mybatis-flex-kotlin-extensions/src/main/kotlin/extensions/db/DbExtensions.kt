@@ -32,6 +32,7 @@ import com.mybatisflex.kotlin.extensions.kproperty.allColumns
 import com.mybatisflex.kotlin.extensions.kproperty.defaultColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.extensions.model.toEntities
+import com.mybatisflex.kotlin.extensions.model.toEntityPage
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
 import kotlin.reflect.KClass
@@ -200,7 +201,7 @@ inline fun <reified E : Any> filter(
 inline fun <reified E : Any> filterOne(
     vararg columns: KProperty<*>,
     condition: () -> QueryCondition
-): E? = queryOne(init = { select(*columns);and(condition()) })
+): E? = queryOne { select(*columns);and(condition()) }
 
 /**
  * 通过条件查询多条数据
@@ -249,12 +250,10 @@ inline fun <reified E : Any> paginate(
     E::class.baseMapper.paginate(page, queryScope(init = init))
 } catch (e: MybatisFlexException) {
     E::class.tableInfo.run {
-        queryPage(schema, tableName, Page(page.pageNumber, page.pageSize), init = {
+        queryPage(schema, tableName, Page(page.pageNumber, page.pageSize)) {
             init()
             if (this.hasSelect().not()) select(*E::class.defaultColumns)
-        }).let {
-            Page(it.records.toEntities(), it.pageNumber, it.pageSize, it.totalRow)
-        }
+        }.toEntityPage()
     }
 }
 
