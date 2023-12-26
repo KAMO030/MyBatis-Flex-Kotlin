@@ -17,6 +17,8 @@ package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.core.query.QueryWrapperAdapter
+import com.mybatisflex.core.util.LambdaGetter
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import kotlin.reflect.KProperty
 
@@ -25,17 +27,28 @@ import kotlin.reflect.KProperty
  * @author KAMOsama
  * @date 2023/8/7
  */
-class QueryScope : QueryWrapper() {
+class QueryScope : QueryWrapperAdapter<QueryScope>() {
 
     operator fun String.get(name: String): QueryColumn = QueryColumn(this, name)
 
     operator fun String.unaryMinus(): QueryColumn = QueryColumn(this)
 
-    fun select(vararg properties: KProperty<*>): QueryWrapper =
-        this.select(*(properties.map { it.column }.toTypedArray()))
+    fun select(vararg properties: KProperty<*>): QueryScope =
+        select(*properties.map { it.column }.toTypedArray())
+
+    @Deprecated("", level = DeprecationLevel.HIDDEN)
+    override fun <T : Any?> select(vararg lambdaGetters: LambdaGetter<T>?): QueryScope {
+        return super.select(*lambdaGetters)
+    }
 
     fun hasSelect(): Boolean = this.selectColumns != null && this.selectColumns.isNotEmpty()
 
+    @Deprecated("", level = DeprecationLevel.HIDDEN)
+    override fun <T : Any?> groupBy(column: LambdaGetter<T>?): QueryScope {
+        return super.groupBy(column)
+    }
+
+    fun <T : Any?> groupBy(column: KProperty<T>): QueryScope = groupBy(column.column)
 }
 
 

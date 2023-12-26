@@ -27,19 +27,19 @@ infix fun QueryWrapper.from(entity: KClass<*>): QueryWrapper = this.from(entity.
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
     this.select(*properties().toQueryColumns())
 
-fun QueryWrapper.select(vararg properties: KProperty<*>): QueryWrapper =
+fun QueryWrapper.selectProperties(vararg properties: KProperty<*>): QueryWrapper =
     this.select(*properties.toQueryColumns())
 
 fun QueryWrapper.select(entityType: KClass<*>): QueryWrapper =
     this.select(*entityType.defaultColumns)
 
-val QueryWrapper.self
+val <T : QueryWrapper> T.self
     get() = QueryWrapperDevelopEntry(this)
 
-fun QueryWrapper.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
+inline fun QueryWrapper.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
     if (isEffective) and(predicate()) else this
 
-fun QueryWrapper.or(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
+inline fun QueryWrapper.or(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
     if (isEffective) this.or(predicate()) else this
 
 inline infix fun QueryWrapper.and(predicate: () -> QueryCondition): QueryWrapper = this.and(predicate())
@@ -50,8 +50,11 @@ infix fun QueryWrapper.and(queryColumn: QueryCondition): QueryWrapper = this.and
 
 infix fun QueryWrapper.or(queryColumn: QueryCondition): QueryWrapper = this.or(queryColumn)
 
-fun QueryWrapper.where(queryColumn: QueryCondition, consumer: Consumer<QueryWrapper>): QueryWrapper =
-    and(queryColumn).where(consumer)
+@Deprecated("Use `whereWith` instead.", ReplaceWith("whereWith{ queryCondition }"))
+fun QueryWrapper.where(queryCondition: QueryCondition, consumer: (QueryWrapper) -> Unit): QueryWrapper =
+    and(queryCondition).where(consumer)
+
+inline fun QueryWrapper.whereWith(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
 
 /**
  * wrapper的内部实现的访问，基于官方CPI而编写。其目的用于简化开发时的
@@ -68,7 +71,7 @@ fun QueryWrapper.where(queryColumn: QueryCondition, consumer: Consumer<QueryWrap
  * @author CloudPlayer
  */
 @JvmInline
-value class QueryWrapperDevelopEntry(val wrapper: QueryWrapper) {
+value class QueryWrapperDevelopEntry<out T : QueryWrapper>(val wrapper: T) {
     var selectColumns: List<QueryColumn>
         get() = CPI.getSelectColumns(wrapper) ?: emptyList()
         set(value) = CPI.setSelectColumns(wrapper, value)
@@ -98,7 +101,7 @@ value class QueryWrapperDevelopEntry(val wrapper: QueryWrapper) {
         set(value) = CPI.setOrderBys(wrapper, value)
 
     var context: Map<String, Any>
-        get() = CPI.getContext(wrapper)
+        get() = CPI.getContext(wrapper) ?: emptyMap()
         set(value) = CPI.setContext(wrapper, value)
 
     val childSelect: List<QueryWrapper>
@@ -115,7 +118,7 @@ value class QueryWrapperDevelopEntry(val wrapper: QueryWrapper) {
         set(value) = CPI.setDataSource(wrapper, value)
 
     var unions: List<UnionWrapper>
-        get() = CPI.getUnions(wrapper)
+        get() = CPI.getUnions(wrapper) ?: emptyList()
         set(value) = CPI.setUnions(wrapper, value)
 
     var offset: Long

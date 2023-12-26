@@ -15,5 +15,4 @@ data class EmpWithDeptName(
     var deptId: Int?,
     var createTime: LocalDateTime,
     var updateTime: LocalDateTime,
-    var deptName: String,
 )

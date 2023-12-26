@@ -14,7 +14,9 @@ import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.apache.ibatis.session.ExecutorType
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import kotlin.reflect.KCallable
 import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.full.valueParameters
 
 object OriginalTest {
@@ -129,12 +131,28 @@ object OriginalTest {
     }
 
     @Test
+    fun kPropReflation() {
+        val dept = Dept()
+        val prop = dept::aDept
+        val javaClass = prop.javaClass
+        println(prop)
+        val propertyReference = javaClass.superclass.superclass
+        val refMethod = propertyReference.getDeclaredMethod("computeReflected")
+        refMethod.isAccessible = true
+        val refKCallable = refMethod.invoke(prop) as KCallable<*>
+        println(refKCallable.instanceParameter)
+        val propImplClass = refKCallable.javaClass
+        println(propImplClass.superclass)
+    }
+
+    @Test
     fun kProp() {
         val dept = Dept(id = 114514)
         val constructor = ::Dept
         val properties = Dept::class.declaredMemberProperties
         val map = constructor.valueParameters.associateWith { parm ->
             properties.find {
+                it.visibility
                 it.name == parm.name
             }?.get(dept)
         }

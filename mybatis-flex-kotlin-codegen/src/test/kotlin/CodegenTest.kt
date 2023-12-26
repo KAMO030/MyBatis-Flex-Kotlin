@@ -1,9 +1,9 @@
 import com.mybatisflex.codegen.Generator
 import com.mybatisflex.codegen.config.GlobalConfig
 import com.mybatisflex.codegen.generator.GeneratorFactory
-import com.mybatisflex.kotlin.ksp.config.KTableDefGenerator
-import com.mybatisflex.kotlin.ksp.internal.asQualifiedNames
-import com.mybatisflex.kotlin.ksp.internal.asTypedString
+import com.mybatisflex.kotlin.codegen.config.ClassTableDefGenerator
+import com.mybatisflex.kotlin.codegen.internal.asQualifiedNames
+import com.mybatisflex.kotlin.codegen.internal.asTypedString
 import com.mysql.cj.jdbc.MysqlDataSource
 import org.junit.jupiter.api.Test
 import kotlin.reflect.typeOf
@@ -27,7 +27,7 @@ class CodegenTest {
 
     @Test
     fun test() {
-        GeneratorFactory.registerGenerator("kt", KTableDefGenerator())
+        GeneratorFactory.registerGenerator("kt", ClassTableDefGenerator())
         val globalConfig = GlobalConfig()
         globalConfig.templateConfig
         val generator = Generator(dataSource, globalConfig)

@@ -3,7 +3,6 @@ package com.mybatisflex.kotlin.example
 import com.mybatisflex.core.activerecord.Model
 import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
-import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.kotlin.example.entity.Account
@@ -57,20 +56,30 @@ class KotlinExample {
             +dataSource
 //            2.通过原始的方式
 //            it.setDataSource(dataSource)
+//            3.通过dsl的方式配置简易的内置数据源
+//            defaultPooledDataSources {
+//                driver可以不写，默认为第一个注册的驱动
+//                driver = com.mysql.cj.jdbc.Driver::class
+//                url = "xxx"
+//                username = "xxx"
+//                password = "xxx"
+//            }
 
 //            配置多dataSource
 //            1.通过of（中缀）的方式
 //            FlexConsts.NAME of dataSource
 //            "dataSource1" of dataSource
 //            "dataSource2" of dataSource
-//            2.通过dsl（中缀）的方式
-            dataSources {
-//            dataSource(FlexConsts.NAME,dataSource)
-//            dataSource("dataSource1",dataSource)
-//            dataSource("dataSource2",dataSource)
-            }
+//            2.通过dsl的方式配置简易的内置数据源
+//            defaultPooledDataSources("name") {
+//                driver可以不写，默认为第一个注册的驱动
+//                driver = com.mysql.cj.jdbc.Driver::class
+//                url = "xxx"
+//                username = "xxx"
+//                password = "xxx"
+//            }
 //          3.通过原始的方式
-//          it.addDataSource(FlexConsts.NAME,dataSource)
+//            it.addDataSource(FlexConsts.NAME, dataSource)
 
 //          配置日志打印在控制台
             logImpl = StdOutImpl::class
@@ -226,13 +235,19 @@ class KotlinExample {
 
     @Test
     fun testPaginate() {
-        paginate<Account>(Page(1, 10)) {
+        paginate<Account>(1, 10) {
             select(Account::id, Account::userName)
             orderBy(-Account::id)
         }.let {
             println("${it.pageNumber} - ${it.pageSize} - ${it.totalRow}")
             it.records.forEach(::println)
         }
+//        paginateWith<Account>(1, 10) {
+//            Account::id between (1 to 2)
+//        }.let {
+//            println("pageNumber: ${it.pageNumber} - pageSize: ${it.pageSize} - totalRow: ${it.totalRow}")
+//            it.records.forEach(::println)
+//        }
     }
 
 }

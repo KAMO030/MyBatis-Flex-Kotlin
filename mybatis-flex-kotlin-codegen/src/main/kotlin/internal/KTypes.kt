@@ -1,4 +1,4 @@
-package com.mybatisflex.kotlin.ksp.internal
+package com.mybatisflex.kotlin.codegen.internal
 
 import kotlin.reflect.KType
 
