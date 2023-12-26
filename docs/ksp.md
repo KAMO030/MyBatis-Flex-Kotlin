@@ -63,7 +63,7 @@ plugins {
 
 ## 启用 MyBatis-Flex KSP
 
-启用 KSP 插件后，您只需要在依赖项声明中声明为 MyBatis-Flex 编写的 KSP 即可。
+启用 KSP 插件后，您只需要在依赖项声明中声明我们为 MyBatis-Flex 编写的 KSP 即可。
 
 【Kotlin】
 

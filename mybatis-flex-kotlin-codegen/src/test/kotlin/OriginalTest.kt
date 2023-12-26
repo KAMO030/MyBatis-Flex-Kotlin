@@ -1,20 +1,23 @@
 import com.mybatisflex.core.BaseMapper
-import com.mybatisflex.core.MybatisFlexBootstrap
-import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.core.FlexGlobalConfig
+import com.mybatisflex.core.query.BaseQueryWrapper
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.kotlin.extensions.db.mapper
-import com.mybatisflex.kotlin.extensions.kproperty.column
+import com.mybatisflex.kotlin.scope.runFlex
 import com.mysql.cj.jdbc.MysqlDataSource
+import com.mysql.cj.jdbc.result.ResultSetMetaData
 import entity.Dept
-import entity.Emp
 import mapper.DeptMapper
 import mapper.EmpMapper
+import org.apache.ibatis.io.ResolverUtil
 import org.apache.ibatis.logging.stdout.StdOutImpl
+import org.apache.ibatis.session.ExecutorType
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.valueParameters
 
-class OriginalTest {
+object OriginalTest {
     private val dataSource = MysqlDataSource().apply {
         setUrl("jdbc:mysql://localhost:3306/homo")
         user = "root"
@@ -22,12 +25,16 @@ class OriginalTest {
     }
 
     init {
-        MybatisFlexBootstrap.getInstance().also {
-            it.addMapper(EmpMapper::class.java)
-            it.addMapper(DeptMapper::class.java)
+        runFlex {
+            println("mybatis-flex location: ${System.getProperty("user.dir")}")
+            val resolverUtil = ResolverUtil<BaseMapper<*>>()
+            resolverUtil.find(ResolverUtil.IsA(BaseMapper::class.java), "mapper")
+            resolverUtil.classes.forEach { mapperClass ->
+                it.addMapper(mapperClass)
+            }
             it.dataSource = dataSource
             it.logImpl = StdOutImpl::class.java
-        }.start()
+        }
     }
 
     val empMapper = mapper<EmpMapper>()
@@ -35,7 +42,7 @@ class OriginalTest {
     val deptMapper = mapper<DeptMapper>()
 
     @Test
-    fun testRelation() {
+    fun testExecuteBatch() {
         val list = listOf(
             Dept(name = "管理部", createTime = LocalDateTime.now(), updateTime = LocalDateTime.now()),
             Dept(name = "后勤部", createTime = LocalDateTime.now(), updateTime = LocalDateTime.now()),
@@ -50,46 +57,87 @@ class OriginalTest {
     }
 
     @Test
-    fun testSelect() {
+    fun testMetaData() {
         val statement = dataSource.connection.createStatement()
-        val resultSet = statement.executeQuery("select * from `emp` where 0")
-        val metadata = resultSet.metaData
-        val al = ArrayList<Pair<String, String>>()
+        val resultSet = statement.executeQuery("select * from `tb_account` where 0")
+        val metadata = resultSet.metaData as ResultSetMetaData
+        println(metadata::class)
+        val al = ArrayList<Pair<String, Class<*>>>()
         val count = metadata.columnCount
         for (i in 1..count) {
-            al += metadata.getColumnName(i) to metadata.getColumnClassName(i)
+            al += metadata.getColumnName(i) to Class.forName(metadata.getColumnClassName(i))
         }
         println(al)
     }
 
     @Test
-    fun testDesc() {
+    fun testJdbc() {
         val statement = dataSource.connection.createStatement()
-        val resultSet = statement.executeQuery("desc `emp`")
-        val res = ArrayList<Any?>()
+        val resultSet = statement.executeQuery("select * from `tb_account`")
+        val res = ArrayList<ArrayList<Any?>>()
         while (!resultSet.isClosed && resultSet.next()) {
-            val obj: Any? = resultSet.getObject("Default")
-            res += obj
+            val row = ArrayList<Any?>()
+            for (i in 1..resultSet.metaData.columnCount) {
+                row += resultSet.getObject(i)
+            }
+            res += row
         }
         println(res)
     }
 
-    @Test
-    fun wrapper() {
-        val wrapper1 = QueryWrapper()
-        wrapper1.select(Emp::id.column().`as`("id1"))
-
-        val wrapper2 = QueryWrapper()
-        wrapper2.select(Emp::id.column().`as`("id2"))
-
-        println(empMapper.selectListByQuery(wrapper1))
-        println(empMapper.selectListByQuery(wrapper2))
+    private inline fun <reified M : BaseMapper<*>, E : Any> executeBatchSuspend(
+        datas: Collection<E>,
+        batchSize: Int = 1000,
+        consumer: (M, E) -> Unit
+    ): IntArray {
+        val sqlSessionFactory = FlexGlobalConfig.getDefaultConfig().sqlSessionFactory
+        val buf = IntArray(datas.size)
+        var bufPos = 0
+        var counter = 0
+        sqlSessionFactory.openSession(ExecutorType.BATCH, true).use { sqlSession ->
+            val mapper = sqlSession.getMapper(M::class.java)
+            datas.forEach { data ->
+                consumer(mapper, data)
+                if (++counter == batchSize) {
+                    counter = 0
+                    val stat = sqlSession.flushStatements()
+                    stat.forEach { batchResult ->
+                        val counts = batchResult.updateCounts
+                        counts.copyInto(buf, bufPos)
+                        bufPos += counts.size
+                    }
+                }
+            }
+            if (counter != 0) {
+                val stat = sqlSession.flushStatements()
+                stat.forEach { batchResult ->
+                    val counts = batchResult.updateCounts
+                    counts.copyInto(buf, bufPos)
+                    bufPos += counts.size
+                }
+            }
+        }
+        return buf
     }
 
     @Test
-    fun test() {
-        assert(EmpMapper::class.isSubclassOf(BaseMapper::class))
+    fun resolverUtilTest() {
+        val resolver = ResolverUtil<BaseQueryWrapper<*>>()
+        resolver.find(ResolverUtil.IsA(BaseQueryWrapper::class.java), "com.mybatisflex.kotlin.vec")
+        val classes = resolver.classes
+        println(classes)
+    }
+
+    @Test
+    fun kProp() {
+        val dept = Dept(id = 114514)
+        val constructor = ::Dept
+        val properties = Dept::class.declaredMemberProperties
+        val map = constructor.valueParameters.associateWith { parm ->
+            properties.find {
+                it.name == parm.name
+            }?.get(dept)
+        }
+        println(constructor.callBy(map))
     }
 }
-
-

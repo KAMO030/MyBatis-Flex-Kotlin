@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 data class Dept(
     @Id(keyType = KeyType.Auto)
     var id: Int = Int.MIN_VALUE,
-    var name: String,
-    var createTime: LocalDateTime,
-    var updateTime: LocalDateTime,
+    var name: String = "",
+    var createTime: LocalDateTime = LocalDateTime.now(),
+    var updateTime: LocalDateTime = LocalDateTime.now(),
 )
