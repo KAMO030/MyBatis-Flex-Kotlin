@@ -11,20 +11,13 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
 
-internal class TablesGenerator {
+internal class TablesGenerator(private val properties: List<PropertySpec>) {
     companion object {
         private var isExists = false  // 此属性用于判断是否已经生成了 Tables 类。
     }
 
-    val properties = ArrayList<PropertySpec>()
-
-    operator fun invoke() {
-        generate()
-    }
-
-    private fun generate() {
+    fun generate() {
         if (!AllInTablesEnable.value) return
-        // 到这一步时，AllInTablesPackage.value 已确定非空。这里的可空性已由 com.mybatisflex.kotlin.MybatisFlexKSP 中进行判断。
         val packageName = AllInTablesPackage.value
             ?: return logger.warn(
                 "The KSP needs to generate the class Tables " +

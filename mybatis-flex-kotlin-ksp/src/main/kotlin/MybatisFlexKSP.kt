@@ -10,9 +10,11 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.validate
 import com.mybatisflex.annotation.Table
+import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesEnable
 import com.mybatisflex.kotlin.ksp.internal.config.flex.Enable
 import com.mybatisflex.kotlin.ksp.internal.config.flex.MapperBaseClass
 import com.mybatisflex.kotlin.ksp.internal.config.flex.MapperGenerateEnable
+import com.mybatisflex.kotlin.ksp.internal.gen.tables.TablesGenerator
 import com.mybatisflex.kotlin.ksp.internal.gen.visitor.MapperVisitor
 import com.mybatisflex.kotlin.ksp.internal.gen.visitor.TableDefVisitor
 import com.mybatisflex.kotlin.ksp.internal.util.file.flexConfigs
@@ -43,7 +45,10 @@ internal class MybatisFlexKSP : SymbolProcessor {
             it.accept(tableDefVisitor, Unit)
         }
 
-        tableDefVisitor.tablesGenerator()
+        if (AllInTablesEnable.value) {
+            val generator = tableDefVisitor.generator
+            TablesGenerator(generator.instancePropertySpecs).generate()
+        }
 
         if (MapperGenerateEnable.value) {
             val mapperVisitor = MapperVisitor(

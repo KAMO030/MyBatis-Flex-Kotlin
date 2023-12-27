@@ -1,10 +1,17 @@
 version = libs.versions.mybatisflex.kotlin.ksp.get()
 
+plugins {
+    alias(libs.plugins.ksp)
+}
+
 dependencies {
     implementation(libs.kotlinpoet)
     implementation(libs.kotlinpoet.ksp)
     implementation(libs.mybatisflex.annotation)
     implementation(libs.ksp.api)
+
+    kspTest(project(":mybatis-flex-kotlin-ksp"))
+    testImplementation(libs.mybatisflex.core)
 }
 
 

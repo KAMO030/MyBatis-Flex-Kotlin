@@ -3,6 +3,8 @@ package com.mybatisflex.kotlin.ksp.internal.util
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.getAnnotationsByType
+import com.google.devtools.ksp.getDeclaredProperties
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.mybatisflex.annotation.Column
@@ -18,6 +20,8 @@ import com.mybatisflex.kotlin.ksp.options
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.jvm.jvmField
 import com.squareup.kotlinpoet.ksp.kspDependencies
+import org.apache.ibatis.type.UnknownTypeHandler
+import java.time.*
 import java.util.*
 
 /**
@@ -71,6 +75,13 @@ val KSPropertyDeclaration.isLarge: Boolean
     get() {
         val column = getAnnotationsByType(Column::class).firstOrNull()
         return column?.isLarge == true
+    }
+
+@OptIn(KspExperimental::class)
+val KSPropertyDeclaration.isLogicDelete: Boolean
+    get() {
+        val column = getAnnotationsByType(Column::class).firstOrNull()
+        return column?.isLogicDelete == true
     }
 
 /**
@@ -232,6 +243,7 @@ val allColumnsBuilder: PropertySpec.Builder by lazy {
  * @return 已构建好的 default columns 。
  * @author CloudPlayer
  */
+@OptIn(KspExperimental::class)
 fun getDefaultColumns(iterable: Sequence<KSPropertyDeclaration>): PropertySpec.Builder {
     val builder = PropertySpec.builder(
         "defaultColumns".asPropertyName(),
@@ -240,7 +252,8 @@ fun getDefaultColumns(iterable: Sequence<KSPropertyDeclaration>): PropertySpec.B
     val fnName = DefaultColumnsType.fnName
     val columns = StringJoiner(",")
     iterable.forEach {
-        if (!it.isLarge) columns.add("`${it.propertyName}`")
+        val column = it.getAnnotationsByType(Column::class).firstOrNull()
+        if (column === null || (!column.isLarge && !column.ignore)) columns.add("`${it.propertyName}`")
     }
     builder.initByLazyOrDefault("$fnName($columns)")
     return builder
@@ -343,6 +356,27 @@ fun KSClassDeclaration.instanceProperty(typeName: ClassName): PropertySpec.Build
     field.jvmField()
     return field
 }
+
+/**
+ * 从类声明中解析出需要生成的合法属性。
+ *
+ * @author CloudPlayer
+ */
+@OptIn(KspExperimental::class)
+val KSClassDeclaration.legalProperties: Sequence<KSPropertyDeclaration>
+    get() = getDeclaredProperties().filter { prop ->
+        val column = prop.getAnnotationsByType(Column::class).firstOrNull()
+        if (column?.ignore == true) {
+            return@filter false
+        }
+        val returnType = prop.type.resolve()
+        val classDeclaration = returnType.declaration as KSClassDeclaration
+
+        classDeclaration.classKind === ClassKind.ENUM_CLASS  // 属性的返回值是枚举类
+                || classDeclaration.qualifiedName!!.asString() in DEFAULT_SUPPORT_COLUMN_TYPES  // 属性的返回值类型是默认支持的类型之一
+                || (column !== null && column.typeHandler.java !== UnknownTypeHandler::class.java)  // 不是默认类型但是配置了 TypeHandler 。
+    }
+
 
 @JvmField
 val BASE_MAPPER = ClassName("com.mybatisflex.core", "BaseMapper")
