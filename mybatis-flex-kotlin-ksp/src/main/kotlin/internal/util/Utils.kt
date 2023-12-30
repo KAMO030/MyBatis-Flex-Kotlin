@@ -1,9 +1,6 @@
 package com.mybatisflex.kotlin.ksp.internal.util
 
-import com.google.devtools.ksp.KspExperimental
-import com.google.devtools.ksp.closestClassDeclaration
-import com.google.devtools.ksp.getAnnotationsByType
-import com.google.devtools.ksp.getDeclaredProperties
+import com.google.devtools.ksp.*
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
@@ -60,28 +57,6 @@ val KSPropertyDeclaration.columnName: String
             return simpleName.asString().asColumnName(table.camelToUnderline)
         }
         return columnName.asColumnName(table.camelToUnderline)
-    }
-
-/**
- * 是否为大字段。该属性从 [Column.isLarge] 中获得。
- *
- * 如果该字段为大字段，则不会添加进生成的默认列（即 default columns）中。
- * @author CloudPlayer
- * @receiver 实体类中对应的属性声明。
- * @see Column.isLarge
- */
-@OptIn(KspExperimental::class)
-val KSPropertyDeclaration.isLarge: Boolean
-    get() {
-        val column = getAnnotationsByType(Column::class).firstOrNull()
-        return column?.isLarge == true
-    }
-
-@OptIn(KspExperimental::class)
-val KSPropertyDeclaration.isLogicDelete: Boolean
-    get() {
-        val column = getAnnotationsByType(Column::class).firstOrNull()
-        return column?.isLogicDelete == true
     }
 
 /**
@@ -364,7 +339,9 @@ fun KSClassDeclaration.instanceProperty(typeName: ClassName): PropertySpec.Build
  */
 @OptIn(KspExperimental::class)
 val KSClassDeclaration.legalProperties: Sequence<KSPropertyDeclaration>
-    get() = getDeclaredProperties().filter { prop ->
+    get() = getAllProperties().filter {
+        it.hasBackingField  // 只处理拥有 backing field 的属性（没有 backing field 的运行时使用会报错）。
+    }.filter { prop ->
         val column = prop.getAnnotationsByType(Column::class).firstOrNull()
         if (column?.ignore == true) {
             return@filter false

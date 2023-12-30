@@ -12,6 +12,7 @@ dependencies {
 
     kspTest(project(":mybatis-flex-kotlin-ksp"))
     testImplementation(libs.mybatisflex.core)
+    testImplementation(project(":mybatis-flex-kotlin-extensions"))
 }
 
 

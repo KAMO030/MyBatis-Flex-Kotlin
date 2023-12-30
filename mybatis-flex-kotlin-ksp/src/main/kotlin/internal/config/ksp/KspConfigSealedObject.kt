@@ -23,6 +23,18 @@ internal object DefaultColumnsType : KspConfiguration<ParameterizedTypeName> {
         get() = if (_value != ARRAY) _value.parameterizedBy(QUERY_COLUMN)
         else _value.plusParameter(TypeVariableName("out QueryColumn"))
 
+    /**
+     * 用于构建 default columns 时所使用的 kotlin 标准库中的函数名。
+     * 分别对应着：
+     *
+     * 1，[listOf]
+     *
+     * 2，[setOf]
+     *
+     * 3，[arrayOf]
+     *
+     * 4，[sequenceOf]
+     */
     var fnName: String = "list"
         get() = "${field}Of"
         private set
@@ -38,11 +50,7 @@ internal object DefaultColumnsType : KspConfiguration<ParameterizedTypeName> {
     )
 
     override fun initValue(value: String) {
-        val type = legalTypes[value]
-        if (type === null) {
-            illegalValueWarning(key, value)
-            return
-        }
+        val type = legalTypes[value] ?: return illegalValueWarning(key, value)
         fnName = value
         _value = type
     }

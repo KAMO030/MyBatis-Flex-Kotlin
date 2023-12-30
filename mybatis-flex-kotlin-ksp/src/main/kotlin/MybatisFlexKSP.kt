@@ -33,7 +33,7 @@ internal class MybatisFlexKSP : SymbolProcessor {
     private fun generate(resolver: Resolver) {
         val tableDefVisitor = TableDefVisitor()
         val seq = resolver
-            .getSymbolsWithAnnotation(Table::class.qualifiedName!!)
+            .getSymbolsWithAnnotation(Table::class.java.canonicalName)
             .filterIsInstance<KSClassDeclaration>()
             .filter {
                 it.classKind === ClassKind.CLASS
