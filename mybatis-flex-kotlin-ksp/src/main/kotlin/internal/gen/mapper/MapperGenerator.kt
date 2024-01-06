@@ -15,8 +15,10 @@ import org.apache.ibatis.annotations.Mapper
 import java.nio.charset.Charset
 
 
-internal class MapperGenerator(private val mapper: KSClassDeclaration) {
-    private val superTypeParam = mapper.superTypes.firstOrNull()?.element?.typeArguments?.firstOrNull()
+internal class MapperGenerator(private val mapperDeclaration: KSClassDeclaration) {
+    private val superTypeParam = mapperDeclaration.superTypes.firstOrNull()?.element?.typeArguments?.firstOrNull()
+
+    private val mapperClassName = mapperDeclaration.toClassName()
 
     /**
      * 执行此方法后，立即生成 Mapper 类。
@@ -24,7 +26,7 @@ internal class MapperGenerator(private val mapper: KSClassDeclaration) {
      * @author CloudPlayer
      */
     operator fun invoke(classDeclaration: KSClassDeclaration) {
-        if (MapperBaseClass.isOriginalBaseMapper || mapper.toClassName() == BASE_MAPPER) {
+        if (MapperBaseClass.isOriginalBaseMapper || mapperClassName == BASE_MAPPER) {
             return generateMapper(classDeclaration, BASE_MAPPER.plusParameter(classDeclaration.toClassName()))
         }
         generateTypedMapper(classDeclaration)
@@ -60,9 +62,9 @@ internal class MapperGenerator(private val mapper: KSClassDeclaration) {
      * @param classDeclaration 对应的泛型，即需要生成 Mapper 的实体类。
      */
     private fun generateTypedMapper(classDeclaration: KSClassDeclaration) {
-        val typeParams = mapper.typeParameters
+        val typeParams = mapperDeclaration.typeParameters
         if (typeParams.isEmpty()) {
-            generateMapper(classDeclaration, mapper.toClassName())
+            generateMapper(classDeclaration, mapperDeclaration.toClassName())
         }
         if (typeParams.size == 1) {
             val typeParam = typeParams[0]
@@ -70,13 +72,13 @@ internal class MapperGenerator(private val mapper: KSClassDeclaration) {
             // 获取父类在继承 BaseMapper 时使用的泛型。列表中的第一个元素表示其为逆变。
             val superTypeParam = superTypeParam ?: kotlin.run {
                 val exception =
-                    IllegalArgumentException("Custom Mapper parent classes must inherit from $BASE_MAPPER, not ${mapper.toClassName()}")
+                    IllegalArgumentException("Custom Mapper parent classes must inherit from $BASE_MAPPER, not ${mapperDeclaration.toClassName()}")
                 logger.exception(exception)
                 throw IllegalArgumentException()
             }
             val superType = superTypeParam.toString().split(" ")[1]
             if (thisType == superType) {
-                generateMapper(classDeclaration, mapper.toClassName().plusParameter(classDeclaration.toClassName()))
+                generateMapper(classDeclaration, mapperDeclaration.toClassName().plusParameter(classDeclaration.toClassName()))
             } else {
                 logger.exception(
                     UnsupportedOperationException(
@@ -86,9 +88,9 @@ internal class MapperGenerator(private val mapper: KSClassDeclaration) {
                     |你在自定义 Mapper 中携带的泛型: $thisType，你在继承 BaseMapper 时使用的泛型: $superType
                     |
                     |你的代码:
-                    |       $mapper<$thisType> : BaseMapper<$superType>
+                    |       $mapperDeclaration<$thisType> : BaseMapper<$superType>
                     |你需要让代码看起来像这样，让二者的泛型一致:
-                    |       $mapper<$thisType> : BaseMapper<$thisType>
+                    |       $mapperDeclaration<$thisType> : BaseMapper<$thisType>
                 """.toByteArray(Charsets.UTF_8).toString(Charset.defaultCharset()).trimMargin()
                     )
                 )

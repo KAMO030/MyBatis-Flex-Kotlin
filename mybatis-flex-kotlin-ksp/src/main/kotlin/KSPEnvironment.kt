@@ -18,6 +18,7 @@ internal fun initKspEnvironment(environment: SymbolProcessorEnvironment) {
     codeGenerator = environment.codeGenerator
     logger = environment.logger
     options = environment.options
+    kotlinVersion = environment.kotlinVersion
 }
 
 lateinit var codeGenerator: CodeGenerator
@@ -25,6 +26,8 @@ lateinit var codeGenerator: CodeGenerator
 lateinit var logger: KSPLogger
 
 lateinit var options: Map<String, String>
+
+lateinit var kotlinVersion: KotlinVersion
 
 /**
  * 初始化Flex配置文件对应的单例，使得配置文件中的配置项可以被方便地读取.

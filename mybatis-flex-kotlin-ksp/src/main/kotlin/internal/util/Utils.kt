@@ -10,6 +10,9 @@ import com.mybatisflex.annotation.Table
 import com.mybatisflex.kotlin.ksp.codeGenerator
 import com.mybatisflex.kotlin.ksp.internal.config.flex.*
 import com.mybatisflex.kotlin.ksp.internal.config.ksp.DefaultColumnsType
+import com.mybatisflex.kotlin.ksp.internal.config.ksp.PropertyTypeChecker
+import com.mybatisflex.kotlin.ksp.internal.util.anno.column
+import com.mybatisflex.kotlin.ksp.internal.util.anno.table
 import com.mybatisflex.kotlin.ksp.internal.util.str.asColumnName
 import com.mybatisflex.kotlin.ksp.internal.util.str.asPropertyName
 import com.mybatisflex.kotlin.ksp.internal.util.str.filterInstanceSuffix
@@ -45,12 +48,11 @@ val KSPropertyDeclaration.propertyName: String
  * @receiver 实体类中对应的属性声明。
  * @author CloudPlayer
  */
-@OptIn(KspExperimental::class)
 val KSPropertyDeclaration.columnName: String
     get() {
         // 从属性声明中获取最近的类声明（即该属性所在的类），并从类声明获得 Table 注解
-        val table = closestClassDeclaration()!!.getAnnotationsByType(Table::class).first()
-        val column = getAnnotationsByType(Column::class).firstOrNull()
+        val table = closestClassDeclaration()!!.table
+        val column = column
         // 如果没有 Column 注解，或者注解的名字是没有长度的（就是没有主动设置过列名），则使用属性名作为列名
         val columnName = column?.value
         if (columnName === null || columnName.isEmpty()) {
@@ -105,31 +107,31 @@ fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): PropertySpec.Bu
  * 获得已初始化的 PropertySpec ，且已经根据实体类中对应属性上面的注释为生成的属性打好了相同注释。
  *
  * 其在 [PropertySpec.Builder.initByLazyOrDefault] 中已完成初始化。
+ * @param tableDef 实例化 QueryColumn 时，传入的第一个参数，表示 tableDef 的子类。
  * @receiver 实体类中对应的属性声明。
  * @see PropertySpec.Builder.initByLazyOrDefault
  * @see KSPropertyDeclaration.propertyName
  * @author CloudPlayer
  */
 @OptIn(KspExperimental::class)
-val KSPropertyDeclaration.propertySpecBuilder: PropertySpec.Builder
-    get() {
-        val name = propertyName
-        val builder = PropertySpec.builder(
-            name,
-            QUERY_COLUMN
-        )
-        docString?.let {
-            builder.addKdoc(it.trimIndent())
-        }
-        val columnName = columnName
-        val columnAlias = getAnnotationsByType(ColumnAlias::class).firstOrNull()
-        val res = if (columnAlias !== null) {
-            """QueryColumn(this, "$columnName", "${columnAlias.value[0]}")"""
-        } else {
-            """QueryColumn(this,  "$columnName")"""
-        }
-        return builder.initByLazyOrDefault(res)
+fun KSPropertyDeclaration.getPropertySpecBuilder(tableDef: String = "this"): PropertySpec.Builder {
+    val name = propertyName
+    val builder = PropertySpec.builder(
+        name,
+        QUERY_COLUMN
+    )
+    docString?.let {
+        builder.addKdoc(it.trimIndent())
     }
+    val columnName = columnName
+    val columnAlias = getAnnotationsByType(ColumnAlias::class).firstOrNull()
+    val res = if (columnAlias !== null) {
+        """QueryColumn($tableDef, "$columnName", "${columnAlias.value[0]}")"""
+    } else {
+        """QueryColumn($tableDef,  "$columnName")"""
+    }
+    return builder.initByLazyOrDefault(res)
+}
 
 /**
  * 获得即将生成的 TableDef 的类名。其名字已过滤实体类后缀并增添 TableDef 类后缀。
@@ -175,10 +177,9 @@ val KSClassDeclaration.interfaceName: String
  * @see Table.schema
  * @author CloudPlayer
  */
-@OptIn(KspExperimental::class)
 val KSClassDeclaration.scheme: String
     get() {
-        val table = getAnnotationsByType(Table::class).first()
+        val table = table
         return table.schema
     }
 
@@ -188,12 +189,8 @@ val KSClassDeclaration.scheme: String
  * @see Table.value
  * @author CloudPlayer
  */
-@OptIn(KspExperimental::class)
 val KSClassDeclaration.tableName: String
-    get() {
-        val table = getAnnotationsByType(Table::class).first()
-        return table.value
-    }
+    get() = table.value
 
 /**
  * 生成 all columns 属性。
@@ -214,20 +211,20 @@ val allColumnsBuilder: PropertySpec.Builder by lazy {
  *
  * 默认情况下，它的类型是 [List] 而不是 [Array]。
  *
- * @param iterable default columns中包含的属性。大字段不包括其中。
+ * @param sequence default columns中包含的属性。大字段不包括其中。
+ * @see DefaultColumnsType
  * @return 已构建好的 default columns 。
  * @author CloudPlayer
  */
-@OptIn(KspExperimental::class)
-fun getDefaultColumns(iterable: Sequence<KSPropertyDeclaration>): PropertySpec.Builder {
+fun getDefaultColumns(sequence: Sequence<KSPropertyDeclaration>): PropertySpec.Builder {
     val builder = PropertySpec.builder(
         "defaultColumns".asPropertyName(),
         DefaultColumnsType.value,
     )
     val fnName = DefaultColumnsType.fnName
     val columns = StringJoiner(",")
-    iterable.forEach {
-        val column = it.getAnnotationsByType(Column::class).firstOrNull()
+    sequence.forEach {
+        val column = it.column
         if (column === null || (!column.isLarge && !column.ignore)) columns.add("`${it.propertyName}`")
     }
     builder.initByLazyOrDefault("$fnName($columns)")
@@ -261,33 +258,6 @@ val KSClassDeclaration.mapperPackageName: String
         }
         return pack ?: res
     }
-
-/**
- * 给对象增添一个无参操作符函数 invoke ，用于模拟对象的主构造器以实现兼容。在调用时均会返回自身。
- *
- * 正如下面的例子所示：
- * ```kotlin
- * object MyTableDef : TableDef(..., ...) {
- *      ...  // ksp 生成的其他内容。
- *      inline operator fun invoke() = MyTableDef  // 在调用时模拟主构造器 new 对象的行为。
- * }
- * ```
- * @author CloudPlayer
- */
-@Suppress("unused")
-fun invokeFunction(): FunSpec.Builder {
-    val func = FunSpec.builder("invoke")
-    func.modifiers += KModifier.OPERATOR
-    func.modifiers += KModifier.INLINE
-    func.addKdoc("A constructor used to mock objects for code compatibility. It returns itself on each call.")
-    func.addCode("return this")
-    func.addAnnotation(
-        AnnotationSpec.builder(SUPPRESS)
-            .addMember("\"NOTHING_TO_INLINE\"")
-            .build()
-    )
-    return func
-}
 
 /**
  * 生成文件时，压制默认的警告。
@@ -325,9 +295,9 @@ fun FileSpec.Builder.suppressDefault(): FileSpec.Builder = addAnnotation(
  * @param typeName 生成的 TableDef 类的类名。
  * @receiver 实体类声明。
  */
-fun KSClassDeclaration.instanceProperty(typeName: ClassName): PropertySpec.Builder {
+fun KSClassDeclaration.instanceProperty(typeName: ClassName, initBlock: String = typeName.simpleName): PropertySpec.Builder {
     val field = PropertySpec.builder(instanceName, typeName)
-    field.initializer(typeName.simpleName)
+    field.initializer(initBlock)
     field.jvmField()
     return field
 }
@@ -337,23 +307,25 @@ fun KSClassDeclaration.instanceProperty(typeName: ClassName): PropertySpec.Build
  *
  * @author CloudPlayer
  */
-@OptIn(KspExperimental::class)
 val KSClassDeclaration.legalProperties: Sequence<KSPropertyDeclaration>
     get() = getAllProperties().filter {
         it.hasBackingField  // 只处理拥有 backing field 的属性（没有 backing field 的运行时使用会报错）。
     }.filter { prop ->
-        val column = prop.getAnnotationsByType(Column::class).firstOrNull()
+        val column = prop.column
         if (column?.ignore == true) {
             return@filter false
         }
-        val returnType = prop.type.resolve()
-        val classDeclaration = returnType.declaration as KSClassDeclaration
+        if (PropertyTypeChecker.value) {
+            val returnType = prop.type.resolve()
+            val classDeclaration = returnType.declaration as KSClassDeclaration
 
-        classDeclaration.classKind === ClassKind.ENUM_CLASS  // 属性的返回值是枚举类
-                || classDeclaration.qualifiedName!!.asString() in DEFAULT_SUPPORT_COLUMN_TYPES  // 属性的返回值类型是默认支持的类型之一
-                || (column !== null && column.typeHandler.java !== UnknownTypeHandler::class.java)  // 不是默认类型但是配置了 TypeHandler 。
+            classDeclaration.classKind === ClassKind.ENUM_CLASS  // 属性的返回值是枚举类
+                    || classDeclaration.qualifiedName!!.asString() in DEFAULT_SUPPORT_COLUMN_TYPES  // 属性的返回值类型是默认支持的类型之一
+                    || (column !== null && column.typeHandler.java !== UnknownTypeHandler::class.java)  // 不是默认类型但是配置了 TypeHandler 。
+        } else {
+            true
+        }
     }
-
 
 @JvmField
 val BASE_MAPPER = ClassName("com.mybatisflex.core", "BaseMapper")
