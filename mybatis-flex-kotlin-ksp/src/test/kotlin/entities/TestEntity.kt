@@ -6,7 +6,7 @@ import com.mybatisflex.annotation.Id
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.table.TableDef
-import org.apache.ibatis.type.ArrayTypeHandler
+import handler.NotingTypeHandler
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -41,7 +41,7 @@ data class TestEntity(
     val ignoreProperty: Int = 0,
 
     val unsupportedTypeProperty: Nothing,
-    @Column(typeHandler = ArrayTypeHandler::class)
+    @Column(typeHandler = NotingTypeHandler::class)
     val supportedTypeProperty: Nothing,
 
     val enumProperty: DeprecationLevel = DeprecationLevel.WARNING,
