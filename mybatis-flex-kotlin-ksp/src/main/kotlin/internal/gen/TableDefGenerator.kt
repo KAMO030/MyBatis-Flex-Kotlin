@@ -28,7 +28,7 @@ interface TableDefGenerator {
         fileSpec
             .suppressDefault()
             .build()
-            .write()
+            .write(classDeclaration.containingFile)
     }
 
     /**

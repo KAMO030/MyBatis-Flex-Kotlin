@@ -3,6 +3,7 @@ package com.mybatisflex.kotlin.ksp.internal.util
 import com.google.devtools.ksp.*
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.mybatisflex.annotation.Column
 import com.mybatisflex.annotation.ColumnAlias
@@ -236,11 +237,11 @@ fun getDefaultColumns(sequence: Sequence<KSPropertyDeclaration>): PropertySpec.B
  * 生成新代码。生成的代码的字符集即为自定义的字符集。
  *
  * @see FlexCharset.value
+ * @param files 依赖的所有文件，用于增量编译。
  * @author CloudPlayer
  */
-
-fun FileSpec.write() {
-    val dependencies = kspDependencies(false)
+fun FileSpec.write(vararg files: KSFile?) {
+    val dependencies = kspDependencies(true, files.filterNotNull())
     val outputStream = codeGenerator.createNewFile(dependencies, packageName, name)
     outputStream.writer(FlexCharset.value).use(::writeTo)
 }
