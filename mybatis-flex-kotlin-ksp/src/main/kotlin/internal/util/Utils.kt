@@ -20,6 +20,7 @@ import com.mybatisflex.kotlin.ksp.options
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.jvm.jvmField
 import com.squareup.kotlinpoet.ksp.kspDependencies
+import com.squareup.kotlinpoet.ksp.toClassName
 import org.apache.ibatis.type.UnknownTypeHandler
 import java.time.*
 import java.util.*
@@ -222,7 +223,7 @@ fun getDefaultColumns(sequence: Sequence<KSPropertyDeclaration>): PropertySpec.B
         DefaultColumnsType.value,
     )
     val fnName = DefaultColumnsType.fnName
-    val columns = StringJoiner(",")
+    val columns = StringJoiner(", ")
     sequence.forEach {
         val column = it.column
         if (column === null || (!column.isLarge && !column.ignore)) columns.add("`${it.propertyName}`")
@@ -320,12 +321,28 @@ val KSClassDeclaration.legalProperties: Sequence<KSPropertyDeclaration>
             val classDeclaration = returnType.declaration as KSClassDeclaration
 
             classDeclaration.classKind === ClassKind.ENUM_CLASS  // 属性的返回值是枚举类
-                    || classDeclaration.qualifiedName!!.asString() in DEFAULT_SUPPORT_COLUMN_TYPES  // 属性的返回值类型是默认支持的类型之一
-                    || (column !== null && column.typeHandler.java !== UnknownTypeHandler::class.java)  // 不是默认类型但是配置了 TypeHandler 。
+                    || classDeclaration.qualifiedName?.asString() in DEFAULT_SUPPORT_COLUMN_TYPES  // 属性的返回值类型是默认支持的类型之一
+                    || (column !== null && !column.isUnknownTypeHandler())  // 不是默认类型但是配置了 TypeHandler 。
         } else {
             true
         }
     }
+
+/**
+ * 用于判断 [Column.typeHandler] 是否为 [UnknownTypeHandler] 。
+ *
+ * 正常情况下，应当在 try 块中就直接返回。 catch 块用于保证在极特殊情况下仍然能够正常返回值。
+ *
+ * @author CloudPlayer
+ * @return true 表示 [Column.typeHandler] 为 [UnknownTypeHandler] ，否则为 false 。
+ */
+@OptIn(KspExperimental::class)
+fun Column.isUnknownTypeHandler(): Boolean = try {
+    typeHandler.java === UnknownTypeHandler::class.java
+} catch (e: KSTypeNotPresentException) {
+    val type = e.ksType.declaration as KSClassDeclaration
+    type.toClassName() == UNKNOWN_TYPE_HANDLER
+}
 
 @JvmField
 val BASE_MAPPER = ClassName("com.mybatisflex.core", "BaseMapper")
@@ -338,3 +355,6 @@ val SUPPRESS = ClassName("kotlin", "Suppress")
 
 @JvmField
 val TABLE_DEF = ClassName("com.mybatisflex.core.table", "TableDef")
+
+@JvmField
+val UNKNOWN_TYPE_HANDLER = ClassName("org.apache.ibatis.type", "UnknownTypeHandler")

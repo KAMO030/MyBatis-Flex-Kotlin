@@ -11,9 +11,9 @@ import com.mybatisflex.annotation.Table
     此文件用于缓存 KSP 创建的代理注解对象，避免重复创建。
  */
 
-private val columnBuffer = HashMap<KSPropertyDeclaration, Column>()
+private val columnCache = HashMap<KSPropertyDeclaration, Column>()
 
-private val tableBuffer = HashMap<KSClassDeclaration, Table>()
+private val tableCache = HashMap<KSClassDeclaration, Table>()
 
 /**
  * 从 [KSPropertyDeclaration] 获取可能存在的 [Column] 注解对象。
@@ -23,8 +23,8 @@ private val tableBuffer = HashMap<KSClassDeclaration, Table>()
  */
 @OptIn(KspExperimental::class)
 val KSPropertyDeclaration.column: Column?
-    get() = columnBuffer[this] ?: getAnnotationsByType(Column::class).firstOrNull()?.also {
-        columnBuffer[this] = it
+    get() = columnCache[this] ?: getAnnotationsByType(Column::class).firstOrNull()?.also {
+        columnCache[this] = it
     }
 
 /**
@@ -35,6 +35,6 @@ val KSPropertyDeclaration.column: Column?
  */
 @OptIn(KspExperimental::class)
 val KSClassDeclaration.table: Table
-    get() = tableBuffer.getOrPut(this) {
+    get() = tableCache.getOrPut(this) {
         getAnnotationsByType(Table::class).first()
     }

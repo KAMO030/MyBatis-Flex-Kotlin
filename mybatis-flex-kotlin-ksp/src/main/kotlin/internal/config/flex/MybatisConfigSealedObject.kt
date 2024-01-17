@@ -300,15 +300,14 @@ internal object TableDefIgnoreEntitySuffixes : MybatisFlexConfiguration<Set<Stri
 
     private val _value = LinkedHashSet<String>()
 
-    override var value: Set<String>
+    override val value: Set<String>
         get() = _value
-        set(value) {
-            _value += value
-        }
 
     override fun initValue(value: String) {
-        _value += value.split(",").map {
-            it.trim()
+        if (value.isNotBlank()) {
+            _value += value.split(",").map {
+                it.trim()
+            }
         }
     }
 }
