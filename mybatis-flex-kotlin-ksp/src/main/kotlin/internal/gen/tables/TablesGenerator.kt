@@ -1,5 +1,6 @@
 package com.mybatisflex.kotlin.ksp.internal.gen.tables
 
+import com.google.devtools.ksp.symbol.KSFile
 import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesClassName
 import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesEnable
 import com.mybatisflex.kotlin.ksp.internal.config.flex.AllInTablesPackage
@@ -11,7 +12,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
 
-internal class TablesGenerator(private val properties: List<PropertySpec>) {
+internal class TablesGenerator(private val properties: List<PropertySpec>, private vararg val files: KSFile) {
     companion object {
         private var isExists = false  // 此属性用于判断是否已经生成了 Tables 类。
     }
@@ -38,7 +39,7 @@ internal class TablesGenerator(private val properties: List<PropertySpec>) {
             )
             .suppressDefault()
             .build()
-        fileSpec.write()
+        fileSpec.write(*files)
         isExists = true
     }
 }

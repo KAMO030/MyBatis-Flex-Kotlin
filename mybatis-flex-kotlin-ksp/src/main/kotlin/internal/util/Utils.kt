@@ -339,7 +339,7 @@ val KSClassDeclaration.legalProperties: Sequence<KSPropertyDeclaration>
  */
 @OptIn(KspExperimental::class)
 fun Column.isUnknownTypeHandler(): Boolean = try {
-    typeHandler.java === UnknownTypeHandler::class.java
+    typeHandler.java === Class.forName("org.apache.ibatis.type.UnknownTypeHandler")
 } catch (e: KSTypeNotPresentException) {
     val type = e.ksType.declaration as KSClassDeclaration
     type.toClassName() == UNKNOWN_TYPE_HANDLER

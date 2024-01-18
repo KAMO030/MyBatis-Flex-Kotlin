@@ -1,7 +1,5 @@
 package com.mybatisflex.kotlin.ksp
 
-import com.google.devtools.ksp.KspExperimental
-import com.google.devtools.ksp.getAnnotationsByType
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
@@ -17,6 +15,7 @@ import com.mybatisflex.kotlin.ksp.internal.config.flex.MapperGenerateEnable
 import com.mybatisflex.kotlin.ksp.internal.gen.tables.TablesGenerator
 import com.mybatisflex.kotlin.ksp.internal.gen.visitor.MapperVisitor
 import com.mybatisflex.kotlin.ksp.internal.gen.visitor.TableDefVisitor
+import com.mybatisflex.kotlin.ksp.internal.util.anno.table
 import com.mybatisflex.kotlin.ksp.internal.util.file.flexConfigs
 
 internal class MybatisFlexKSP : SymbolProcessor {
@@ -29,10 +28,9 @@ internal class MybatisFlexKSP : SymbolProcessor {
         return emptyList()
     }
 
-    @OptIn(KspExperimental::class)
     private fun generate(resolver: Resolver) {
         val tableDefVisitor = TableDefVisitor()
-        val seq = resolver
+        val seq = resolver  // 获取需要生成 TableDef 的类
             .getSymbolsWithAnnotation(Table::class.java.canonicalName)
             .filterIsInstance<KSClassDeclaration>()
             .filter {
@@ -42,22 +40,21 @@ internal class MybatisFlexKSP : SymbolProcessor {
             }
 
         seq.forEach {
-            it.accept(tableDefVisitor, Unit)
+            it.accept(tableDefVisitor, Unit)  // 生成 TableDef
         }
 
-        if (AllInTablesEnable.value) {
+        if (AllInTablesEnable.value) {  // 生成 Tables 类
             val generator = tableDefVisitor.generator
-            TablesGenerator(generator.instancePropertySpecs).generate()
+            TablesGenerator(generator.instancePropertySpecs, *seq.mapNotNull { it.containingFile }.toList().toTypedArray()).generate()
         }
 
-        if (MapperGenerateEnable.value) {
+        if (MapperGenerateEnable.value) {  // 生成 Mapper 接口
             val mapperVisitor = MapperVisitor(
                 resolver.getClassDeclarationByName(MapperBaseClass.value) ?:
                 resolver.getClassDeclarationByName(MapperBaseClass.BASE_MAPPER)!!
             )
             seq.filter {
-                val table = it.getAnnotationsByType(Table::class).first()
-                table.mapperGenerateEnable
+                it.table.mapperGenerateEnable
             }.forEach {
                 it.accept(mapperVisitor, Unit)
             }
