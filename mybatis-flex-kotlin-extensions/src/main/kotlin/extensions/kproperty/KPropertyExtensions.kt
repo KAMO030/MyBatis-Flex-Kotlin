@@ -194,6 +194,12 @@ infix fun <T> KProperty<T?>.eq(other: QueryColumn): QueryCondition = column.eq(o
 
 infix fun <T> KProperty<T?>.eq(other: KProperty<T?>): QueryCondition = column.eq(other.column)
 
+infix fun <T> KProperty<T?>.ne(other: T): QueryCondition = column.ne(other)
+
+infix fun <T> KProperty<T?>.ne(other: QueryColumn): QueryCondition = column.ne(other)
+
+infix fun <T> KProperty<T?>.ne(other: KProperty<T?>): QueryCondition = column.ne(other.column)
+
 infix fun <T : Comparable<T>> KProperty<T?>.gt(other: T): QueryCondition = column.gt(other)
 
 infix fun <T : Comparable<T>> KProperty<T?>.gt(other: QueryColumn): QueryCondition = column.gt(other)
