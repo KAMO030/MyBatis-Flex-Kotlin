@@ -45,6 +45,8 @@ data class TestEntity(
     val supportedTypeProperty: Nothing,
 
     val enumProperty: DeprecationLevel = DeprecationLevel.WARNING,
+
+    val `in`: String = ""
 ) {
     var noBackingFieldProperty: String by Delegates.notNull()
 }

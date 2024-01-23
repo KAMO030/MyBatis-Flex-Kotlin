@@ -17,6 +17,7 @@ import com.mybatisflex.kotlin.ksp.internal.util.anno.table
 import com.mybatisflex.kotlin.ksp.internal.util.str.asColumnName
 import com.mybatisflex.kotlin.ksp.internal.util.str.asPropertyName
 import com.mybatisflex.kotlin.ksp.internal.util.str.filterInstanceSuffix
+import com.mybatisflex.kotlin.ksp.logger
 import com.mybatisflex.kotlin.ksp.options
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.jvm.jvmField
@@ -54,7 +55,6 @@ val KSPropertyDeclaration.columnName: String
     get() {
         // 从属性声明中获取最近的类声明（即该属性所在的类），并从类声明获得 Table 注解
         val table = closestClassDeclaration()!!.table
-        val column = column
         // 如果没有 Column 注解，或者注解的名字是没有长度的（就是没有主动设置过列名），则使用属性名作为列名
         val columnName = column?.value
         if (columnName === null || columnName.isEmpty()) {
@@ -90,17 +90,18 @@ fun isLazy(): Boolean = options["flex.generate.lazy"]?.toBoolean() == true
  * @return 已初始化后的属性。
  * @author CloudPlayer
  */
-fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String): PropertySpec.Builder {
+fun PropertySpec.Builder.initByLazyOrDefault(initBlock: String, vararg args: Any?): PropertySpec.Builder {
     return if (isLazy()) {
         delegate(
             """
             |lazy {
             |    $initBlock
             |}
-            """.trimMargin()
+            """.trimMargin(),
+            *args
         )
     } else {
-        initializer(initBlock).jvmField()
+        initializer(initBlock, *args).jvmField()
     }
 }
 
@@ -128,11 +129,11 @@ fun KSPropertyDeclaration.getPropertySpecBuilder(tableDef: String = "this"): Pro
     val columnName = columnName
     val columnAlias = getAnnotationsByType(ColumnAlias::class).firstOrNull()
     val res = if (columnAlias !== null) {
-        """QueryColumn($tableDef, "$columnName", "${columnAlias.value[0]}")"""
+        """%T($tableDef, %S, "${columnAlias.value[0]}")"""
     } else {
-        """QueryColumn($tableDef,  "$columnName")"""
+        "%T($tableDef, %S)"
     }
-    return builder.initByLazyOrDefault(res)
+    return builder.initByLazyOrDefault(res, QUERY_COLUMN, columnName)
 }
 
 /**
@@ -205,7 +206,7 @@ val allColumnsBuilder: PropertySpec.Builder by lazy {
     PropertySpec.builder(
         "allColumns".asPropertyName(),
         QUERY_COLUMN
-    ).initByLazyOrDefault("QueryColumn(this, \"*\")")
+    ).initByLazyOrDefault("%T(this, %S)", QUERY_COLUMN, "*")
 }
 
 /**
@@ -225,11 +226,15 @@ fun getDefaultColumns(sequence: Sequence<KSPropertyDeclaration>): PropertySpec.B
     )
     val fnName = DefaultColumnsType.fnName
     val columns = StringJoiner(", ")
+    val columnsName = ArrayList<String>()
     sequence.forEach {
         val column = it.column
-        if (column === null || (!column.isLarge && !column.ignore)) columns.add("`${it.propertyName}`")
+        if (column === null || (!column.isLarge && !column.ignore)) {
+            columns.add("%N")
+            columnsName += it.propertyName
+        }
     }
-    builder.initByLazyOrDefault("$fnName($columns)")
+    builder.initByLazyOrDefault("%N($columns)", fnName, *columnsName.toTypedArray())
     return builder
 }
 
@@ -238,10 +243,11 @@ fun getDefaultColumns(sequence: Sequence<KSPropertyDeclaration>): PropertySpec.B
  *
  * @see FlexCharset.value
  * @param files 依赖的所有文件，用于增量编译。
+ * @param aggregating 是否使用聚合模式。生成 TableDef 和 Mapper 时为 false 即启用隔离模式，生成 Tables 为聚合模式。
  * @author CloudPlayer
  */
-fun FileSpec.write(vararg files: KSFile?) {
-    val dependencies = kspDependencies(true, files.filterNotNull())
+fun FileSpec.write(aggregating: Boolean = false, vararg files: KSFile?) {
+    val dependencies = kspDependencies(aggregating, files.filterNotNull())
     val outputStream = codeGenerator.createNewFile(dependencies, packageName, name)
     outputStream.writer(FlexCharset.value).use(::writeTo)
 }
@@ -253,13 +259,7 @@ fun FileSpec.write(vararg files: KSFile?) {
  * @see MapperPackage.value
  */
 val KSClassDeclaration.mapperPackageName: String
-    get() {
-        val pack = MapperPackage.value
-        val res by lazy {
-            "${packageName.asString()}.mapper"
-        }
-        return pack ?: res
-    }
+    get() = MapperPackage.value ?: "${packageName.asString()}.mapper"
 
 /**
  * 生成文件时，压制默认的警告。
@@ -272,15 +272,13 @@ val KSClassDeclaration.mapperPackageName: String
  *
  * 3，从未使用xxx的警告。
  *
- * 4，冗余反引号。
- *
  * @author CloudPlayer
  * @receiver 要压制警告的文件
  * @see Suppress
  */
 fun FileSpec.Builder.suppressDefault(): FileSpec.Builder = addAnnotation(
     AnnotationSpec.builder(SUPPRESS)
-        .addMember("\"RedundantVisibilityModifier\", \"MemberVisibilityCanBePrivate\", \"unused\", \"RemoveRedundantBackticks\"")
+        .addMember("\"RedundantVisibilityModifier\", \"MemberVisibilityCanBePrivate\", \"unused\"")
         .build()
 )
 
@@ -297,9 +295,13 @@ fun FileSpec.Builder.suppressDefault(): FileSpec.Builder = addAnnotation(
  * @param typeName 生成的 TableDef 类的类名。
  * @receiver 实体类声明。
  */
-fun KSClassDeclaration.instanceProperty(typeName: ClassName, initBlock: String = typeName.simpleName): PropertySpec.Builder {
+fun KSClassDeclaration.instanceProperty(
+    typeName: ClassName,
+    initBlock: String = "%T",
+    vararg args: Any?
+): PropertySpec.Builder {
     val field = PropertySpec.builder(instanceName, typeName)
-    field.initializer(initBlock)
+    field.initializer(initBlock, typeName, *args)
     field.jvmField()
     return field
 }
@@ -343,6 +345,9 @@ fun Column.isUnknownTypeHandler(): Boolean = try {
 } catch (e: KSTypeNotPresentException) {
     val type = e.ksType.declaration as KSClassDeclaration
     type.toClassName() == UNKNOWN_TYPE_HANDLER
+} catch (e: Throwable) {
+    logger.exception(e)
+    error("unreachable code")
 }
 
 @JvmField

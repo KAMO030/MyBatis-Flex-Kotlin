@@ -29,11 +29,7 @@ internal class ClassGenerator : TableDefGenerator {
         )
 
         superclass(TABLE_DEF)
-        addSuperclassConstructorParameter(
-            """
-            "$scheme", "$tableName"
-            """.trimIndent()
-        )
+        addSuperclassConstructorParameter("%S, %S", scheme, tableName)
 
         addProperties(legalProperties.map {
             it.getPropertySpecBuilder().build()
@@ -46,7 +42,7 @@ internal class ClassGenerator : TableDefGenerator {
 
     private fun KSClassDeclaration.companionObjectSpec(): TypeSpec = TypeSpec.companionObjectBuilder().apply {
         val generateClassName = ClassName("${packageName.asString()}.table", tableClassName)
-        val instanceProperty = instanceProperty(generateClassName, "${generateClassName.simpleName}()").build()
+        val instanceProperty = instanceProperty(generateClassName, "%T()").build()
 
         addProperty(instanceProperty)
         _instancePropertySpecs += instanceProperty

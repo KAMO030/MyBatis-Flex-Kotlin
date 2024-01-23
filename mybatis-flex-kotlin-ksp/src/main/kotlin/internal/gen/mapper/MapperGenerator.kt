@@ -54,7 +54,7 @@ internal class MapperGenerator(private val mapperDeclaration: KSClassDeclaration
         )
             .suppressDefault()
             .build()
-            .write()
+            .write(false, classDeclaration.containingFile)
     }
 
     /**
