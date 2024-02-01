@@ -77,12 +77,9 @@ inline fun <T, reified R> BaseMapper<T>.selectListWithRelationsByQueryAs(
 val <E : Any> KClass<E>.all: List<E>
     get() = baseMapper.selectAll()
 
-//    insert-----------
-inline fun <reified E : MapperModel<E>> insert(build: E.() -> Unit): Int =
-    E::class.java.newInstance().apply(build).run { insert() }
-
-
-inline fun <reified E : MapperModel<E>> E.insert(): Int = baseMapper().insert(this)
+//    save-----------
+inline fun <reified E : MapperModel<E>> save(build: E.() -> Unit): Boolean =
+    E::class.java.newInstance().apply(build).run { save() }
 
 //    update-----------
 inline fun <reified E : MapperModel<E>> E.update(conditionBlock: (E) -> QueryCondition): Int =
