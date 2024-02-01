@@ -1,6 +1,7 @@
 rootProject.name = "mybatis-flex-kotlin"
 include("mybatis-flex-kotlin-ksp")
 include("mybatis-flex-kotlin-extensions")
+include("mybatis-flex-kotlin-codegen")
 
 pluginManagement {
     repositories {
@@ -17,4 +18,3 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-include("mybatis-flex-kotlin-codegen")
