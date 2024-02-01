@@ -11,8 +11,8 @@ import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.condition.or
 import com.mybatisflex.kotlin.extensions.db.*
 import com.mybatisflex.kotlin.extensions.kproperty.*
-import com.mybatisflex.kotlin.extensions.mapper.insert
 import com.mybatisflex.kotlin.extensions.mapper.remove
+import com.mybatisflex.kotlin.extensions.mapper.save
 import com.mybatisflex.kotlin.extensions.mapper.update
 import com.mybatisflex.kotlin.extensions.model.batchDeleteById
 import com.mybatisflex.kotlin.extensions.model.batchInsert
@@ -121,7 +121,7 @@ class KotlinExample {
 
     @Test
     fun testInsert() {
-        insert<Account> {
+        save<Account> {
             id = 3
             userName = "kamo"
             age = 20
@@ -248,6 +248,11 @@ class KotlinExample {
 //            println("pageNumber: ${it.pageNumber} - pageSize: ${it.pageSize} - totalRow: ${it.totalRow}")
 //            it.records.forEach(::println)
 //        }
+    }
+
+    @Test
+    fun testModelQuery() {
+        Account.findByAge(18, 1).forEach(::println)
     }
 
 }

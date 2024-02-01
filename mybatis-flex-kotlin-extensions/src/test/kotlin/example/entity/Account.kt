@@ -18,6 +18,11 @@ package com.mybatisflex.kotlin.example.entity
 import com.mybatisflex.annotation.Id
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.core.activerecord.Model
+import com.mybatisflex.kotlin.extensions.condition.and
+import com.mybatisflex.kotlin.extensions.db.query
+import com.mybatisflex.kotlin.extensions.kproperty.eq
+import com.mybatisflex.kotlin.extensions.kproperty.`in`
+import com.mybatisflex.kotlin.extensions.wrapper.whereWith
 import java.util.*
 
 /**
@@ -29,11 +34,22 @@ import java.util.*
  *
  * @author KAMOsama
  */
+
 @Table("tb_account")
 data class Account(
     @Id var id: Int = -1,
     var userName: String? = null,
     var age: Int? = null,
     var birthday: Date? = null,
-) : Model<Account>()
+) : Model<Account>() {
+    companion object {
+        fun findByAge(age: Int, vararg ids: Int): List<Account> = query {
+            whereWith {
+                (Account::age eq age).and(ids.isNotEmpty()) {
+                    Account::id `in` ids.asList()
+                }
+            }
+        }
+    }
+}
 
