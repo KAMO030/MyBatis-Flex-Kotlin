@@ -89,8 +89,7 @@ inline fun <reified T : Any> queryOne(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
 ): T? = T::class.baseMapperOrNull?.let {
-    val scope = QueryScope()
-    scope.init()
+    val scope = QueryScope().apply(init)
     if (!scope.hasSelect() && columns.isNotEmpty()) scope.select(*columns)
     it.selectOneByQuery(scope)
 } ?: T::class.tableInfo.let {
@@ -110,7 +109,7 @@ inline fun <reified T : Any> query(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
 ): List<T> = try {
-    T::class.baseMapper.selectListByQuery(queryScope(init = init))
+    T::class.baseMapper.selectListByQuery(queryScope(columns = columns, init = init))
 } catch (e: MybatisFlexException) {
     T::class.tableInfo.run {
         queryRows(schema = schema, tableName = tableName, columns = columns) {
@@ -201,7 +200,7 @@ inline fun <reified E : Any> filter(
 inline fun <reified E : Any> filterOne(
     vararg columns: KProperty<*>,
     condition: () -> QueryCondition
-): E? = queryOne { select(*columns);and(condition()) }
+): E? = queryOne { select(*columns).and(condition()) }
 
 /**
  * 通过条件查询多条数据
