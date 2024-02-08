@@ -113,7 +113,7 @@
 ```kotlin
 dependencies {
   //kotlin扩展库
-  implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:1.0.5")
+  implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:1.0.6")
   //核心库
   implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
@@ -127,7 +127,7 @@ dependencies {
   <dependency>
     <groupId>com.mybatis-flex</groupId>
     <artifactId>mybatis-flex-kotlin-extensions</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
   </dependency>
   <!--核心库-->
   <dependency>
@@ -189,7 +189,7 @@ data class Account(
 ```
 执行的SQL：
 ```sql
-  SELECT `age`, `birthday`, `id`, `user_name` 
+  SELECT `age`, `birthday`, `id`, `user_name`
   FROM `tb_account`
 ```
 ```sql

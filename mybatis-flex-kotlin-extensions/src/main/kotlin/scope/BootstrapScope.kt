@@ -44,7 +44,7 @@ class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBoot
         instant.addDataSource(
             dataSourceKey,
             PooledDataSource(
-                ((driver?.java) ?: DriverManager.drivers().findFirst().orElseThrow().javaClass).name,
+                ((driver?.java) ?: DriverManager.getDrivers().nextElement().javaClass).name,
                 url, username, password
             )
         )
