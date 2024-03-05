@@ -17,10 +17,7 @@ package com.mybatisflex.kotlin.extensions.kproperty
 
 import com.mybatisflex.annotation.Column
 import com.mybatisflex.core.constant.SqlConsts
-import com.mybatisflex.core.query.Brackets
-import com.mybatisflex.core.query.QueryColumn
-import com.mybatisflex.core.query.QueryCondition
-import com.mybatisflex.core.query.QueryOrderBy
+import com.mybatisflex.core.query.*
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.db.tableInfo
@@ -190,6 +187,8 @@ fun <T : KProperty<*>> Iterable<T>.toQueryColumns(): Array<out QueryColumn> =
     map { it.column }.toTypedArray()
 
 fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = column.toOrd(order)
+
+infix fun <T> KProperty<T?>.`in`(other: QueryWrapper): QueryCondition = column.`in`(other)
 
 infix fun <T> KProperty<T?>.eq(other: T): QueryCondition = column.eq(other)
 
