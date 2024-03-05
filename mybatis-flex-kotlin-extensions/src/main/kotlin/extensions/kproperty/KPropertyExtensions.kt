@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (837080904@qq.com).
+ *  Copyright (c) 2023-Present, Mybatis-Flex-Kotlin (kamosama@qq.com).
  *  <p>
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,7 +29,10 @@ import com.mybatisflex.kotlin.vec.Order
 import org.apache.ibatis.type.UnknownTypeHandler
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty0
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmErasure

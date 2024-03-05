@@ -113,7 +113,7 @@ subprojects {
                     developer {
                         id.set("KAMO030")
                         name.set("KAMOsama")
-                        email.set("837080904@qq.com")
+                        email.set("kamosama@qq.com")
                     }
 
                     developer {
