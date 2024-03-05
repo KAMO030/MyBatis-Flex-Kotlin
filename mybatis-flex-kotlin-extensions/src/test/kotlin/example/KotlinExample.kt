@@ -172,6 +172,24 @@ class KotlinExample {
     }
 
     /**
+     * filter: 按条件查泛型对应的表的一条数据
+     */
+    @Test
+    fun testFilterOne() {
+        val account: Account? = filterOne(Account::age) {
+            (Account::id.isNotNull)
+                .and {
+                    (Account::id to Account::userName to Account::age).inTriple(
+                        1 to "张三" to 18,
+                        2 to "李四" to 19,
+                    )
+                }
+                .and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
+        }
+        println(account)
+    }
+
+    /**
      * query: 较复杂查泛型对应的表的数据,如分组排序等
      */
     @Test

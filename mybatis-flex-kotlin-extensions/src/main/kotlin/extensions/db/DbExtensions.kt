@@ -156,7 +156,7 @@ inline fun queryRows(
  * @param queryCondition 查询条件
  */
 inline fun <reified E : Any> filter(
-    vararg columns: QueryColumn,
+    vararg columns: QueryColumn = emptyArray(),
     queryCondition: QueryCondition = QueryCondition.createEmpty()
 ): List<E> = query(columns = columns) { and(queryCondition) }
 
@@ -171,14 +171,18 @@ inline fun <reified E : Any> filterColumn(
 ): List<E> = filter(columns = columns, queryCondition = condition())
 
 /**
- * 通过条件查询多条数据
+ * 通过条件查询一条数据
  * @param columns 查询的列
  * @param condition 查询条件
+ * @since 1.0.5
  */
-inline fun <reified E : Any> filter(
-    vararg columns: QueryColumn = E::class.defaultColumns,
+inline fun <reified E : Any> filterOne(
+    vararg columns: KProperty<*> = emptyArray(),
     condition: () -> QueryCondition
-): List<E> = filterColumn(columns = columns, condition = condition)
+): E? = queryOne {
+    takeIf { columns.isNotEmpty() }?.select(*columns)
+    and(condition())
+}
 
 /**
  * 通过条件查询一条数据
@@ -186,8 +190,8 @@ inline fun <reified E : Any> filter(
  * @param condition 查询条件
  * @since 1.0.5
  */
-inline fun <reified E : Any> filterOne(
-    vararg columns: KProperty<*>,
+inline fun <reified E : Any> filterOneColumn(
+    vararg columns: QueryColumn = E::class.defaultColumns,
     condition: () -> QueryCondition
 ): E? = queryOne { select(*columns).and(condition()) }
 
@@ -197,10 +201,10 @@ inline fun <reified E : Any> filterOne(
  * @param condition 查询条件
  */
 inline fun <reified E : Any> filter(
-    vararg columns: KProperty<*>,
+    vararg columns: KProperty<*> = emptyArray(),
     condition: () -> QueryCondition
 ): List<E> =
-    filter(
+    filterColumn(
         columns = columns.toQueryColumns(),
         condition = condition
     )
