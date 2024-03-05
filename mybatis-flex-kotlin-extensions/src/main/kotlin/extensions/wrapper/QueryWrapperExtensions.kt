@@ -26,6 +26,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 
 /*
  * QueryWrapper操作扩展
@@ -37,6 +38,14 @@ inline fun QueryWrapper.from(init: QueryScope.() -> Unit = {}): QueryWrapper = t
 fun QueryWrapper.from(vararg entities: KClass<*>): QueryWrapper = this.from(*entities.map { it.java }.toTypedArray())
 
 infix fun QueryWrapper.from(entity: KClass<*>): QueryWrapper = this.from(entity.java)
+
+inline fun <reified T> QueryWrapper.from(): QueryWrapper = this.from(T::class)
+
+/**
+ * 带范型约束的select，约束只能是某个实体类的属性
+ */
+inline fun <reified T> QueryWrapper.selectFrom(vararg properties: KProperty1<T, *>): QueryWrapper =
+    this.select(*properties.toQueryColumns()).from<T>()
 
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
     this.select(*properties().toQueryColumns())

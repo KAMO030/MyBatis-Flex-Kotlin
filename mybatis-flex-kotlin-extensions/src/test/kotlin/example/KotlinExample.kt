@@ -20,6 +20,7 @@ import com.mybatisflex.kotlin.extensions.model.batchUpdateById
 import com.mybatisflex.kotlin.extensions.sql.orderBy
 import com.mybatisflex.kotlin.extensions.wrapper.and
 import com.mybatisflex.kotlin.extensions.wrapper.from
+import com.mybatisflex.kotlin.extensions.wrapper.selectFrom
 import com.mybatisflex.kotlin.scope.runFlex
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
@@ -195,7 +196,7 @@ class KotlinExample {
     @Test
     fun testQuery() {
         val accounts: List<Account> = query {
-            select(Account::id, Account::userName)
+            selectFrom(Account::id, Account::userName)
             where {
                 and(Account::age `in` (17..19))
                 and(Account::birthday between (start to end))
