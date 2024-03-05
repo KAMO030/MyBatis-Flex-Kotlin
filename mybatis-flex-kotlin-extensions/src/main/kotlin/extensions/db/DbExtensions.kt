@@ -21,7 +21,6 @@ import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
-import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Db.selectListByQuery
 import com.mybatisflex.core.row.Db.selectOneByQuery
@@ -159,17 +158,7 @@ inline fun queryRows(
 inline fun <reified E : Any> filter(
     vararg columns: QueryColumn,
     queryCondition: QueryCondition = QueryCondition.createEmpty()
-): List<E> = try {
-    E::class.baseMapper.selectListByCondition(queryCondition)
-} catch (e: MybatisFlexException) {
-    E::class.tableInfo.run {
-        selectListByQuery(
-            schema,
-            tableName,
-            QueryWrapper().select(*columns).where(queryCondition)
-        ).toEntities()
-    }
-}
+): List<E> = query(columns = columns) { and(queryCondition) }
 
 /**
  * 通过条件查询多条数据
