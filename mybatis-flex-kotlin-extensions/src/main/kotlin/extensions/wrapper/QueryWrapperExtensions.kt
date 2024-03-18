@@ -17,6 +17,8 @@ package com.mybatisflex.kotlin.extensions.wrapper
 
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.util.MapperUtil
+import com.mybatisflex.kotlin.extensions.condition.allAnd
+import com.mybatisflex.kotlin.extensions.condition.allOr
 import com.mybatisflex.kotlin.extensions.kproperty.defaultColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.scope.QueryScope
@@ -78,6 +80,20 @@ fun QueryWrapper.where(queryCondition: QueryCondition, consumer: (QueryWrapper) 
     and(queryCondition).where(consumer)
 
 inline fun QueryWrapper.whereWith(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
+
+
+@OptIn(ExperimentalContracts::class)
+inline fun QueryWrapper.having(predicate: () -> QueryCondition): QueryWrapper {
+    contract {
+        callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
+    }
+    return having(predicate())
+}
+
+fun QueryWrapper.andAll(vararg conditions: QueryCondition): QueryWrapper = this and allAnd(*conditions)
+
+fun QueryWrapper.orAll(vararg conditions: QueryCondition): QueryWrapper = this or allOr(*conditions)
+
 
 /**
  * wrapper的内部实现的访问，基于官方CPI而编写。其目的用于简化开发时的
@@ -151,13 +167,7 @@ value class QueryWrapperDevelopEntry<out T : QueryWrapper>(val wrapper: T) {
     var rows: Long
         get() = CPI.getLimitRows(wrapper)
         set(value) = CPI.setLimitRows(wrapper, value)
-}
 
-@OptIn(ExperimentalContracts::class)
-inline fun QueryWrapper.having(predicate: () -> QueryCondition): QueryWrapper {
-    contract {
-        callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
-    }
+    fun setFromIfNecessary(schema: String, tableName: String) = CPI.setFromIfNecessary(wrapper, schema, tableName)
 
-    return having(predicate())
 }

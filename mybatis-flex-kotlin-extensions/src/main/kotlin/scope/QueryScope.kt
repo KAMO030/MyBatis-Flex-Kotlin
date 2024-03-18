@@ -16,7 +16,6 @@
 package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.query.QueryColumn
-import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.core.query.QueryWrapperAdapter
 import com.mybatisflex.core.util.LambdaGetter
 import com.mybatisflex.kotlin.extensions.kproperty.column
@@ -52,7 +51,7 @@ class QueryScope : QueryWrapperAdapter<QueryScope>() {
 }
 
 
-inline fun queryScope(vararg columns: QueryColumn, init: QueryScope.() -> Unit = {}): QueryWrapper =
+inline fun queryScope(vararg columns: QueryColumn, init: QueryScope.() -> Unit = {}): QueryScope =
     QueryScope().apply(init).apply { if (columns.isNotEmpty() && !hasSelect()) select(*columns) }
 
 

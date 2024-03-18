@@ -33,7 +33,9 @@ import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.extensions.model.toEntities
 import com.mybatisflex.kotlin.extensions.model.toEntityPage
 import com.mybatisflex.kotlin.scope.QueryScope
+import com.mybatisflex.kotlin.scope.UpdateScope
 import com.mybatisflex.kotlin.scope.queryScope
+import com.mybatisflex.kotlin.scope.updateScope
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.isSubclassOf
@@ -66,7 +68,7 @@ val <E : Any> KClass<E>.baseMapperOrNull: BaseMapper<E>?
 
 val <E : Any> KClass<E>.tableInfo: TableInfo
     get() = requireNotNull(tableInfoOrNull) {
-        "The class TableInfo cannot be found through $this" +
+        "Ehe class TableInfo cannot be found through $this" +
                 " because the entity class corresponding to the generic used by this interface to inherit from BaseMapper cannot be found."
     }
 
@@ -84,19 +86,19 @@ val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
  * @param columns 查询的列
  * @param init 查询作用域初始化函数
  */
-inline fun <reified T : Any> queryOne(
+inline fun <reified E : Any> queryOne(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
-): T? = T::class.baseMapperOrNull?.let {
+): E? = E::class.baseMapperOrNull?.let {
     val scope = QueryScope().apply(init)
     if (!scope.hasSelect() && columns.isNotEmpty()) scope.select(*columns)
     it.selectOneByQuery(scope)
-} ?: T::class.tableInfo.let {
+} ?: E::class.tableInfo.let {
     queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
         init()
         // 如果未调用select方法，则默认查询所有列
-        if (this.hasSelect().not()) select(T::class.allColumns)
-    }?.toEntity(T::class.java)
+        if (this.hasSelect().not()) select(E::class.allColumns)
+    }?.toEntity(E::class.java)
 }
 
 /**
@@ -104,17 +106,17 @@ inline fun <reified T : Any> queryOne(
  * @param columns 查询的列
  * @param init 查询作用域初始化函数
  */
-inline fun <reified T : Any> query(
+inline fun <reified E : Any> query(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
-): List<T> = try {
-    T::class.baseMapper.selectListByQuery(queryScope(columns = columns, init = init))
+): List<E> = try {
+    E::class.baseMapper.selectListByQuery(queryScope(columns = columns, init = init))
 } catch (e: MybatisFlexException) {
-    T::class.tableInfo.run {
+    E::class.tableInfo.run {
         queryRows(schema = schema, tableName = tableName, columns = columns) {
             init()
             // 如果未调用select方法，则默认查询所有列
-            if (this.hasSelect().not()) select(*T::class.defaultColumns)
+            if (this.hasSelect().not()) select(*E::class.defaultColumns)
         }.toEntities()
     }
 }
@@ -257,3 +259,18 @@ inline fun queryPage(
     init: QueryScope.() -> Unit
 ): Page<Row> = Db.paginate(schema, tableName, page, queryScope(init = init))
 
+//    update----------
+inline fun <reified E : Any> update(scope: UpdateScope<E>.() -> Unit): Int {
+    updateScope<E>().run {
+        scope()
+        val entity = updateWrapper.toEntity()
+        return try {
+            E::class.baseMapper.updateByQuery(entity, this)
+        } catch (e: MybatisFlexException) {
+            TODO()
+//            E::class.tableInfo.let {
+//                Db.updateByQuery(it.schema, it.tableName, entity.toRow(), this)
+//            }
+        }
+    }
+}

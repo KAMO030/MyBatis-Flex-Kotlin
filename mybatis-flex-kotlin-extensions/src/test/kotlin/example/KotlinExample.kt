@@ -11,6 +11,7 @@ import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.condition.or
 import com.mybatisflex.kotlin.extensions.db.*
 import com.mybatisflex.kotlin.extensions.kproperty.*
+import com.mybatisflex.kotlin.extensions.mapper.all
 import com.mybatisflex.kotlin.extensions.mapper.remove
 import com.mybatisflex.kotlin.extensions.mapper.save
 import com.mybatisflex.kotlin.extensions.mapper.update
@@ -18,9 +19,7 @@ import com.mybatisflex.kotlin.extensions.model.batchDeleteById
 import com.mybatisflex.kotlin.extensions.model.batchInsert
 import com.mybatisflex.kotlin.extensions.model.batchUpdateById
 import com.mybatisflex.kotlin.extensions.sql.orderBy
-import com.mybatisflex.kotlin.extensions.wrapper.and
-import com.mybatisflex.kotlin.extensions.wrapper.from
-import com.mybatisflex.kotlin.extensions.wrapper.selectFrom
+import com.mybatisflex.kotlin.extensions.wrapper.*
 import com.mybatisflex.kotlin.scope.runFlex
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
@@ -136,7 +135,7 @@ class KotlinExample {
     fun testUpdate() {
         // 通过条件更新
         filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.update {
-            Account::userName eq it.userName
+            Account::userName eq it.userName and (Account::age le 18)
         }
         // 通过id更新
         // filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.updateById()
@@ -147,7 +146,7 @@ class KotlinExample {
     fun testDelete() {
         // 通过条件删除
         filterOne<Account> { Account::id eq 2 }?.remove {
-            Account::userName eq it.userName
+            Account::userName eq it.userName and (Account::age le 18)
         }
         // 通过id删除
         // filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.removeById()
@@ -272,6 +271,58 @@ class KotlinExample {
     @Test
     fun testModelQuery() {
         Account.findByAge(18, 1).forEach(::println)
+    }
+
+    @Test
+    fun testAllCondition() {
+        query<Account> {
+//          andAll:
+            andAll(
+                Account::id eq 1,
+                Account::age eq 18,
+                Account::userName eq "张三",
+            )
+//            or
+//            (Account::id eq 1).andAll(
+//                Account::age eq 18,
+//                Account::userName eq "张三",
+//            )
+
+//            orAll:
+//            orAll(
+//                Account::id eq 1,
+//                Account::age `in` (17..20),
+//                Account::userName eq "张三",
+//            )
+//            or
+//            (Account::id eq 1).orAll(
+//                Account::age `in` (17..20),
+//                Account::userName eq "张三",
+//            )
+
+        }.also { println(it) }
+    }
+
+    @Test
+    fun testUpdate2() {
+        println("更新前: ${Account::class.all.first()}")
+        update<Account> {
+            Account::id set 5
+            Account::age setRaw {
+                select(Account::age)
+                from(Account::class)
+                this.and(Account::age `in` (19..20))
+                limit(1)
+            }
+//            or
+//            Account::age.setRaw(Account::age){
+//                from(Account::class)
+//                this.and(Account::age `in` (19..20))
+//                limit(1)
+//            }
+            whereWith { Account::id eq 1 and (Account::userName eq "张三") }
+        }
+        println("更新后: ${Account::class.all.first()}")
     }
 
 }

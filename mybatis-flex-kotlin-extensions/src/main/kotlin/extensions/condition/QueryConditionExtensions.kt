@@ -40,3 +40,10 @@ infix fun QueryCondition.or(other: QueryCondition): QueryCondition = this.or(oth
 inline fun `if`(test: Boolean, block: () -> QueryCondition): QueryCondition =
     if (test) block() else QueryCondition.createEmpty()
 
+fun QueryCondition.andAll(vararg conditions: QueryCondition): QueryCondition = this and allAnd(*conditions)
+
+fun QueryCondition.orAll(vararg conditions: QueryCondition): QueryCondition = this or allOr(*conditions)
+
+fun allAnd(vararg conditions: QueryCondition): QueryCondition = conditions.reduce(QueryCondition::and)
+
+fun allOr(vararg conditions: QueryCondition): QueryCondition = conditions.reduce(QueryCondition::or)
