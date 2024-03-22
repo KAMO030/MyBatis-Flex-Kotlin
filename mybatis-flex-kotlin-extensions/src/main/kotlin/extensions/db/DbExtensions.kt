@@ -251,13 +251,13 @@ inline fun <reified E : Any> paginate(
     }
 }
 
-
 inline fun paginateRows(
     schema: String? = null,
     tableName: String? = null,
     page: Page<Row>? = null,
     init: QueryScope.() -> Unit
 ): Page<Row> = Db.paginate(schema, tableName, page, queryScope(init = init))
+
 
 //    update----------
 inline fun <reified E : Any> update(scope: UpdateScope<E>.() -> Unit): Int {

@@ -21,7 +21,7 @@ import java.util.*
  */
 
 @Table("tb_account")
-data class Account(
+open class Account(
     @Id var id: Int = -1,
     var userName: String? = null,
     var age: Int? = null,
@@ -35,6 +35,10 @@ data class Account(
                 }
             }
         }
+    }
+
+    override fun toString(): String {
+        return "Account(id=$id, userName=$userName, age=$age, birthday=$birthday)"
     }
 }
 
