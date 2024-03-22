@@ -244,7 +244,7 @@ inline fun <reified E : Any> paginate(
     E::class.baseMapper.paginate(page, queryScope(init = init))
 } catch (e: MybatisFlexException) {
     E::class.tableInfo.run {
-        queryPage(schema, tableName, Page(page.pageNumber, page.pageSize)) {
+        paginateRows(schema, tableName, Page(page.pageNumber, page.pageSize)) {
             init()
             if (this.hasSelect().not()) select(*E::class.defaultColumns)
         }.toEntityPage()
@@ -252,7 +252,7 @@ inline fun <reified E : Any> paginate(
 }
 
 
-inline fun queryPage(
+inline fun paginateRows(
     schema: String? = null,
     tableName: String? = null,
     page: Page<Row>? = null,
