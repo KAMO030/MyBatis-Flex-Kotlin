@@ -192,11 +192,17 @@ infix fun <T> KProperty<T?>.`in`(other: QueryWrapper): QueryCondition = column.`
 
 infix fun <T> KProperty<T?>.eq(other: T): QueryCondition = column.eq(other)
 
+@Deprecated("使用 eq 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
+infix fun <T> KProperty<T?>.eq(other: Nothing?): QueryCondition = column.eq(other)
+
 infix fun <T> KProperty<T?>.eq(other: QueryColumn): QueryCondition = column.eq(other)
 
 infix fun <T> KProperty<T?>.eq(other: KProperty<T?>): QueryCondition = column.eq(other.column)
 
 infix fun <T> KProperty<T?>.ne(other: T): QueryCondition = column.ne(other)
+
+@Deprecated("使用 ne 和 null 进行比较可能是个错误。", ReplaceWith("this.isNotNull"))
+infix fun <T> KProperty<T?>.ne(other: Nothing?): QueryCondition = column.ne(other)
 
 infix fun <T> KProperty<T?>.ne(other: QueryColumn): QueryCondition = column.ne(other)
 

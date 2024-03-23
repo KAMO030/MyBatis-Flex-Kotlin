@@ -19,6 +19,9 @@ import com.mybatisflex.core.activerecord.MapperModel
 import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.row.RowUtil
+import com.mybatisflex.core.table.EntityMetaObject
+import com.mybatisflex.core.table.TableInfo
+import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.core.util.SqlUtil
 import com.mybatisflex.kotlin.extensions.db.*
 import java.io.Serializable
@@ -28,7 +31,21 @@ import java.io.Serializable
  * @author KAMOsama
  */
 
+@Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
+
+fun <T : Any> T.toRow(): Row {
+    val tableInfo: TableInfo = TableInfoFactory.ofEntityClass(javaClass)
+    val metaObject = EntityMetaObject.forObject(this, tableInfo.reflectorFactory)
+    val row = Row()
+    tableInfo.primaryKeyList.forEach {
+        row[it.column] = metaObject.getValue(it.property)
+    }
+    tableInfo.columnInfoList.forEach {
+        row[it.column] = metaObject.getValue(it.property)
+    }
+    return row
+}
 
 inline fun <reified E> Collection<Row>.toEntities(): MutableList<E> =
     RowUtil.toEntityList(this.toMutableList(), E::class.java)

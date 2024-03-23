@@ -33,7 +33,13 @@ infix fun QueryColumn.like(value: String): QueryCondition = this.like(value)
 
 infix fun QueryColumn.eq(value: Any?): QueryCondition = this.eq(value)
 
+@Deprecated("使用 eq 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
+infix fun QueryColumn.eq(value: Nothing?): QueryCondition = this.eq(value)
+
 infix fun QueryColumn.ne(value: Any?): QueryCondition = this.ne(value)
+
+@Deprecated("使用 ne 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
+infix fun QueryColumn.ne(value: Nothing?): QueryCondition = this.ne(value)
 
 @JvmName("equals")
 infix fun QueryColumn.`=`(value: Any?): QueryCondition = this.eq(value)
@@ -141,11 +147,4 @@ fun QueryColumn.toOrd(order: Order = Order.ASC): QueryOrderBy = when (order) {
     Order.DESC -> desc()
 }
 
-operator fun QueryCondition.not(): QueryCondition =
-    if (this is OperatorQueryCondition) {  // 如果是OperatorQueryCondition，则需要判断是否已经反转
-        val field = OperatorQueryCondition::class.java.getDeclaredField("operator")
-        field.isAccessible = true
-        val operator = field[this] as? String?
-        if (operator !== null && "NOT" in operator.uppercase()) childCondition
-        else OperatorQueryCondition("NOT ", this)
-    } else OperatorQueryCondition("NOT ", this)
+operator fun QueryCondition.not(): QueryCondition = QueryMethods.not(this)
