@@ -157,7 +157,9 @@ data class Account(
 
 - 使用 `@Table("tb_account")` 设置实体类与表名的映射关系
 - 使用 `@Id` 标识主键
-> ⚠️ 最好不要写成 data class ，否则没有无参构造某些情况下会报错；
+
+> ⚠️ 最好不要写成 data class ，否则没有无参构造某些情况下会报错，例如属性的顺序与数据库字段不一致会导致报错；
+>
 > 如有需要可以安装官方 [noArg](https://kotlinlang.org/docs/no-arg-plugin.html) 插件
 
 **第 4 步：开始使用**

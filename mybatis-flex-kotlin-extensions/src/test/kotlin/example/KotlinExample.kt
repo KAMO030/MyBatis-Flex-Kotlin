@@ -7,14 +7,12 @@ import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapper
 import com.mybatisflex.kotlin.example.entity.Account
 import com.mybatisflex.kotlin.example.mapper.AccountMapper
+import com.mybatisflex.kotlin.extensions.condition.allAnd
 import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.condition.or
 import com.mybatisflex.kotlin.extensions.db.*
 import com.mybatisflex.kotlin.extensions.kproperty.*
-import com.mybatisflex.kotlin.extensions.mapper.all
-import com.mybatisflex.kotlin.extensions.mapper.remove
-import com.mybatisflex.kotlin.extensions.mapper.save
-import com.mybatisflex.kotlin.extensions.mapper.update
+import com.mybatisflex.kotlin.extensions.mapper.*
 import com.mybatisflex.kotlin.extensions.model.batchDeleteById
 import com.mybatisflex.kotlin.extensions.model.batchInsert
 import com.mybatisflex.kotlin.extensions.model.batchUpdateById
@@ -133,13 +131,57 @@ class KotlinExample {
 
     @Test
     fun testUpdate() {
-        // 通过条件更新
+        // 通过条件查询到后更新
         filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.update {
             Account::userName eq it.userName and (Account::age le 18)
         }
         // 通过id更新
         // filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.updateById()
         filterOne<Account> { Account::id eq 2 }?.also(::println)
+    }
+
+    @Test
+    fun testUpdate2() {
+        println("更新前: ${Account::class.all.first()}")
+        filterOne<Account>(Account::age) {
+            Account::age `in` (19..20)
+        }
+        update<Account> {
+            Account::id set 5
+//            Account::age setRaw {
+//                select(Account::age)
+//                from(Account::class)
+//                this.and(Account::age `in` (19..20))
+//                limit(1)
+//            }
+//            或者写成:
+            Account::age.setRaw(Account::age) {
+                from(Account::class)
+                and(Account::age `in` (19..20))
+            }
+//            或者写成:
+//            Account::age set queryScope(Account::age.column){
+//                from(Account::class)
+//                and(Account::age `in` (19..20))
+//                limit(1)
+//            }
+//            或者写成 (此时会执行两次sql):
+//            Account::age set filterOne<Account>(Account::age){
+//                Account::age `in` (19..20)
+//            }?.age
+            whereWith { Account::id eq 1 and (Account::userName eq "张三") }
+        }
+//        val account = Account(
+//            id = 5,
+//            // 此时会执行一次sql
+//            age = filterOne<Account>(Account::age) {
+//                Account::age `in` (19..20)
+//            }?.age
+//        )
+//        Account::class.baseMapper.updateByCondition(account){
+//            Account::age `in` (19..20)
+//        }
+        println("更新后: ${Account::class.all.first()}")
     }
 
     @Test
@@ -159,14 +201,14 @@ class KotlinExample {
     @Test
     fun testFilter() {
         val accounts: List<Account> = filter {
-            (Account::id.isNotNull)
-                .and {
-                    (Account::id to Account::userName to Account::age).inTriple(
-                        1 to "张三" to 18,
-                        2 to "李四" to 19,
-                    )
-                }
-                .and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
+            allAnd(
+                Account::id.isNotNull,
+                (Account::id to Account::userName to Account::age).inTriple(
+                    1 to "张三" to 18,
+                    2 to "李四" to 19
+                ),
+                Account::age.`in`(17..19)
+            ) or { Account::birthday between (start to end) }
         }
         accounts.forEach(::println)
     }
@@ -177,14 +219,14 @@ class KotlinExample {
     @Test
     fun testFilterOne() {
         val account: Account? = filterOne(Account::age) {
-            (Account::id.isNotNull)
-                .and {
-                    (Account::id to Account::userName to Account::age).inTriple(
-                        1 to "张三" to 18,
-                        2 to "李四" to 19,
-                    )
-                }
-                .and(Account::age.`in`(17..19) or { Account::birthday between (start to end) })
+            allAnd(
+                Account::id.isNotNull,
+                (Account::id to Account::userName to Account::age).inTriple(
+                    1 to "张三" to 18,
+                    2 to "李四" to 19
+                ),
+                Account::age.`in`(17..19)
+            ) or { Account::birthday between (start to end) }
         }
         println(account)
     }
@@ -196,9 +238,8 @@ class KotlinExample {
     fun testQuery() {
         val accounts: List<Account> = query {
             selectFrom(Account::id, Account::userName)
-            where {
-                and(Account::age `in` (17..19))
-                and(Account::birthday between (start to end))
+            whereWith {
+                Account::age `in` (17..19) and (Account::birthday between (start to end))
             } orderBy -Account::id
             limit(2)
         }
@@ -303,26 +344,5 @@ class KotlinExample {
         }.also { println(it) }
     }
 
-    @Test
-    fun testUpdate2() {
-        println("更新前: ${Account::class.all.first()}")
-        update<Account> {
-            Account::id set 5
-            Account::age setRaw {
-                select(Account::age)
-                from(Account::class)
-                this.and(Account::age `in` (19..20))
-                limit(1)
-            }
-//            or
-//            Account::age.setRaw(Account::age){
-//                from(Account::class)
-//                this.and(Account::age `in` (19..20))
-//                limit(1)
-//            }
-            whereWith { Account::id eq 1 and (Account::userName eq "张三") }
-        }
-        println("更新后: ${Account::class.all.first()}")
-    }
 
 }

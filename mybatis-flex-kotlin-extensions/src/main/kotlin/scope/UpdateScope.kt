@@ -5,6 +5,7 @@ import com.mybatisflex.core.query.QueryWrapperAdapter
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.core.update.UpdateWrapper
 import com.mybatisflex.core.util.UpdateEntity
+import com.mybatisflex.kotlin.extensions.kproperty.column
 import kotlin.reflect.KProperty1
 
 class UpdateScope<T>(
@@ -22,7 +23,7 @@ class UpdateScope<T>(
     }
 
     infix fun <V> KProperty1<T, V>.setRaw(queryWrapper: QueryScope.() -> Unit) {
-        updateWrapper.setRaw(tableInfo.getColumnByProperty(this.name), queryScope().apply(queryWrapper))
+        updateWrapper.setRaw(tableInfo.getColumnByProperty(this.name), queryScope().apply(queryWrapper).limit(1))
     }
 
     fun <V> KProperty1<T, V>.setRaw(column: QueryColumn, queryWrapper: QueryScope.() -> Unit) {
@@ -33,10 +34,7 @@ class UpdateScope<T>(
     }
 
     fun <V> KProperty1<T, V>.setRaw(property: KProperty1<*, *>, queryWrapper: QueryScope.() -> Unit) {
-        setRaw {
-            queryWrapper()
-            select(property)
-        }
+        setRaw(property.column, queryWrapper)
     }
 
 }
