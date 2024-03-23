@@ -21,6 +21,7 @@ import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
+import com.mybatisflex.core.query.QueryTable
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Db.selectListByQuery
 import com.mybatisflex.core.row.Db.selectOneByQuery
@@ -68,10 +69,15 @@ val <E : Any> KClass<E>.baseMapperOrNull: BaseMapper<E>?
 
 val <E : Any> KClass<E>.tableInfo: TableInfo
     get() = requireNotNull(tableInfoOrNull) {
-        "Ehe class TableInfo cannot be found through $this" +
+        "The class TableInfo cannot be found through $this" +
                 " because the entity class corresponding to the generic used by this interface to inherit from BaseMapper cannot be found."
     }
 
+val <E: Any> KClass<E>.queryTable: QueryTable
+    get() {
+        val info = tableInfo
+        return QueryTable(info.schema, info.tableName)
+    }
 
 val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
     get() = if (isSubclassOf(BaseMapper::class)) {

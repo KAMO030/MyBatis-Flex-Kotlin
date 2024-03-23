@@ -58,7 +58,7 @@ fun QueryWrapper.selectProperties(vararg properties: KProperty<*>): QueryWrapper
 fun QueryWrapper.select(entityType: KClass<*>): QueryWrapper =
     this.select(*entityType.defaultColumns)
 
-val <T : QueryWrapper> T.self
+val <T : QueryWrapper> T.self: QueryWrapperDevelopEntry<T>
     get() = QueryWrapperDevelopEntry(this)
 
 inline fun QueryWrapper.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
@@ -121,9 +121,7 @@ value class QueryWrapperDevelopEntry<out T : QueryWrapper>(val wrapper: T) {
 
     var where: QueryCondition?
         get() = CPI.getWhereQueryCondition(wrapper)
-        set(value) = CPI.setWhereQueryCondition(wrapper, requireNotNull(value) {
-            "An error occurred while setting `where`, QueryCondition must not be empty."
-        })
+        set(value) = CPI.setWhereQueryCondition(wrapper, value)
 
     var groupBy: List<QueryColumn>
         get() = CPI.getGroupByColumns(wrapper) ?: emptyList()
@@ -135,6 +133,18 @@ value class QueryWrapperDevelopEntry<out T : QueryWrapper>(val wrapper: T) {
 
     val isDistinct: Boolean get() = MapperUtil.hasDistinct(selectColumns)
 
+    var joins: List<Join>
+        get() = CPI.getJoins(wrapper) ?: emptyList()
+        set(value) = CPI.setJoins(wrapper, value)
+
+    var hint: String?
+        get() = CPI.getHint(wrapper)
+        set(value) = CPI.setHint(wrapper, value)
+
+    var endFragments: List<String>
+        get() = CPI.getEndFragments(wrapper) ?: emptyList()
+        set(value) = CPI.setEndFragments(wrapper, value)
+
     var orderBys: List<QueryOrderBy>
         get() = CPI.getOrderBys(wrapper) ?: emptyList()
         set(value) = CPI.setOrderBys(wrapper, value)
@@ -144,15 +154,18 @@ value class QueryWrapperDevelopEntry<out T : QueryWrapper>(val wrapper: T) {
         set(value) = CPI.setContext(wrapper, value)
 
     val childSelect: List<QueryWrapper>
-        get() = CPI.getChildSelect(wrapper)
+        get() = CPI.getChildSelect(wrapper) ?: emptyList()
 
-    val valueArray: Array<out Any?> get() = CPI.getValueArray(wrapper)
+    val valueArray: Array<out Any?>
+        get() = CPI.getValueArray(wrapper) ?: emptyArray()
 
-    val joinValue: Array<out Any?> get() = CPI.getJoinValueArray(wrapper)
+    val joinValue: Array<out Any?>
+        get() = CPI.getJoinValueArray(wrapper) ?: emptyArray()
 
-    val conditionValue: Array<out Any?> get() = CPI.getConditionValueArray(wrapper)
+    val conditionValue: Array<out Any?>
+        get() = CPI.getConditionValueArray(wrapper) ?: emptyArray()
 
-    var dataSource: String
+    var dataSource: String?
         get() = CPI.getDataSource(wrapper)
         set(value) = CPI.setDataSource(wrapper, value)
 

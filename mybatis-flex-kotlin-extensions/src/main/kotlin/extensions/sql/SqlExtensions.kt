@@ -35,8 +35,10 @@ infix fun QueryColumn.eq(value: Any?): QueryCondition = this.eq(value)
 
 infix fun QueryColumn.ne(value: Any?): QueryCondition = this.ne(value)
 
+@JvmName("equals")
 infix fun QueryColumn.`=`(value: Any?): QueryCondition = this.eq(value)
 
+@JvmName("notEquals")
 infix fun QueryColumn.`!=`(value: Any?): QueryCondition = this.ne(value)
 
 infix fun QueryColumn.gt(value: Any?): QueryCondition = this.gt(value)

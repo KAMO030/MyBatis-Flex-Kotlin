@@ -16,6 +16,6 @@
 package com.mybatisflex.kotlin.annotation
 
 @Retention(AnnotationRetention.BINARY)
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @DslMarker
 internal annotation class MybatisFlexDsl
