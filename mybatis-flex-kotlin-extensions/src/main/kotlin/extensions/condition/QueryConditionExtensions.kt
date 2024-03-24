@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-@file:Suppress("MemberVisibilityCanBePrivate", "unused")
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.extensions.condition
 
 import com.mybatisflex.core.query.QueryCondition
