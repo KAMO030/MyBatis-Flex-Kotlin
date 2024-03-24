@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("MemberVisibilityCanBePrivate", "unused")
 package com.mybatisflex.kotlin.extensions.condition
 
 import com.mybatisflex.core.query.QueryCondition
@@ -47,3 +48,5 @@ fun QueryCondition.orAll(vararg conditions: QueryCondition): QueryCondition = th
 fun allAnd(vararg conditions: QueryCondition): QueryCondition = conditions.reduce(QueryCondition::and)
 
 fun allOr(vararg conditions: QueryCondition): QueryCondition = conditions.reduce(QueryCondition::or)
+
+fun emptyCondition(): QueryCondition = QueryCondition.createEmpty()
