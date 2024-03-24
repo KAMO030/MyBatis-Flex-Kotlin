@@ -164,3 +164,79 @@
       WHERE (`id` = 1 AND `user_name` = '张三' AND `age` = 18) 
          OR (`id` = 2 AND `user_name` = '李四' AND `age` = 19)
       ```
+
+## 更多可能性
+
+> Tips: 以下用法只是基于语言特性提供的参考，具体是否适用，请根据实际需求自行判断。
+
+1. 可以将SQL操作抽离到Mapper接口中，然后在Mapper接口中使用`query`,`filter`等方法:
+    ````kotlin
+    @JvmDefaultWithCompatibility
+    interface AccountMapper : BaseMapper<Account> {
+        fun findByAge(age: Int, vararg ids: Int): List<Account> = filter {
+            allAnd(
+                Account::age eq age,
+                (Account::id `in` ids.asList()).`when`(ids.isNotEmpty())
+            )
+        }
+    }
+   fun main() {
+       mapper<AccountMapper>.findByAge(18, 1, 2, 3)
+   }
+   ````
+   > 注意：此写法必须要打上`@JvmDefaultWithCompatibility`注解，否在不会生成接口的默认实现方法，导致报错
+2. 可以将SQL操作写到实体类的伴生对象中，然后通过实体类调用使用`query`,`filter`等方法:
+    ````kotlin
+    @Table("tb_account")
+    open class Account(
+        @Id var id: Int = -1,
+        var userName: String? = null,
+        var age: Int? = null,
+        var birthday: Date? = null,
+    ) {
+        companion object  {
+            fun findByAge2(age: Int, vararg ids: Int): List<Account> = query {
+                whereWith {
+                    allAnd(
+                        Account::age eq age,
+                        (Account::id `in` ids.asList()).`when`(ids.isNotEmpty())
+                    )
+                }
+            }
+        }
+   }
+   fun main() {
+       Account.findByAge(18, 1, 2, 3)
+   }
+   ````
+   > 比较适用于没有定义Mapper接口的情况
+
+3. 可以使用委托让SQL操作都挂在实体类上方便调用:
+    ````kotlin
+    @Table("tb_account")
+    open class Account(
+        @Id var id: Int = -1,
+        var userName: String? = null,
+        var age: Int? = null,
+        var birthday: Date? = null,
+    ) {
+        companion object : AccountMapper by mapper()
+   }
+   fun main() {
+        // from BaseMapper
+        Account.selectListByCondition(Account::age eq 18 and Account::id.`in`(1))
+   }
+   ````
+
+以上三种用法可以同时存在:
+
+````kotlin
+    fun main() {
+    // from AccountMapper
+    Account.findByAge(18, 1)
+    // from Account
+    Account.findByAge2(18, 1)
+    // from BaseMapper
+    Account.selectListByCondition(Account::age eq 18 and Account::id.`in`(1))
+}
+   ````

@@ -101,7 +101,7 @@ class KotlinExample {
         mapper<AccountMapper>().selectListByQuery(queryWrapper)
         // 【扩展后】
         // 无需注册Mapper与APT/KSP即可查询操作
-        val accountList: List<Account> = query {
+        query<Account> {
             select(Account::id, Account::userName)
             where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
         }
@@ -189,6 +189,9 @@ class KotlinExample {
         // 通过条件删除
         filterOne<Account> { Account::id eq 2 }?.remove {
             Account::userName eq it.userName and (Account::age le 18)
+        }
+        mapper<AccountMapper>().deleteByCondition {
+            Account::id between (1 to 2)
         }
         // 通过id删除
         // filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.removeById()
@@ -311,7 +314,12 @@ class KotlinExample {
 
     @Test
     fun testModelQuery() {
+        // from AccountMapper
         Account.findByAge(18, 1).forEach(::println)
+        // from Account
+        Account.findByAge2(18, 1).forEach(::println)
+        // from BaseMapper
+        Account.selectListByCondition(Account::age eq 18 and Account::id.`in`(1)).forEach(::println)
     }
 
     @Test

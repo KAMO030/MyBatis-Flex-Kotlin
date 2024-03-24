@@ -1,3 +1,4 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
 package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.query.QueryColumn
@@ -9,9 +10,10 @@ import com.mybatisflex.kotlin.extensions.kproperty.column
 import kotlin.reflect.KProperty1
 
 class UpdateScope<T>(
-    private val entityClass: Class<T>,
+    entityClass: Class<T>,
 ) : QueryWrapperAdapter<UpdateScope<T>>() {
 
+    @Suppress("UNCHECKED_CAST")
     @PublishedApi
     internal val updateWrapper: UpdateWrapper<T> = UpdateEntity.of(entityClass) as UpdateWrapper<T>
 

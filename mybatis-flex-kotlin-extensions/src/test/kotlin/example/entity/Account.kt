@@ -3,7 +3,9 @@ package com.mybatisflex.kotlin.example.entity
 import com.mybatisflex.annotation.Id
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.core.activerecord.Model
-import com.mybatisflex.kotlin.extensions.condition.and
+import com.mybatisflex.kotlin.example.mapper.AccountMapper
+import com.mybatisflex.kotlin.extensions.condition.allAnd
+import com.mybatisflex.kotlin.extensions.db.mapper
 import com.mybatisflex.kotlin.extensions.db.query
 import com.mybatisflex.kotlin.extensions.kproperty.eq
 import com.mybatisflex.kotlin.extensions.kproperty.`in`
@@ -27,12 +29,13 @@ open class Account(
     var age: Int? = null,
     var birthday: Date? = null,
 ) : Model<Account>() {
-    companion object {
-        fun findByAge(age: Int, vararg ids: Int): List<Account> = query {
+    companion object : AccountMapper by mapper() {
+        fun findByAge2(age: Int, vararg ids: Int): List<Account> = query {
             whereWith {
-                (Account::age eq age).and(ids.isNotEmpty()) {
-                    Account::id `in` ids.asList()
-                }
+                allAnd(
+                    Account::age eq age,
+                    (Account::id `in` ids.asList()).`when`(ids.isNotEmpty())
+                )
             }
         }
     }
