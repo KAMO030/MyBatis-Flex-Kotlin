@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.extensions.db
 
 import com.mybatisflex.core.BaseMapper
@@ -29,16 +30,21 @@ import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.kproperty.allColumns
+import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.kproperty.defaultColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
+import com.mybatisflex.kotlin.extensions.mapper.deleteByCondition
 import com.mybatisflex.kotlin.extensions.model.toEntities
 import com.mybatisflex.kotlin.extensions.model.toEntityPage
+import com.mybatisflex.kotlin.extensions.model.toRow
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.UpdateScope
 import com.mybatisflex.kotlin.scope.queryScope
 import com.mybatisflex.kotlin.scope.updateScope
+import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.isSubclassOf
 
 
@@ -266,17 +272,56 @@ inline fun paginateRows(
 
 
 //    update----------
-inline fun <reified E : Any> update(scope: UpdateScope<E>.() -> Unit): Int {
+inline fun <reified E : Any> update(scope: UpdateScope<E>.() -> Unit): Int =
     updateScope<E>().run {
         scope()
-        val entity = updateWrapper.toEntity()
         return try {
-            E::class.baseMapper.updateByQuery(entity, this)
+            E::class.baseMapper.updateByQuery(updateWrapper.toEntity(), this)
         } catch (e: MybatisFlexException) {
-            TODO()
-//            E::class.tableInfo.let {
-//                Db.updateByQuery(it.schema, it.tableName, entity.toRow(), this)
-//            }
+            E::class.tableInfo.let {
+                Db.updateByQuery(it.schema, it.tableName, updateWrapper.toRow(), this)
+            }
+        }
+    }
+
+//    delete----------
+/**
+ * 根据主键删除数据。如果是多个主键的情况下，请直接传入多个例如 ：deleteById(1,"zs",100)
+ * 如果没有自定义Mapper时需要注意实体类中主键的顺序与传入的id顺序一致
+ *
+ */
+inline fun <reified E : Any> deleteById(vararg id: Serializable) =
+    try {
+        E::class.baseMapper.deleteById(id)
+    } catch (e: MybatisFlexException) {
+        E::class.tableInfo.let {
+            val row = Row.ofKey(it.primaryColumns.joinToString(separator = ","), id)
+            Db.deleteById(it.schema, it.tableName, row)
+        }
+    }
+
+/**
+ * 根据map的key对应的字段比较删除
+ */
+inline fun <reified E : Any> deleteByMap(vararg propPairs: Pair<KProperty1<E, Serializable>, Serializable>): Int {
+    val propMap = propPairs.associate { id -> id.first.column.name to id.second }
+    return try {
+        E::class.baseMapper.deleteByMap(propMap)
+    } catch (e: MybatisFlexException) {
+        E::class.tableInfo.let {
+            Db.deleteByMap(it.schema, it.tableName, propMap)
         }
     }
 }
+
+/**
+ * 根据返回的条件删除
+ */
+inline fun <reified E : Any> deleteWith(noinline condition: () -> QueryCondition) =
+    try {
+        E::class.baseMapper.deleteByCondition(condition)
+    } catch (e: MybatisFlexException) {
+        E::class.tableInfo.let {
+            Db.deleteByCondition(it.schema, it.tableName, condition())
+        }
+    }

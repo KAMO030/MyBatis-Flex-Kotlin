@@ -134,6 +134,28 @@
         }
       ```
 
+## 删除
+
+```kotlin
+        @Test
+fun testDelete() {
+    // 根据返回的条件删除
+    deleteWith<Account> { Account::id eq 2 }
+    // 根据主键删除
+    deleteById<Account>(2)
+    // 通过map的key对应的字段比较删除
+    deleteByMap(Account::id to 2)
+    // 根据aseMapper删除 (需要注册Mapper接口))
+    mapper<AccountMapper>().deleteByCondition { Account::id eq 2 }
+    // 根据Model的id删除 (需要注册Mapper接口))
+    Account(id = 2).removeById()
+    all<Account>().forEach(::println)
+}
+```
+
+> 注意：
+> * `deleteById`方法如果是多个主键的情况下，请直接传入多个例如: deleteById(1,"zs",100)
+> * 如果没有注册自定义Mapper情况下，在使用`deleteById`方法时需要注意实体类中主键的顺序与传入的id顺序一致
 ## 操作符
 
 1. `and`，`or` 等条件关联的中缀方法，返回值为`QueryCondition`

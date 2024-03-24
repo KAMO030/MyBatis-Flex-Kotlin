@@ -42,6 +42,4 @@ class UpdateScope<T>(
 }
 
 
-inline fun <reified T> updateScope(): UpdateScope<T> {
-    return UpdateScope(T::class.java)
-}
+inline fun <reified T> updateScope(): UpdateScope<T> = UpdateScope(T::class.java)

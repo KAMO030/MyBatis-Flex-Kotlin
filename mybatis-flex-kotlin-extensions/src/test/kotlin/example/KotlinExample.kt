@@ -142,7 +142,7 @@ class KotlinExample {
 
     @Test
     fun testUpdate2() {
-        println("更新前: ${Account::class.all.first()}")
+        println("更新前: ${all<Account>().first()}")
         filterOne<Account>(Account::age) {
             Account::age `in` (19..20)
         }
@@ -181,20 +181,21 @@ class KotlinExample {
 //        Account::class.baseMapper.updateByCondition(account){
 //            Account::age `in` (19..20)
 //        }
-        println("更新后: ${Account::class.all.first()}")
+        println("更新后: ${all<Account>().first()}")
     }
 
     @Test
     fun testDelete() {
-        // 通过条件删除
-        filterOne<Account> { Account::id eq 2 }?.remove {
-            Account::userName eq it.userName and (Account::age le 18)
-        }
-        mapper<AccountMapper>().deleteByCondition {
-            Account::id between (1 to 2)
-        }
-        // 通过id删除
-        // filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.removeById()
+        // 根据返回的条件删除
+        deleteWith<Account> { Account::id eq 2 }
+        // 根据主键删除
+        deleteById<Account>(2)
+        // 通过map的key对应的字段比较删除
+        deleteByMap(Account::id to 2)
+        // 根据aseMapper删除 (需要注册Mapper接口))
+        //  mapper<AccountMapper>().deleteByCondition { Account::id eq 2 }
+        // 根据Model的id删除 (需要注册Mapper接口))
+        // Account(id = 2).removeById()
         all<Account>().forEach(::println)
     }
 

@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.extensions.model
 
 import com.mybatisflex.core.activerecord.MapperModel
@@ -38,11 +39,11 @@ fun <T : Any> T.toRow(): Row {
     val tableInfo: TableInfo = TableInfoFactory.ofEntityClass(javaClass)
     val metaObject = EntityMetaObject.forObject(this, tableInfo.reflectorFactory)
     val row = Row()
-    tableInfo.primaryKeyList.forEach {
-        row[it.column] = metaObject.getValue(it.property)
+    tableInfo.primaryKeyList.forEach { idInfo ->
+        metaObject.getValue(idInfo.property)?.let { row[idInfo.column] = it }
     }
-    tableInfo.columnInfoList.forEach {
-        row[it.column] = metaObject.getValue(it.property)
+    tableInfo.columnInfoList.forEach { idInfo ->
+        metaObject.getValue(idInfo.property)?.let { row[idInfo.column] = it }
     }
     return row
 }
