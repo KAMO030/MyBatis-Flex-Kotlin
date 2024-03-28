@@ -295,9 +295,9 @@ inline fun paginateRows(
  */
 inline fun <reified E : Any> update(scope: UpdateScope<E>.() -> Unit): Int =
     updateScope<E>().apply(scope).run {
-        E::class.baseMapperOrNull?.updateByQuery(updateWrapper.toEntity(), this)
+        E::class.baseMapperOrNull?.updateByQuery(updateRow.toEntity(E::class.java), this)
             ?: E::class.tableInfo.let {
-                Db.updateByQuery(it.schema, it.tableName, updateWrapper.toRow(), this)
+                Db.updateByQuery(it.schema, it.tableName, updateRow, this)
             }
     }
 

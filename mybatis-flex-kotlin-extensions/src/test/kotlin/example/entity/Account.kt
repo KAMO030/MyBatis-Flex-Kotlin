@@ -23,7 +23,7 @@ import java.util.*
  */
 
 @Table("tb_account")
-open class Account(
+class Account(
     @Id var id: Int = -1,
     var userName: String? = null,
     var age: Int? = null,
