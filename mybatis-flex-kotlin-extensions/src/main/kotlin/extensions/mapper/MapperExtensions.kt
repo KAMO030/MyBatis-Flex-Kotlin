@@ -13,12 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.extensions.mapper
 
 import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.activerecord.MapperModel
 import com.mybatisflex.core.field.FieldQueryBuilder
 import com.mybatisflex.core.query.QueryCondition
+import com.mybatisflex.core.util.ClassUtil
 import com.mybatisflex.kotlin.extensions.db.baseMapper
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
@@ -79,7 +81,7 @@ val <E : Any> KClass<E>.all: List<E>
 
 //    save-----------
 inline fun <reified E : MapperModel<E>> save(build: E.() -> Unit): Boolean =
-    E::class.java.newInstance().apply(build).run { save() }
+    ClassUtil.newInstance(E::class.java).apply(build).run { save() }
 
 //    update-----------
 inline fun <reified E : MapperModel<E>> E.update(conditionBlock: (E) -> QueryCondition): Int =

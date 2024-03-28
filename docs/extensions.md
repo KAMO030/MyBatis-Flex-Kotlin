@@ -1,8 +1,8 @@
 # 简单查询与扩展
 
-> Tips: 阅读本文档时请已核心库使用文档为主，此文档为辅，扩展模块只是基于核心库的提供了符合Kotlin的便捷函数,
-> 并不是另立门户，二者可以混用。
-
+> Tips:
+> * 阅读本文档时请已核心库使用文档为主，此文档为辅，扩展模块只是基于核心库的提供了符合Kotlin的便捷函数, 并不是另立门户，二者可以混用。
+> * xxxWith命名的方法通常入参数为: `condition: () -> QueryCondition` 条件构造函数
 ## 获取mapper与tableInfo
 
 - **mapper**
@@ -47,7 +47,7 @@
       ```
 
 3. `query<E>(QueryScope.() -> Unit): List<E>`: 较复杂查泛型对应的表的数据 (如分组,分页,排序等)（无需注册Mapper接口）
-   > 除此之外还有queryOne(只查一个)，
+   > 除此之外还有queryOne(只查一个, 自核心库1.7.7起会自动limit 1)，
    > queryRows(强制走默认RowMapper返回值为Row)，
    > queryRow(前两者结合)
 
@@ -116,10 +116,8 @@
             }?.age
       ```
    > 注意：
-   > * 更新的实体类必须是open class，例如data class会报错，因为核心库中的`UpdateWrapper`使用了动态代理，而data
-       class的构造函数是final，从而导致的
    > * 用set子查询时flex核心库低版本存在[BUG](https://gitee.com/mybatis-flex/mybatis-flex/issues/I96XJA)
-       会导致子查询参数丢失问题，需要更新核心库到1.8.2以上(不包含)版本
+       会导致子查询参数丢失问题，需要更新核心库到1.8.4及以上版本
 2. 使用原生的baseMapper的扩展方法更新:
       ```kotlin
         val account = Account(
@@ -137,25 +135,48 @@
 ## 删除
 
 ```kotlin
-        @Test
+    @Test
 fun testDelete() {
-    // 根据返回的条件删除
-    deleteWith<Account> { Account::id eq 2 }
-    // 根据主键删除
-    deleteById<Account>(2)
-    // 通过map的key对应的字段比较删除
-    deleteByMap(Account::id to 2)
-    // 根据aseMapper删除 (需要注册Mapper接口))
-    mapper<AccountMapper>().deleteByCondition { Account::id eq 2 }
-    // 根据Model的id删除 (需要注册Mapper接口))
-    Account(id = 2).removeById()
-    all<Account>().forEach(::println)
+   // 根据返回的条件删除
+   deleteWith<Account> { Account::id eq 2 }
+   // 根据主键删除
+   deleteById<Account>(2)
+   // 通过map的key对应的字段比较删除
+   deleteByMap(Account::id to 2)
+   // 根据aseMapper删除 (需要注册Mapper接口))
+   mapper<AccountMapper>().deleteByCondition { Account::id eq 2 }
+   // 根据Model的id删除 (需要注册Mapper接口))
+   Account(id = 2).removeById()
+   all<Account>().forEach(::println)
 }
 ```
 
 > 注意：
 > * `deleteById`方法如果是多个主键的情况下，请直接传入多个例如: deleteById(1,"zs",100)
 > * 如果没有注册自定义Mapper情况下，在使用`deleteById`方法时需要注意实体类中主键的顺序与传入的id顺序一致
+
+## 插入
+
+1. `insert(E): Int`: 插入单条数据 （无需注册Mapper接口）
+    ```kotlin
+        insert(Account(3, "kamo", 20, Date()))
+    ```
+2. `inline fun <reified E : MapperModel<E>> save(build: E.() -> Unit): Boolean`: 插入单条数据,需要类型是MapperModel的子类并注册了Mapper接口
+    ```kotlin
+        save<Account> {
+            id = 3
+            userName = "kamo"
+            age = 20
+            birthday = Date()
+        }
+    ```
+   > 注意: 无匹配的构造方法时可能没办法自动new对象导致错误，可以添加无参构造解决
+
+   > Tips: 此方法命名为save而不是insert，是因为实体类型必须是MapperModel的子类，统一MapperModel的命名
+3. 使用原生的baseMapper的扩展方法查询:
+      ```kotlin
+        Account::class.baseMapper.insert(Account(3, "kamo", 20, Date()))
+      ```
 ## 操作符
 
 1. `and`，`or` 等条件关联的中缀方法，返回值为`QueryCondition`
@@ -210,7 +231,7 @@ fun testDelete() {
 2. 可以将SQL操作写到实体类的伴生对象中，然后通过实体类调用使用`query`,`filter`等方法:
     ````kotlin
     @Table("tb_account")
-    open class Account(
+    class Account(
         @Id var id: Int = -1,
         var userName: String? = null,
         var age: Int? = null,
@@ -236,7 +257,7 @@ fun testDelete() {
 3. 可以使用委托让SQL操作都挂在实体类上方便调用:
     ````kotlin
     @Table("tb_account")
-    open class Account(
+    class Account(
         @Id var id: Int = -1,
         var userName: String? = null,
         var age: Int? = null,

@@ -125,7 +125,8 @@ class KotlinExample {
             age = 20
             birthday = Date()
         }
-
+//        insert(Account(3, "kamo", 20, Date()))
+//        Account::class.baseMapper.insert(Account(3, "kamo", 20, Date()))
         filterOne<Account> { Account::id eq 3 }?.also(::println)
     }
 
