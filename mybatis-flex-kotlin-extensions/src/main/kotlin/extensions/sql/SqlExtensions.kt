@@ -41,12 +41,6 @@ infix fun QueryColumn.ne(value: Any?): QueryCondition = this.ne(value)
 @Deprecated("使用 ne 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
 infix fun QueryColumn.ne(value: Nothing?): QueryCondition = this.ne(value)
 
-@JvmName("equals")
-infix fun QueryColumn.`=`(value: Any?): QueryCondition = this.eq(value)
-
-@JvmName("notEquals")
-infix fun QueryColumn.`!=`(value: Any?): QueryCondition = this.ne(value)
-
 infix fun QueryColumn.gt(value: Any?): QueryCondition = this.gt(value)
 
 infix fun QueryColumn.ge(value: Any?): QueryCondition = this.ge(value)
