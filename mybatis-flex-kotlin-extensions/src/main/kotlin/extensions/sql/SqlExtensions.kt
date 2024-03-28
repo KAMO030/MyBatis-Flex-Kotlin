@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.query.*

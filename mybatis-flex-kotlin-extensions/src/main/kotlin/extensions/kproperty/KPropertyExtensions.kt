@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.extensions.kproperty
 
 import com.mybatisflex.annotation.Column
@@ -246,11 +247,11 @@ infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: Pair<T, T>): Query
 
 infix fun KProperty<String?>.like(other: String): QueryCondition = column.likeRaw(other)
 
+infix fun KProperty<String?>.contains(other: String): QueryCondition = column.like(other)
+
 infix fun KProperty<String?>.startsWith(other: String): QueryCondition = column.likeLeft(other)
 
 infix fun KProperty<String?>.endsWith(other: String): QueryCondition = column.likeRight(other)
-
-infix fun KProperty<String?>.contains(other: String): QueryCondition = column.like(other)
 
 infix fun KProperty<String?>.notLike(other: String): QueryCondition =
     QueryCondition.create(column, SqlConsts.NOT_LIKE, other)
