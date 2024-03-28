@@ -14,10 +14,10 @@
  *  limitations under the License.
  */
 @file:Suppress("unused")
+
 package com.mybatisflex.kotlin.extensions.db
 
 import com.mybatisflex.core.BaseMapper
-import com.mybatisflex.core.exception.MybatisFlexException
 import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
@@ -79,7 +79,7 @@ val <E : Any> KClass<E>.tableInfo: TableInfo
                 " because the entity class corresponding to the generic used by this interface to inherit from BaseMapper cannot be found."
     }
 
-val <E: Any> KClass<E>.queryTable: QueryTable
+val <E : Any> KClass<E>.queryTable: QueryTable
     get() {
         val info = tableInfo
         return QueryTable(info.schema, info.tableName)
@@ -101,17 +101,14 @@ val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
 inline fun <reified E : Any> queryOne(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
-): E? = E::class.baseMapperOrNull?.let {
-    val scope = QueryScope().apply(init)
-    if (!scope.hasSelect() && columns.isNotEmpty()) scope.select(*columns)
-    it.selectOneByQuery(scope)
-} ?: E::class.tableInfo.let {
-    queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
-        init()
-        // 如果未调用select方法，则默认查询所有列
-        if (this.hasSelect().not()) select(E::class.allColumns)
-    }?.toEntity(E::class.java)
-}
+): E? = E::class.baseMapperOrNull?.selectOneByQuery(queryScope(columns = columns, init = init))
+    ?: E::class.tableInfo.let {
+        queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
+            init()
+            // 如果未调用select方法，则默认查询所有列
+            if (this.hasSelect().not()) select(E::class.allColumns)
+        }?.toEntity(E::class.java)
+    }
 
 /**
  * 通过条件查询多条数据
@@ -121,17 +118,14 @@ inline fun <reified E : Any> queryOne(
 inline fun <reified E : Any> query(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
-): List<E> = try {
-    E::class.baseMapper.selectListByQuery(queryScope(columns = columns, init = init))
-} catch (e: MybatisFlexException) {
-    E::class.tableInfo.run {
+): List<E> = E::class.baseMapperOrNull?.selectListByQuery(queryScope(columns = columns, init = init))
+    ?: E::class.tableInfo.run {
         queryRows(schema = schema, tableName = tableName, columns = columns) {
             init()
             // 如果未调用select方法，则默认查询所有列
             if (this.hasSelect().not()) select(*E::class.defaultColumns)
         }.toEntities()
     }
-}
 
 /**
  * 通过条件查询一条数据
@@ -230,39 +224,60 @@ inline fun <reified E : Any> filter(
 inline fun <reified E : Any> all() = filter<E>(condition = QueryCondition::createEmpty)
 
 //    paginate----------
+/**
+ * 分页查询
+ * @param pageNumber 当前页码
+ * @param pageSize 每页大小
+ * @param totalRow 总数居数量
+ * @param init 查询作用域初始化函数
+ */
 inline fun <reified E : Any> paginate(
     pageNumber: Number,
     pageSize: Number,
     totalRow: Number? = null,
     init: QueryScope.() -> Unit
 ): Page<E> = paginate(
-    totalRow?.let { Page(pageNumber, pageSize, it) } ?: Page<E>(pageNumber, pageSize),
-    init)
+    totalRow?.let { Page(pageNumber, pageSize, it) }
+        ?: Page<E>(pageNumber, pageSize), init)
 
+/**
+ * 分页查询
+ * @param pageNumber 当前页码
+ * @param pageSize 每页大小
+ * @param totalRow 总数居数量
+ * @param condition 查询条件函数
+ */
 inline fun <reified E : Any> paginateWith(
     pageNumber: Number,
     pageSize: Number,
     totalRow: Number? = null,
-    queryConditionGet: () -> QueryCondition
+    condition: () -> QueryCondition
 ): Page<E> = paginate(
     totalRow?.let { Page(pageNumber, pageSize, it) } ?: Page<E>(pageNumber, pageSize)
-) { where(queryConditionGet()) }
+) { where(condition()) }
 
-
+/**
+ * 分页查询
+ * @param page 分页对象
+ * @param init 查询作用域初始化函数
+ */
 inline fun <reified E : Any> paginate(
     page: Page<E>,
     init: QueryScope.() -> Unit
-): Page<E> = try {
-    E::class.baseMapper.paginate(page, queryScope(init = init))
-} catch (e: MybatisFlexException) {
-    E::class.tableInfo.run {
+): Page<E> = E::class.baseMapperOrNull?.paginate(page, queryScope(init = init))
+    ?: E::class.tableInfo.run {
         paginateRows(schema, tableName, Page(page.pageNumber, page.pageSize)) {
             init()
             if (this.hasSelect().not()) select(*E::class.defaultColumns)
         }.toEntityPage()
     }
-}
 
+/**
+ * 分页查询Row
+ * @param schema 模式
+ * @param tableName 表名
+ * @param init 查询作用域初始化函数
+ */
 inline fun paginateRows(
     schema: String? = null,
     tableName: String? = null,
@@ -272,56 +287,65 @@ inline fun paginateRows(
 
 
 //    update----------
+
+/**
+ * 更新数据
+ * @param scope 更新作用域
+ * @since 1.0.8
+ */
 inline fun <reified E : Any> update(scope: UpdateScope<E>.() -> Unit): Int =
-    updateScope<E>().run {
-        scope()
-        return try {
-            E::class.baseMapper.updateByQuery(updateWrapper.toEntity(), this)
-        } catch (e: MybatisFlexException) {
-            E::class.tableInfo.let {
+    updateScope<E>().apply(scope).run {
+        E::class.baseMapperOrNull?.updateByQuery(updateWrapper.toEntity(), this)
+            ?: E::class.tableInfo.let {
                 Db.updateByQuery(it.schema, it.tableName, updateWrapper.toRow(), this)
             }
-        }
     }
 
 //    delete----------
 /**
  * 根据主键删除数据。如果是多个主键的情况下，请直接传入多个例如 ：deleteById(1,"zs",100)
  * 如果没有自定义Mapper时需要注意实体类中主键的顺序与传入的id顺序一致
- *
+ * @since 1.0.8
  */
 inline fun <reified E : Any> deleteById(vararg id: Serializable) =
-    try {
-        E::class.baseMapper.deleteById(id)
-    } catch (e: MybatisFlexException) {
-        E::class.tableInfo.let {
-            val row = Row.ofKey(it.primaryColumns.joinToString(separator = ","), id)
-            Db.deleteById(it.schema, it.tableName, row)
-        }
+    E::class.baseMapperOrNull?.deleteById(id) ?: E::class.tableInfo.let {
+        Db.deleteById(it.schema, it.tableName, id)
     }
 
 /**
  * 根据map的key对应的字段比较删除
+ * @param propPairs 删除条件键值对
+ * @sample <p>deleteByMap(age to 18, name to "zs")</p>
+ * @since 1.0.8
  */
 inline fun <reified E : Any> deleteByMap(vararg propPairs: Pair<KProperty1<E, Serializable>, Serializable>): Int {
     val propMap = propPairs.associate { id -> id.first.column.name to id.second }
-    return try {
-        E::class.baseMapper.deleteByMap(propMap)
-    } catch (e: MybatisFlexException) {
-        E::class.tableInfo.let {
+    return E::class.baseMapperOrNull?.deleteByMap(propMap)
+        ?: E::class.tableInfo.let {
             Db.deleteByMap(it.schema, it.tableName, propMap)
         }
-    }
 }
 
 /**
  * 根据返回的条件删除
+ * @param condition 条件函数
+ * @since 1.0.8
  */
 inline fun <reified E : Any> deleteWith(noinline condition: () -> QueryCondition) =
-    try {
-        E::class.baseMapper.deleteByCondition(condition)
-    } catch (e: MybatisFlexException) {
-        E::class.tableInfo.let {
+    E::class.baseMapperOrNull?.deleteByCondition(condition)
+        ?: E::class.tableInfo.let {
             Db.deleteByCondition(it.schema, it.tableName, condition())
         }
-    }
+
+
+//    insert----------
+/**
+ * 插入一条数据
+ * @param entity 实体对象
+ * @since 1.0.8
+ */
+inline fun <reified E : Any> insert(entity: E): Int =
+    E::class.baseMapperOrNull?.insert(entity)
+        ?: E::class.tableInfo.let {
+            Db.insert(it.schema, it.tableName, entity.toRow())
+        }
