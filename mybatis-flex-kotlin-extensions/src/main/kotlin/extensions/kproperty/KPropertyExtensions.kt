@@ -17,7 +17,6 @@
 package com.mybatisflex.kotlin.extensions.kproperty
 
 import com.mybatisflex.annotation.Column
-import com.mybatisflex.core.constant.SqlConsts
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.condition.and
@@ -187,10 +186,10 @@ fun <T : KProperty<*>> Array<T>.toQueryColumns(): Array<out QueryColumn> =
 fun <T : KProperty<*>> Iterable<T>.toQueryColumns(): Array<out QueryColumn> =
     map { it.column }.toTypedArray()
 
+// order
 fun <T> KProperty<T?>.toOrd(order: Order = Order.ASC): QueryOrderBy = column.toOrd(order)
 
-infix fun <T> KProperty<T?>.`in`(other: QueryWrapper): QueryCondition = column.`in`(other)
-
+// comparable
 infix fun <T> KProperty<T?>.eq(other: T): QueryCondition = column.eq(other)
 
 @Deprecated("使用 eq 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
@@ -233,6 +232,7 @@ infix fun <T : Comparable<T>> KProperty<T?>.le(other: QueryColumn): QueryConditi
 
 infix fun <T : Comparable<T>> KProperty<T?>.le(other: KProperty<T?>): QueryCondition = column.le(other)
 
+// between
 infix fun <T : Comparable<T>> KProperty<T?>.between(other: ClosedRange<T>): QueryCondition =
     column.between(other.start, other.endInclusive)
 
@@ -245,16 +245,31 @@ infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: ClosedRange<T>): Q
 infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: Pair<T, T>): QueryCondition =
     column.notBetween(other.first, other.second)
 
-infix fun KProperty<String?>.like(other: String): QueryCondition = column.likeRaw(other)
+// like
+infix fun KProperty<String?>.like(other: Any): QueryCondition = column.like(other)
 
-infix fun KProperty<String?>.contains(other: String): QueryCondition = column.like(other)
+infix fun KProperty<String?>.likeRaw(other: Any): QueryCondition = column.likeRaw(other)
 
-infix fun KProperty<String?>.startsWith(other: String): QueryCondition = column.likeLeft(other)
+infix fun KProperty<String?>.likeLeft(other: Any): QueryCondition = column.likeLeft(other)
 
-infix fun KProperty<String?>.endsWith(other: String): QueryCondition = column.likeRight(other)
+infix fun KProperty<String?>.likeRight(other: Any): QueryCondition = column.likeRight(other)
 
-infix fun KProperty<String?>.notLike(other: String): QueryCondition =
-    QueryCondition.create(column, SqlConsts.NOT_LIKE, other)
+infix fun KProperty<String?>.contains(other: Any): QueryCondition = column.like(other)
+
+infix fun KProperty<String?>.startsWith(other: Any): QueryCondition = column.likeLeft(other)
+
+infix fun KProperty<String?>.endsWith(other: Any): QueryCondition = column.likeRight(other)
+
+infix fun KProperty<String?>.notLike(other: Any): QueryCondition = column.notLike(other)
+
+infix fun KProperty<String?>.notLikeRaw(other: Any): QueryCondition = column.notLikeRaw(other)
+
+infix fun KProperty<String?>.notLikeLeft(other: Any): QueryCondition = column.notLikeLeft(other)
+
+infix fun KProperty<String?>.notLikeRight(other: Any): QueryCondition = column.notLikeRight(other)
+
+// in
+infix fun <T> KProperty<T?>.`in`(other: QueryWrapper): QueryCondition = column.`in`(other)
 
 infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: ClosedRange<T>): QueryCondition = this inRange other
 
@@ -304,10 +319,12 @@ infix fun <T : Comparable<T>> KProperty<T?>.inRange(other: ClosedRange<out T>): 
     )
 }
 
+// as
 infix fun <T> KProperty<T?>.alias(other: String): QueryColumn = column.`as`(other)
 
 infix fun <T> KProperty<T?>.`as`(other: String): QueryColumn = column.`as`(other)
 
+// operator
 operator fun <T : Number> KProperty<T?>.plus(other: QueryColumn): QueryColumn = column + other
 
 operator fun <T : Number> KProperty<T?>.plus(other: KProperty<T?>): QueryColumn = column + other.column
@@ -336,6 +353,7 @@ operator fun <T : Comparable<T>> KProperty<T?>.unaryPlus(): QueryOrderBy = this.
 
 operator fun <T : Comparable<T>> KProperty<T?>.unaryMinus(): QueryOrderBy = this.column.desc()
 
+// is
 val KProperty<*>.isNull: QueryCondition get() = column.isNull
 
 val KProperty<*>.isNotNull: QueryCondition get() = column.isNotNull

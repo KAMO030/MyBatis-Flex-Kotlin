@@ -29,9 +29,24 @@ import kotlin.reflect.KProperty
  * @date 2023/8/7
  */
 
-//Comparable------
-infix fun QueryColumn.like(value: String): QueryCondition = this.like(value)
+//like------
+infix fun QueryColumn.like(value: Any): QueryCondition = this.like(value)
 
+infix fun QueryColumn.likeRaw(value: Any): QueryCondition = this.likeRaw(value)
+
+infix fun QueryColumn.likeLeft(value: Any): QueryCondition = this.likeLeft(value)
+
+infix fun QueryColumn.likeRight(value: Any): QueryCondition = this.likeRight(value)
+
+infix fun QueryColumn.notLike(other: Any): QueryCondition = this.notLike(other)
+
+infix fun QueryColumn.notLikeRaw(other: Any): QueryCondition = this.notLikeRaw(other)
+
+infix fun QueryColumn.notLikeLeft(other: Any): QueryCondition = this.notLikeLeft(other)
+
+infix fun QueryColumn.notLikeRight(other: Any): QueryCondition = this.notLikeRight(other)
+
+//comparable
 infix fun QueryColumn.eq(value: Any?): QueryCondition = this.eq(value)
 
 @Deprecated("使用 eq 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
@@ -50,7 +65,7 @@ infix fun QueryColumn.le(value: Any?): QueryCondition = this.le(value)
 
 infix fun QueryColumn.lt(value: Any?): QueryCondition = this.lt(value)
 
-//range-----
+//range
 infix fun QueryColumn.between(pair: Pair<Any?, Any?>): QueryCondition = this.between(pair.first, pair.second)
 
 infix fun QueryColumn.notBetween(pair: Pair<Any?, Any?>): QueryCondition = this.notBetween(pair.first, pair.second)
@@ -84,10 +99,10 @@ infix fun <C : QueryColumn, A : Any> Pair<Pair<C, C>, C>.inTriple(others: Iterab
     others.map { this.first.first.eq(it.first.first) and this.first.second.eq(it.first.second) and this.second.eq(it.second) }
         .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
-//as-----
+//as
 infix fun QueryWrapper.`as`(alias: String?): QueryWrapper = this.`as`(alias)
 
-//join------
+//join
 infix fun <M> Joiner<M>.`as`(alias: String?): Joiner<M> = this.`as`(alias)
 
 infix fun <M> Joiner<M>.on(on: String?): M = this.on(on)
@@ -96,7 +111,7 @@ infix fun <M> Joiner<M>.on(on: QueryCondition?): M = this.on(on)
 
 infix fun <M> Joiner<M>.on(consumer: Consumer<QueryWrapper?>): M = this.on(consumer)
 
-// orderBy------
+// orderBy
 infix fun QueryWrapper.orderBy(orderBys: Collection<QueryOrderBy?>): QueryWrapper =
     this.orderBy(*orderBys.toTypedArray())
 
@@ -106,13 +121,14 @@ operator fun QueryColumn.unaryPlus(): QueryOrderBy = this.asc()
 
 operator fun QueryColumn.unaryMinus(): QueryOrderBy = this.desc()
 
-// limit------
+// limit
 infix fun QueryWrapper.limit(rows: Number): QueryWrapper = this.limit(rows)
 
 infix fun QueryWrapper.limit(pair: Pair<Number?, Number?>): QueryWrapper = this.limit(pair.first, pair.second)
 
 infix fun QueryWrapper.limit(range: IntRange): QueryWrapper = this.limit(range.first, range.last)
 
+// operator
 operator fun QueryColumn.plus(other: QueryColumn): QueryColumn = add(other)
 
 operator fun QueryColumn.plus(other: Number): QueryColumn = add(other)
@@ -137,6 +153,7 @@ operator fun QueryColumn.div(other: Number): QueryColumn = divide(other)
 
 operator fun QueryColumn.div(other: KProperty<Number?>): QueryColumn = divide(other.column)
 
+// order
 fun QueryColumn.toOrd(order: Order = Order.ASC): QueryOrderBy = when (order) {
     Order.ASC -> asc()
     Order.DESC -> desc()
