@@ -40,7 +40,6 @@ import com.mybatisflex.kotlin.extensions.model.toRow
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.UpdateScope
 import com.mybatisflex.kotlin.scope.queryScope
-import com.mybatisflex.kotlin.scope.updateScope
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -136,7 +135,7 @@ inline fun queryRow(
     schema: String? = null,
     tableName: String? = null,
     vararg columns: QueryColumn,
-    init: QueryScope.() -> Unit
+    init: QueryScope.() -> Unit = {}
 ): Row? = selectOneByQuery(
     schema,
     tableName,
@@ -152,7 +151,7 @@ inline fun queryRows(
     schema: String? = null,
     tableName: String? = null,
     vararg columns: QueryColumn,
-    init: QueryScope.() -> Unit
+    init: QueryScope.() -> Unit = {}
 ): List<Row> = selectListByQuery(
     schema, tableName, queryScope(columns = columns, init = init)
 )
@@ -294,7 +293,7 @@ inline fun paginateRows(
  * @since 1.0.8
  */
 inline fun <reified E : Any> update(scope: UpdateScope<E>.() -> Unit): Int =
-    updateScope<E>().apply(scope).run {
+    UpdateScope<E>().apply(scope).run {
         E::class.baseMapperOrNull?.updateByQuery(updateRow.toEntity(E::class.java), this)
             ?: E::class.tableInfo.let {
                 Db.updateByQuery(it.schema, it.tableName, updateRow, this)

@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 @file:Suppress("unused")
+
 package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.query.*
@@ -103,13 +104,18 @@ infix fun <C : QueryColumn, A : Any> Pair<Pair<C, C>, C>.inTriple(others: Iterab
 infix fun QueryWrapper.`as`(alias: String?): QueryWrapper = this.`as`(alias)
 
 //join
-infix fun <M> Joiner<M>.`as`(alias: String?): Joiner<M> = this.`as`(alias)
+@Deprecated(
+    "核心库已废除 Joiner.as 方法。详情请看官方库描述。",
+    replaceWith = ReplaceWith("this.`as`(alias)"),
+    level = DeprecationLevel.ERROR,
+)
+infix fun <W : QueryWrapper> Joiner<W>.`as`(alias: String?): Joiner<W> = this.`as`(alias)
 
-infix fun <M> Joiner<M>.on(on: String?): M = this.on(on)
+infix fun <W : QueryWrapper> Joiner<W>.on(on: String?): W = this.on(on)
 
-infix fun <M> Joiner<M>.on(on: QueryCondition?): M = this.on(on)
+infix fun <W : QueryWrapper> Joiner<W>.on(on: QueryCondition?): W = this.on(on)
 
-infix fun <M> Joiner<M>.on(consumer: Consumer<QueryWrapper?>): M = this.on(consumer)
+infix fun <W : QueryWrapper> Joiner<W>.on(consumer: Consumer<QueryWrapper?>): W = this.on(consumer)
 
 // orderBy
 infix fun QueryWrapper.orderBy(orderBys: Collection<QueryOrderBy?>): QueryWrapper =

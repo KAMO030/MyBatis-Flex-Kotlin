@@ -20,6 +20,7 @@ import com.mybatisflex.annotation.Column
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.condition.and
+import com.mybatisflex.kotlin.extensions.db.queryTable
 import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.sql.*
 import com.mybatisflex.kotlin.vec.Order
@@ -59,26 +60,6 @@ val KProperty<*>.column: QueryColumn
         }.type.jvmErasure.tableInfo.getQueryColumnByProperty(name) ?: throwNoSuchElementException()
     }
 
-/**
- * 同 [KProperty.column] ，但是在找不到对应的 [QueryColumn] 时，使用属性名构建 [QueryColumn] 。
- *
- * 注意：以此构建的 [QueryColumn] 不会遵循驼峰转蛇形的命名规则。
- *
- * @see KProperty.column
- * @author CloudPlayer
- */
-val KProperty<*>.columnOrBuiltIn: QueryColumn
-    get() = if (this is KProperty0<*>) {
-        requireNotNull(javaField) {
-            "Unable to find the corresponding QueryColumn from `$this` without a java field."
-        }.columnOrBuiltIn
-    } else {
-        requireNotNull(instanceParameter) {
-            "Unable to find the entity class in which property $this is located."
-        }.type.jvmErasure.tableInfo.let {
-            it.getQueryColumnByProperty(name) ?: it.buildQueryColumn(name)
-        }
-    }
 
 /**
  * 同 [KProperty.column] ，但是在没有找到对应 [QueryColumn] 时不会抛出异常，而是返回 null。
@@ -141,7 +122,7 @@ val KClass<*>.defaultColumns: Array<out QueryColumn>
     get() = tableInfo.defaultQueryColumn.toTypedArray()
 
 val <T : Any> KClass<T>.allColumns: QueryColumn
-    get() = tableInfo.buildQueryColumn("*")
+    get() = QueryColumn(queryTable, "*")
 
 /**
  * 通过 [Field] 来构建 [QueryColumn] 。用于在 [KProperty] 是 [KProperty0] 时这种已实例化属性特殊情况下获取声明该属性所在的类。
@@ -166,15 +147,6 @@ val Field.column: QueryColumn
 val Field.columnOrNull: QueryColumn?
     get() = TableInfoFactory.ofEntityClass(declaringClass).getQueryColumnByProperty(name)
 
-/**
- * 同 [Field.column] ，但在获取不到其 [QueryColumn] 时，构建对应的 [QueryColumn] 。
- * @author CloudPlayer
- * @see Field.column
- */
-val Field.columnOrBuiltIn: QueryColumn
-    get() = TableInfoFactory.ofEntityClass(declaringClass).let {
-        it.getQueryColumnByProperty(name) ?: it.buildQueryColumn(name)
-    }
 
 private fun Field.throwNoSuchElementException(from: String? = null, typeName: String? = null): Nothing {
     getAnnotation(Column::class.java).throwNoSuchElementException(from ?: toGenericString(), typeName ?: genericType.typeName)
