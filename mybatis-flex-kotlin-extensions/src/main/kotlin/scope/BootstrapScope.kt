@@ -60,11 +60,19 @@ class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBoot
             instant.logImpl = v.java
         }
 
-    fun scanPackages(vararg packages: String) {
+    /**
+     * 扫描包路径自动注册Mapper
+     * @param packages 包路径
+     * @param needScanAnnotated 是否开启扫描Mapper注解，默认关闭
+     * @since 1.0.8
+     */
+    fun scanPackages(vararg packages: String, needScanAnnotated: Boolean = false) {
         if (packages.isEmpty()) return
         val resolverUtil = ResolverUtil<BaseMapper<*>>()
         resolverUtil.findImplementations(BaseMapper::class.java, *packages)
-        resolverUtil.findAnnotated(Mapper::class.java, *packages)
+        if (needScanAnnotated) {
+            resolverUtil.findAnnotated(Mapper::class.java, *packages)
+        }
         resolverUtil.classes.forEach { instant.addMapper(it) }
     }
 
