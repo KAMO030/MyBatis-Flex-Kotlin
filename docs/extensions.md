@@ -3,6 +3,7 @@
 > Tips:
 > * 阅读本文档时请已核心库使用文档为主，此文档为辅，扩展模块只是基于核心库的提供了符合Kotlin的便捷函数, 并不是另立门户，二者可以混用。
 > * xxxWith命名的方法通常入参数为: `condition: () -> QueryCondition` 条件构造函数
+> * 有复杂业务场景时请注册自定义Mapper接口，否则可能会导致部分功能无法使用，例如@Table所配置的xxxListener
 ## 获取mapper与tableInfo
 
 - **mapper**
@@ -116,8 +117,10 @@
             }?.age
       ```
    > 注意：
+   > * 更新的实体类时如果有注册此实体类对象的Mapper，那么实体类需要是open class (核心库对实体类使用了动态代理)
    > * 用set子查询时flex核心库低版本存在[BUG](https://gitee.com/mybatis-flex/mybatis-flex/issues/I96XJA)
        会导致子查询参数丢失问题，需要更新核心库到1.8.4及以上版本
+   > * 在不注册自定义Mapper时，用set子查询时flex核心库低版本存在BUG会导致子查询参数丢失问题，需要更新核心库到1.8.7及以上版本
 2. 使用原生的baseMapper的扩展方法更新:
       ```kotlin
         val account = Account(
