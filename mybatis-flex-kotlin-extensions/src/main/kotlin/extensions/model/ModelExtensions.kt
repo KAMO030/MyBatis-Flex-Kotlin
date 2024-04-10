@@ -23,6 +23,7 @@ import com.mybatisflex.core.row.RowUtil
 import com.mybatisflex.core.table.EntityMetaObject
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.core.update.UpdateWrapper
 import com.mybatisflex.core.util.SqlUtil
 import com.mybatisflex.kotlin.extensions.db.*
 import java.io.Serializable
@@ -36,15 +37,22 @@ import java.io.Serializable
 inline fun <reified T> Row.toEntity(): T = RowUtil.toEntity(this, T::class.java)
 
 fun <T : Any> T.toRow(): Row {
-    val tableInfo: TableInfo = TableInfoFactory.ofEntityClass(javaClass)
-    val metaObject = EntityMetaObject.forObject(this, tableInfo.reflectorFactory)
     val row = Row()
-    tableInfo.primaryKeyList.forEach { idInfo ->
-        metaObject.getValue(idInfo.property)?.let { row[idInfo.column] = it }
+    if (this is UpdateWrapper<*>) {
+        this.updates.forEach { (column, value) ->
+            row.put(column, value)
+        }
+    } else {
+        val tableInfo: TableInfo = TableInfoFactory.ofEntityClass(javaClass)
+        val metaObject = EntityMetaObject.forObject(this, tableInfo.reflectorFactory)
+        tableInfo.primaryKeyList.forEach { idInfo ->
+            metaObject.getValue(idInfo.property)?.let { row[idInfo.column] = it }
+        }
+        tableInfo.columnInfoList.forEach { idInfo ->
+            metaObject.getValue(idInfo.property)?.let { row[idInfo.column] = it }
+        }
     }
-    tableInfo.columnInfoList.forEach { idInfo ->
-        metaObject.getValue(idInfo.property)?.let { row[idInfo.column] = it }
-    }
+
     return row
 }
 

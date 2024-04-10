@@ -3,14 +3,14 @@ package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapperAdapter
-import com.mybatisflex.core.row.Row
+import com.mybatisflex.core.update.UpdateWrapper
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import kotlin.reflect.KProperty1
 
-class UpdateScope<T> : QueryWrapperAdapter<UpdateScope<T>>() {
+class UpdateScope<T>(entryClass: Class<T>) : QueryWrapperAdapter<UpdateScope<T>>() {
 
     @PublishedApi
-    internal val updateRow: Row = Row()
+    internal val updateRow: UpdateWrapper<T> = UpdateWrapper.of(entryClass)
 
 
     infix fun <V> KProperty1<T, V>.set(value: V) {
@@ -34,4 +34,4 @@ class UpdateScope<T> : QueryWrapperAdapter<UpdateScope<T>>() {
 
 }
 
-inline fun <reified T> updateScope(): UpdateScope<T> = UpdateScope()
+inline fun <reified T> updateScope(): UpdateScope<T> = UpdateScope(T::class.java)
