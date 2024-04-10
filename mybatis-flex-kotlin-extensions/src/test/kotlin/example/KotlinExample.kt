@@ -48,6 +48,8 @@ class KotlinExample {
             +AccountMapper::class
 //            2.通过原始的方式
 //            it.addMapper(AccountMapper::class.java)
+//            3.通过扫描包路径自动注册 （接口需要继承BaseMapper或打上@Mapper注解）
+//            scanPackages("com.mybatisflex.kotlin.example.mapper")
 
 //            配置单dataSource
 //            1.通过+（重写自增）的方式

@@ -1,5 +1,8 @@
 ## runFlex:简化配置，一键启动
 利用Kotlin的Dsl，重载运算符和中缀表达式，简化了MybatisFlexBootstrap的配置，用起来更加简单方便：
+
+> Tips:
+> 如果是SpringBoot等容器环境，无需使用此方法，请参考[核心库配置](https://mybatis-flex.com/zh/base/configuration.html)
 ```kotlin
 runFlex {
     //  此方法体 it 是 MybatisFlexBootstrap 实例
@@ -8,8 +11,10 @@ runFlex {
     +AccountMapper::class
     //  2.通过原始的方式
     //  it.addMapper(AccountMapper::class.java)
+    //  3.通过扫描包路径自动注册 （接口需要继承BaseMapper或打上@Mapper注解）
+    //  scanPackages("com.mybatisflex.kotlin.example.mapper")
 
-    //   配置单dataSource
+    //  配置单dataSource
     //   1.通过+（重写自增）的方式
     +dataSource
     //  2.通过原始的方式

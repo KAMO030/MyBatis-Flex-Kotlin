@@ -13,12 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.scope
 
+import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.FlexConsts
 import com.mybatisflex.core.MybatisFlexBootstrap
 import com.mybatisflex.kotlin.annotation.MybatisFlexDsl
+import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.datasource.pooled.PooledDataSource
+import org.apache.ibatis.io.ResolverUtil
 import org.apache.ibatis.logging.Log
 import java.sql.Driver
 import java.sql.DriverManager
@@ -55,6 +59,14 @@ class BootstrapScope(private val instant: MybatisFlexBootstrap = MybatisFlexBoot
         set(v) {
             instant.logImpl = v.java
         }
+
+    fun scanPackages(vararg packages: String) {
+        if (packages.isEmpty()) return
+        val resolverUtil = ResolverUtil<BaseMapper<*>>()
+        resolverUtil.findImplementations(BaseMapper::class.java, *packages)
+        resolverUtil.findAnnotated(Mapper::class.java, *packages)
+        resolverUtil.classes.forEach { instant.addMapper(it) }
+    }
 
     operator fun Class<*>.unaryPlus(): MybatisFlexBootstrap =
         instant.addMapper(this)
