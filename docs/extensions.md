@@ -69,6 +69,7 @@
    ): Page<E>` : 分页查询 （无需注册Mapper接口）
    > 除此之外还有paginateWith(简单按条件分页)，
    > paginateRows(返回值为Row)
+   > paginateAs(带类型转换的分页)
 
       ```kotlin
         val accounts: List<Account> = paginate<Account>(1, 10) {

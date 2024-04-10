@@ -64,7 +64,7 @@ inline fun <reified T> Row.toObject(): T = RowUtil.toObject(this, T::class.java)
 inline fun <reified E> Collection<Row>.toObjects(): MutableList<E> =
     RowUtil.toObjectList(this.toMutableList(), E::class.java)
 
-inline fun <reified T> Page<Row>.toEntityPage(): Page<T> = Page(records.toEntities(), pageNumber, pageSize, totalRow)
+inline fun <reified T> Page<Row>.toEntityPage(): Page<T> = this.map { it.toEntity<T>() }
 
 inline fun <reified E : MapperModel<E>> List<E>.batchInsert() = E::class.baseMapper.insertBatch(this)
 

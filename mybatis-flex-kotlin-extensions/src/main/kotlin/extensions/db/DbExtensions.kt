@@ -29,13 +29,13 @@ import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.core.table.TableInfo
 import com.mybatisflex.core.table.TableInfoFactory
+import com.mybatisflex.kotlin.annotation.InternalMybatisFlexApi
 import com.mybatisflex.kotlin.extensions.kproperty.allColumns
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.kproperty.defaultColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
 import com.mybatisflex.kotlin.extensions.mapper.deleteByCondition
 import com.mybatisflex.kotlin.extensions.model.toEntities
-import com.mybatisflex.kotlin.extensions.model.toEntityPage
 import com.mybatisflex.kotlin.extensions.model.toRow
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.UpdateScope
@@ -234,11 +234,9 @@ inline fun <reified E : Any> all() = filter<E>(condition = QueryCondition::creat
 inline fun <reified E : Any> paginate(
     pageNumber: Number,
     pageSize: Number,
-    totalRow: Number? = null,
+    totalRow: Number = -1L,
     init: QueryScope.() -> Unit
-): Page<E> = paginate(
-    totalRow?.let { Page(pageNumber, pageSize, it) }
-        ?: Page<E>(pageNumber, pageSize), init)
+): Page<E> = paginate(Page(pageNumber, pageSize, totalRow), init)
 
 /**
  * 分页查询
@@ -250,27 +248,21 @@ inline fun <reified E : Any> paginate(
 inline fun <reified E : Any> paginateWith(
     pageNumber: Number,
     pageSize: Number,
-    totalRow: Number? = null,
+    totalRow: Number = -1,
     condition: () -> QueryCondition
-): Page<E> = paginate(
-    totalRow?.let { Page(pageNumber, pageSize, it) } ?: Page<E>(pageNumber, pageSize)
-) { where(condition()) }
+): Page<E> = paginate(Page(pageNumber, pageSize, totalRow)) { where(condition()) }
 
 /**
  * 分页查询
  * @param page 分页对象
  * @param init 查询作用域初始化函数
  */
+@OptIn(InternalMybatisFlexApi::class)
 inline fun <reified E : Any> paginate(
     page: Page<E>,
     init: QueryScope.() -> Unit
 ): Page<E> = E::class.baseMapperOrNull?.paginate(page, queryScope(init = init))
-    ?: E::class.tableInfo.run {
-        paginateRows(schema, tableName, Page(page.pageNumber, page.pageSize)) {
-            init()
-            if (this.hasSelect().not()) select(*E::class.defaultColumns)
-        }.toEntityPage()
-    }
+    ?: paginateRowsAs<E>(page, init)
 
 /**
  * 分页查询Row
@@ -284,6 +276,66 @@ inline fun paginateRows(
     page: Page<Row>? = null,
     init: QueryScope.() -> Unit
 ): Page<Row> = Db.paginate(schema, tableName, page, queryScope(init = init))
+
+/**
+ * 分页查询Row
+ * 此查询只会走RowMapper，用户无需使用此方法
+ * 因为Db.paginate需要Page<Row>，而传入的Page为E范型所以需要在此方法统一转换
+ * @param page 分页对象
+ * @param init 查询作用域初始化函数
+ * @since 1.0.8
+ */
+@InternalMybatisFlexApi
+inline fun <reified E : Any> paginateRowsAs(
+    page: Page<E>,
+    init: QueryScope.() -> Unit
+): Page<E> = E::class.tableInfo.run {
+    val rowPage = Page<Row>(page.pageNumber, page.pageSize, page.totalRow)
+    rowPage.setOptimizeCountQuery(page.needOptimizeCountQuery())
+    paginateRows(schema, tableName, rowPage) {
+        init()
+        if (this.hasSelect().not()) select(*E::class.defaultColumns)
+    }
+    // 保证入参数和返回参数对象一致性处理
+    page.records = rowPage.records.map { it.toEntity(E::class.java) }
+    page.totalPage = rowPage.totalPage
+    page.totalRow = rowPage.totalRow
+    page
+}
+
+
+/**
+ * 分页查询
+ * @param E 实体类型
+ * @param R 接收数据类型
+ * @param page 分页对象
+ * @param init 查询作用域初始化函数
+ * @since 1.0.8
+ */
+@OptIn(InternalMybatisFlexApi::class)
+inline fun <reified E : Any, reified R : Any> paginateAs(
+    page: Page<R>,
+    init: QueryScope.() -> Unit
+): Page<R> = E::class.baseMapperOrNull?.paginateAs(page, queryScope(init = init), R::class.java)
+    ?: paginateRowsAs<R>(page, init)
+
+/**
+ * 分页查询
+ * @param E 实体类型
+ * @param R 接收数据类型
+ * @param pageNumber 当前页码
+ * @param pageSize 每页大小
+ * @param totalRow 总数居数量
+ * @param init 查询作用域初始化函数
+ * @since 1.0.8
+ */
+inline fun <reified E : Any, reified R : Any> paginateAs(
+    pageNumber: Number,
+    pageSize: Number,
+    totalRow: Number = -1L,
+    init: QueryScope.() -> Unit
+): Page<R> = paginateAs<E, R>(Page(pageNumber, pageSize, totalRow), init)
+
 
 
 //    update----------
