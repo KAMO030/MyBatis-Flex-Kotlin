@@ -113,7 +113,7 @@
 ```kotlin
 dependencies {
   //kotlin扩展库
-  implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:1.0.7")
+  implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:1.0.8")
   //核心库
   implementation("com.mybatis-flex:mybatis-flex-core:$version")
 }
