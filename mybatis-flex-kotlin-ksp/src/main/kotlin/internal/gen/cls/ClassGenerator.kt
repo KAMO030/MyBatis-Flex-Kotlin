@@ -3,12 +3,13 @@ package com.mybatisflex.kotlin.ksp.internal.gen.cls
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mybatisflex.kotlin.ksp.internal.gen.TableDefGenerator
 import com.mybatisflex.kotlin.ksp.internal.util.*
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeSpec
+import com.mybatisflex.kotlin.ksp.isOverridable
+import com.squareup.kotlinpoet.*
 
 /**
- * 生成的 TableDef 由 object 变为了 class ，仅在极特殊情况下需要使用构造器时，或完全兼容 Java 时的选择这个类。
+ * 生成的 TableDef class 。 在需要使用构造器，或者 as 方法时，请使用此类。
+ *
+ * @author CloudPlayer
  */
 internal class ClassGenerator : TableDefGenerator {
     override val KSClassDeclaration.typeSpec: TypeSpec
@@ -18,6 +19,10 @@ internal class ClassGenerator : TableDefGenerator {
 
     override val instancePropertySpecs: List<PropertySpec>
         get() = _instancePropertySpecs
+
+    private val schema = ParameterSpec("schema", STRING)
+    private val tableName = ParameterSpec("tableName", STRING)
+    private val alias = ParameterSpec("alias", STRING.copy(nullable = true))
 
     private fun KSClassDeclaration.classSpec(): TypeSpec = TypeSpec.classBuilder(tableClassName).apply {
         val legalProperties = legalProperties
@@ -29,7 +34,6 @@ internal class ClassGenerator : TableDefGenerator {
         )
 
         superclass(TABLE_DEF)
-        addSuperclassConstructorParameter("%S, %S", scheme, tableName)
 
         addProperties(legalProperties.map {
             it.getPropertySpecBuilder().build()
@@ -38,6 +42,8 @@ internal class ClassGenerator : TableDefGenerator {
         addProperty(getDefaultColumns(legalProperties).build())
 
         addType(companionObjectSpec())
+
+        addCode(this)
     }.build()
 
     private fun KSClassDeclaration.companionObjectSpec(): TypeSpec = TypeSpec.companionObjectBuilder().apply {
@@ -46,5 +52,65 @@ internal class ClassGenerator : TableDefGenerator {
 
         addProperty(instanceProperty)
         _instancePropertySpecs += instanceProperty
+    }.build()
+
+    /**
+     * 根据是否能够重写 as 方法判断应该添加的产物。
+     *
+     * 如果可以重写 as ，那么将生成一个私有的，有参的主构造器和一个无参公共的辅助构造器，以及 as 方法。
+     *
+     * 否则将仅有一个无参公共的主构造器。
+     *
+     * @author CloudPlayer
+     */
+    private fun KSClassDeclaration.addCode(builder: TypeSpec.Builder) {
+        if (isOverridable) {
+            builder.primaryConstructor(primaryConstructor())
+            builder.addFunction(secondaryConstructor())
+            builder.addFunction(asFunSpec())
+            builder.addSuperclassConstructorParameter(
+                "%N, %N, %N",
+                this@ClassGenerator.schema,
+                this@ClassGenerator.tableName,
+                alias
+            )
+        } else {
+            builder.addSuperclassConstructorParameter("%S, %S", schema, tableName)
+        }
+    }
+
+    // 构建私有主构造器
+    // private constructor(schema: String, tableName: String, alias: String?)
+    private fun primaryConstructor(): FunSpec = FunSpec.constructorBuilder().apply {
+        addParameter(schema)
+        addParameter(tableName)
+        addParameter(alias)
+        addModifiers(KModifier.PRIVATE)
+    }.build()
+
+    // 构建无参辅助构造器
+    // public constructor() : this(...)
+    private fun KSClassDeclaration.secondaryConstructor(): FunSpec = FunSpec.constructorBuilder().apply {
+        val schema = schema
+        val tableName = tableName
+        callThisConstructor(""""$schema", "$tableName", null""")
+    }.build()
+
+    // 构建 as 函数
+    private fun KSClassDeclaration.asFunSpec(): FunSpec = FunSpec.builder("as").apply {
+        val generateClassName = ClassName("${packageName.asString()}.table", tableClassName)
+        val alias = ParameterSpec("alias", STRING)
+        addModifiers(KModifier.OVERRIDE, KModifier.INFIX)
+        addParameter(alias)
+        returns(generateClassName)
+        addCode(
+            CodeBlock.of(
+                """
+                |return getCache("${'$'}nameWithSchema.${'$'}alias") { _: String ->
+                |   %T(%S, %S, %N) 
+                |}
+                """.trimMargin(), generateClassName, schema, tableName, alias
+            )
+        )
     }.build()
 }
