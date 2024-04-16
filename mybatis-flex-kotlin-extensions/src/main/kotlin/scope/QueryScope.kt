@@ -19,6 +19,7 @@ import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapperAdapter
 import com.mybatisflex.core.util.LambdaGetter
 import com.mybatisflex.kotlin.extensions.kproperty.column
+import com.mybatisflex.kotlin.extensions.wrapper.selectProperties
 import kotlin.reflect.KProperty
 
 /**
@@ -33,7 +34,7 @@ class QueryScope : QueryWrapperAdapter<QueryScope>() {
     operator fun String.unaryMinus(): QueryColumn = QueryColumn(this)
 
     fun select(vararg properties: KProperty<*>): QueryScope =
-        select(*properties.map { it.column }.toTypedArray())
+        this.apply { selectProperties(*properties) }
 
     @Deprecated("", level = DeprecationLevel.HIDDEN)
     override fun <T : Any?> select(vararg lambdaGetters: LambdaGetter<T>?): QueryScope {

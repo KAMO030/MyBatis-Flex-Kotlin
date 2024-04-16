@@ -111,6 +111,23 @@ inline fun <reified E : Any> queryOne(
     }
 
 /**
+ * 通过条件查询一条数据,并转换成指定类型
+ * @param columns 查询的列
+ * @param init 查询作用域初始化函数
+ */
+inline fun <reified E : Any, reified T : Any> queryOneAs(
+    vararg columns: QueryColumn,
+    init: QueryScope.() -> Unit
+): T? = E::class.baseMapperOrNull?.selectOneByQueryAs(queryScope(columns = columns, init = init), T::class.java)
+    ?: E::class.tableInfo.let {
+        queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
+            init()
+            // 如果未调用select方法，则默认查询所有列
+            if (this.hasSelect().not()) select(T::class.allColumns)
+        }?.toEntity(T::class.java)
+    }
+
+/**
  * 通过条件查询多条数据
  * @param columns 查询的列
  * @param init 查询作用域初始化函数
@@ -124,6 +141,23 @@ inline fun <reified E : Any> query(
             init()
             // 如果未调用select方法，则默认查询所有列
             if (this.hasSelect().not()) select(*E::class.defaultColumns)
+        }.toEntities()
+    }
+
+/**
+ * 通过条件查询多条数据,并转换成指定类型
+ * @param columns 查询的列
+ * @param init 查询作用域初始化函数
+ */
+inline fun <reified E : Any, reified T : Any> queryAs(
+    vararg columns: QueryColumn,
+    init: QueryScope.() -> Unit
+): List<T> = E::class.baseMapperOrNull?.selectListByQueryAs(queryScope(columns = columns, init = init), T::class.java)
+    ?: E::class.tableInfo.run {
+        queryRows(schema = schema, tableName = tableName, columns = columns) {
+            init()
+            // 如果未调用select方法，则默认查询所有列
+            if (this.hasSelect().not()) select(*T::class.defaultColumns)
         }.toEntities()
     }
 
@@ -169,6 +203,16 @@ inline fun <reified E : Any> filter(
 ): List<E> = query(columns = columns) { and(queryCondition) }
 
 /**
+ * 通过条件查询多条数据,并转换成指定类型
+ * @param columns 查询的列
+ * @param queryCondition 查询条件
+ */
+inline fun <reified E : Any, reified T : Any> filterAs(
+    vararg columns: QueryColumn = emptyArray(),
+    queryCondition: QueryCondition = QueryCondition.createEmpty()
+): List<T> = queryAs<E, T>(columns = columns) { and(queryCondition) }
+
+/**
  * 通过条件查询多条数据
  * @param columns 查询的列
  * @param condition 查询条件
@@ -177,6 +221,16 @@ inline fun <reified E : Any> filterColumn(
     vararg columns: QueryColumn = E::class.defaultColumns,
     condition: () -> QueryCondition
 ): List<E> = filter(columns = columns, queryCondition = condition())
+
+/**
+ * 通过条件查询多条数据,并转换成指定类型
+ * @param columns 查询的列
+ * @param condition 查询条件
+ */
+inline fun <reified E : Any, reified T : Any> filterColumnAs(
+    vararg columns: QueryColumn = E::class.defaultColumns,
+    condition: () -> QueryCondition
+): List<T> = filterAs<E, T>(columns = columns, queryCondition = condition())
 
 /**
  * 通过条件查询一条数据
@@ -193,6 +247,20 @@ inline fun <reified E : Any> filterOne(
 }
 
 /**
+ * 通过条件查询一条数据,并转换成指定类型
+ * @param columns 查询的列
+ * @param condition 查询条件
+ * @since 1.0.5
+ */
+inline fun <reified E : Any, reified T : Any> filterOneAs(
+    vararg columns: KProperty<*> = emptyArray(),
+    condition: () -> QueryCondition
+): T? = queryOneAs<E, T> {
+    takeIf { columns.isNotEmpty() }?.select(*columns)
+    and(condition())
+}
+
+/**
  * 通过条件查询一条数据
  * @param columns 查询的列
  * @param condition 查询条件
@@ -204,6 +272,17 @@ inline fun <reified E : Any> filterOneColumn(
 ): E? = queryOne { select(*columns).and(condition()) }
 
 /**
+ * 通过条件查询一条数据,并转换成指定类型
+ * @param columns 查询的列
+ * @param condition 查询条件
+ * @since 1.0.5
+ */
+inline fun <reified E : Any, reified T : Any> filterOneColumnAs(
+    vararg columns: QueryColumn = E::class.defaultColumns,
+    condition: () -> QueryCondition
+): T? = queryOneAs<E, T> { select(*columns).and(condition()) }
+
+/**
  * 通过条件查询多条数据
  * @param columns 查询的列
  * @param condition 查询条件
@@ -213,6 +292,20 @@ inline fun <reified E : Any> filter(
     condition: () -> QueryCondition
 ): List<E> =
     filterColumn(
+        columns = columns.toQueryColumns(),
+        condition = condition
+    )
+
+/**
+ * 通过条件查询多条数据,并转换成指定类型
+ * @param columns 查询的列
+ * @param condition 查询条件
+ */
+inline fun <reified E : Any, reified T : Any> filterAs(
+    vararg columns: KProperty<*> = emptyArray(),
+    condition: () -> QueryCondition
+): List<T> =
+    filterColumnAs<E, T>(
         columns = columns.toQueryColumns(),
         condition = condition
     )
