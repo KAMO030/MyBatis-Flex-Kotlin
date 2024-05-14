@@ -20,6 +20,7 @@ import com.mybatisflex.annotation.Column
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.condition.and
+import com.mybatisflex.kotlin.extensions.condition.emptyCondition
 import com.mybatisflex.kotlin.extensions.db.queryTable
 import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.sql.*
@@ -206,16 +207,16 @@ infix fun <T : Comparable<T>> KProperty<T?>.le(other: KProperty<T?>): QueryCondi
 
 // between
 infix fun <T : Comparable<T>> KProperty<T?>.between(other: ClosedRange<T>): QueryCondition =
-    column.between(other.start, other.endInclusive)
+    column.between(other)
 
 infix fun <T : Comparable<T>> KProperty<T?>.between(other: Pair<T, T>): QueryCondition =
-    column.between(other.first, other.second)
+    column.between(other)
 
 infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: ClosedRange<T>): QueryCondition =
-    column.notBetween(other.start, other.endInclusive)
+    column.notBetween(other)
 
 infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: Pair<T, T>): QueryCondition =
-    column.notBetween(other.first, other.second)
+    column.notBetween(other)
 
 // like
 infix fun KProperty<String?>.like(other: Any): QueryCondition = column.like(other)
@@ -268,16 +269,16 @@ infix fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KP
         .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
 infix fun <T : Comparable<T>> KProperty<T?>.inList(other: Collection<T>): QueryCondition {
-    require(other.isNotEmpty()) {
-        "The collection must not be empty."
+    if (other.isEmpty()) {
+        return emptyCondition()
     }
     val queryColumn = column
     return if (other.size == 1) queryColumn.eq(other.first()) else queryColumn.`in`(other)
 }
 
 infix fun <T : Comparable<T>> KProperty<T?>.inArray(other: Array<out T>): QueryCondition {
-    require(other.isNotEmpty()) {
-        "The array must not be empty."
+    if (other.isEmpty()) {
+        return emptyCondition()
     }
     val queryColumn = column
     return if (other.size == 1) queryColumn.eq(other[0]) else queryColumn.`in`(other)

@@ -1,7 +1,7 @@
 # 基于 Kotlin 扩展 Mybatis-Flex
 **MyBatis-Flex-Kotlin 基于 [Mybatis-Flex](https://mybatis-flex.com) 的 Kotlin 扩展模块，方便 Kotlin 开发者使用 MyBatis-Flex 进行开发**
 > 它继承了 Mybatis-Flex 轻量的特性，同时拥有 Kotlin 特有的扩展方法、中缀表达式与DSL等语法支持，
-> 使其拥有了更高的灵活性。让我们可以更加轻松的在 Kotlin 中使用 Mybaits-Flex 所带来的开发效率和开发体验。
+> 使其拥有了更高的灵活性。让我们可以更加轻松的在 Kotlin 中使用 MyBatis-Flex 所带来的开发效率和开发体验。
 
 ## 特征
 
@@ -44,7 +44,10 @@
         // 无需注册Mapper与APT/KSP即可查询操作
         val accountList: List<Account> = query {
             select(Account::id, Account::userName)
-            where(Account::age.isNotNull) and { Account::age ge 17 } orderBy -Account::id
+            whereWith {
+                Account::age.isNotNull and (Account::age ge 17)
+            } 
+            orderBy(-Account::id)
         }
       ```
     执行的SQL:

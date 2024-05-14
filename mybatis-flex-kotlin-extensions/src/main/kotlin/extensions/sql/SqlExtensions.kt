@@ -69,9 +69,9 @@ infix fun QueryColumn.lt(value: Any?): QueryCondition = this.lt(value)
 //range
 infix fun QueryColumn.between(pair: Pair<Any?, Any?>): QueryCondition = this.between(pair.first, pair.second)
 
-infix fun QueryColumn.notBetween(pair: Pair<Any?, Any?>): QueryCondition = this.notBetween(pair.first, pair.second)
-
 infix fun QueryColumn.between(range: ClosedRange<*>): QueryCondition = this.between(range.start, range.endInclusive)
+
+infix fun QueryColumn.notBetween(pair: Pair<Any?, Any?>): QueryCondition = this.notBetween(pair.first, pair.second)
 
 infix fun QueryColumn.notBetween(range: ClosedRange<*>): QueryCondition =
     this.notBetween(range.start, range.endInclusive)

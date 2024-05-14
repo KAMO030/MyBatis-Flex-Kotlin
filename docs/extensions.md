@@ -57,7 +57,8 @@
             select(Account::id, Account::userName)
             where {
                  Account::age `in` (17..19) and (Account::birthday between (start to end))
-            }orderBy -Account::id
+            }
+            orderBy(-Account::id)
             limit(2)
         }
       ```
@@ -72,10 +73,11 @@
    > paginateAs(带类型转换的分页)
 
       ```kotlin
-        val accounts: List<Account> = paginate<Account>(1, 10) {
+        val accountPages: Page<Account> = paginate(1, 10) {
             select(Account::id, Account::userName)
             orderBy(-Account::id)
         }
+        val accounts: List<Account> = accountPages.records
       ```
 5. 使用原生的baseMapper的扩展方法查询:
       ```kotlin

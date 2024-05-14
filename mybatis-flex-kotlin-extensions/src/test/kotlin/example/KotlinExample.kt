@@ -50,7 +50,7 @@ class KotlinExample {
 //            it.addMapper(AccountMapper::class.java)
 //            3.通过扫描包路径自动注册
 //            接口需要继承BaseMapper或打上@Mapper注解, 开启@Mapper注解扫描需要修改第二个参数（needScanAnnotated）为true
-            scanPackages("com.mybatisflex.kotlin.example.mapper")
+//            scanPackages("com.mybatisflex.kotlin.example.mapper")
 
 //            配置单dataSource
 //            1.通过+（重写自增）的方式
