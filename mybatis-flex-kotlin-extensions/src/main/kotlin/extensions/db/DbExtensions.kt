@@ -114,6 +114,7 @@ inline fun <reified E : Any> queryOne(
  * 通过条件查询一条数据,并转换成指定类型
  * @param columns 查询的列
  * @param init 查询作用域初始化函数
+ * @since 1.0.9
  */
 inline fun <reified E : Any, reified T : Any> queryOneAs(
     vararg columns: QueryColumn,
@@ -148,6 +149,7 @@ inline fun <reified E : Any> query(
  * 通过条件查询多条数据,并转换成指定类型
  * @param columns 查询的列
  * @param init 查询作用域初始化函数
+ * @since 1.0.9
  */
 inline fun <reified E : Any, reified T : Any> queryAs(
     vararg columns: QueryColumn,
@@ -206,6 +208,7 @@ inline fun <reified E : Any> filter(
  * 通过条件查询多条数据,并转换成指定类型
  * @param columns 查询的列
  * @param queryCondition 查询条件
+ * @since 1.0.9
  */
 inline fun <reified E : Any, reified T : Any> filterAs(
     vararg columns: QueryColumn = emptyArray(),
@@ -226,6 +229,7 @@ inline fun <reified E : Any> filterColumn(
  * 通过条件查询多条数据,并转换成指定类型
  * @param columns 查询的列
  * @param condition 查询条件
+ * @since 1.0.9
  */
 inline fun <reified E : Any, reified T : Any> filterColumnAs(
     vararg columns: QueryColumn = E::class.defaultColumns,
@@ -250,7 +254,7 @@ inline fun <reified E : Any> filterOne(
  * 通过条件查询一条数据,并转换成指定类型
  * @param columns 查询的列
  * @param condition 查询条件
- * @since 1.0.5
+ * @since 1.0.9
  */
 inline fun <reified E : Any, reified T : Any> filterOneAs(
     vararg columns: KProperty<*> = emptyArray(),
@@ -275,7 +279,7 @@ inline fun <reified E : Any> filterOneColumn(
  * 通过条件查询一条数据,并转换成指定类型
  * @param columns 查询的列
  * @param condition 查询条件
- * @since 1.0.5
+ * @since 1.0.9
  */
 inline fun <reified E : Any, reified T : Any> filterOneColumnAs(
     vararg columns: QueryColumn = E::class.defaultColumns,
@@ -300,6 +304,7 @@ inline fun <reified E : Any> filter(
  * 通过条件查询多条数据,并转换成指定类型
  * @param columns 查询的列
  * @param condition 查询条件
+ * @since 1.0.9
  */
 inline fun <reified E : Any, reified T : Any> filterAs(
     vararg columns: KProperty<*> = emptyArray(),
