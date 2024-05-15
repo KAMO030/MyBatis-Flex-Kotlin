@@ -2,7 +2,7 @@
 kotlin = "1.8.20"
 mybatisflex = "1.8.7"
 mybatisflex-kotlin-extensions = "1.0.9"
-mybatisflex-kotlin-ksp = "1.0.0"
+mybatisflex-kotlin-ksp = "1.0.1"
 mybatisflex-kotlin-codegen = "1.0.0"
 junit-jupiter = "5.8.1"
 mysql = "8.0.33"

@@ -1,10 +1,10 @@
 package com.mybatisflex.kotlin.ksp
 
-import com.google.devtools.ksp.processing.CodeGenerator
-import com.google.devtools.ksp.processing.KSPLogger
-import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.getClassDeclarationByName
+import com.google.devtools.ksp.processing.*
 import com.mybatisflex.kotlin.ksp.internal.config.flex.MybatisFlexConfiguration
 import com.mybatisflex.kotlin.ksp.internal.config.ksp.KspConfiguration
+import com.mybatisflex.kotlin.ksp.internal.util.TABLE_DEF
 import com.mybatisflex.kotlin.ksp.internal.util.file.isFlexConfigFile
 import com.mybatisflex.kotlin.ksp.internal.util.file.properties
 import java.io.File
@@ -18,6 +18,7 @@ internal fun initKspEnvironment(environment: SymbolProcessorEnvironment) {
     codeGenerator = environment.codeGenerator
     logger = environment.logger
     options = environment.options
+    kotlinVersion = environment.kotlinVersion
 }
 
 lateinit var codeGenerator: CodeGenerator
@@ -25,6 +26,8 @@ lateinit var codeGenerator: CodeGenerator
 lateinit var logger: KSPLogger
 
 lateinit var options: Map<String, String>
+
+lateinit var kotlinVersion: KotlinVersion
 
 /**
  * 初始化Flex配置文件对应的单例，使得配置文件中的配置项可以被方便地读取.
@@ -80,4 +83,23 @@ fun illegalValueWarning(key: String, value: String) {
         "Illegal value: `$value` for mybatis-flex configuration key: `$key`," +
                 " please check the file `mybatis-flex.config`."
     )
+}
+
+/**
+ * 检查 TableDef 的子类是否可以重写 `fun as(alias: String): QueryTable` 方法。
+ *
+ * 对于 flex 核心库版本高于 1.8.4 的项目，此属性返回 true，否则返回 false。
+ *
+ * @author CloudPlayer
+ */
+var isOverridable = false
+    private set
+
+/**
+ * 用于初始化 [isOverridable] 属性。
+ */
+fun checkOverridable(resolver: Resolver) {
+    val tableDef = resolver.getClassDeclarationByName(TABLE_DEF.canonicalName)!!.asStarProjectedType()
+    val queryTable = resolver.getClassDeclarationByName("com.mybatisflex.core.query.QueryTable")!!.asStarProjectedType()
+    isOverridable = queryTable.isAssignableFrom(tableDef)
 }

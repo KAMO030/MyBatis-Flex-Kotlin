@@ -1,6 +1,12 @@
 package com.mybatisflex.kotlin.ksp.internal.config.ksp
 
+import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mybatisflex.annotation.Column
 import com.mybatisflex.kotlin.ksp.illegalValueWarning
+import com.mybatisflex.kotlin.ksp.internal.gen.TableDefGenerator
+import com.mybatisflex.kotlin.ksp.internal.gen.cls.ClassGenerator
+import com.mybatisflex.kotlin.ksp.internal.gen.obj.ObjectGenerator
+import com.mybatisflex.kotlin.ksp.internal.util.DEFAULT_SUPPORT_COLUMN_TYPES
 import com.mybatisflex.kotlin.ksp.internal.util.QUERY_COLUMN
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -14,15 +20,27 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
  * @author CloudPlayer
  */
 internal object DefaultColumnsType : KspConfiguration<ParameterizedTypeName> {
-    override val key: String = "ksp.type.defaultColumns"
+    override val key: String = "ksp.prop.type.defaultColumns"
 
     private var _value = LIST
 
     // 如果是数组类型，则其中的泛型为 out QueryColumn，以防止数组被修改。
     override val value: ParameterizedTypeName
         get() = if (_value != ARRAY) _value.parameterizedBy(QUERY_COLUMN)
-        else _value.plusParameter(TypeVariableName("out QueryColumn"))
+        else _value.plusParameter(WildcardTypeName.producerOf(QUERY_COLUMN))
 
+    /**
+     * 用于构建 default columns 时所使用的 kotlin 标准库中的函数名。
+     * 分别对应着：
+     *
+     * 1，[listOf]
+     *
+     * 2，[setOf]
+     *
+     * 3，[arrayOf]
+     *
+     * 4，[sequenceOf]
+     */
     var fnName: String = "list"
         get() = "${field}Of"
         private set
@@ -38,12 +56,59 @@ internal object DefaultColumnsType : KspConfiguration<ParameterizedTypeName> {
     )
 
     override fun initValue(value: String) {
-        val type = legalTypes[value]
-        if (type === null) {
-            illegalValueWarning(key, value)
-            return
-        }
+        val type = legalTypes[value] ?: return illegalValueWarning(key, value)
         fnName = value
         _value = type
     }
+}
+
+/**
+ * 用于配置是否开启属性的合法性检查。默认开启。
+ *
+ * 如果开启了合法性检查，那么当属性不为枚举类，
+ * 类型不在 [DEFAULT_SUPPORT_COLUMN_TYPES] 之中，且其 [Column.typeHandler] 没有配置为其他时，将忽略该属性。
+ *
+ * @author CloudPlayer
+ * @see KSClassDeclaration.legalProperties
+ */
+internal object PropertyTypeChecker : KspConfiguration<Boolean> {
+    override val key: String = "ksp.prop.type.check"
+
+    private var _value = true
+
+    override val value: Boolean
+        get() = _value
+
+    override fun initValue(value: String) {
+        _value = value.toBoolean()
+    }
+}
+
+/**
+ * 用于指定 KSP 生成的 TableDef 为 class 或 object 。
+ *
+ * 一般情况下，我们推荐您使用 class 而不是 object 。仅在
+ * 您确实十分需要使用 object 的情况下，才使用 object 。
+ *
+ * @author CloudPlayer
+ */
+internal object GenerateType : KspConfiguration<GenerateTypeEnum> {
+    override val key: String = "ksp.generate.type"
+
+    private var _value: GenerateTypeEnum = GenerateTypeEnum.CLASS
+
+    override val value: GenerateTypeEnum
+        get() = _value
+
+    override fun initValue(value: String) {
+        _value = try {
+            GenerateTypeEnum.valueOf(value.uppercase())
+        } catch (_: IllegalArgumentException) {
+            return illegalValueWarning(key, value)
+        }
+    }
+}
+
+enum class GenerateTypeEnum(val description: String, val tableDefGenerator: TableDefGenerator) {
+    OBJECT("object", ObjectGenerator()), CLASS("class", ClassGenerator());
 }

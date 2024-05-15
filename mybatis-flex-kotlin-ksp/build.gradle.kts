@@ -9,6 +9,10 @@ dependencies {
     implementation(libs.kotlinpoet.ksp)
     implementation(libs.mybatisflex.annotation)
     implementation(libs.ksp.api)
+
+    kspTest(project(":mybatis-flex-kotlin-ksp"))
+    testImplementation(libs.mybatisflex.core)
+    testImplementation(project(":mybatis-flex-kotlin-extensions"))
 }
 
 
