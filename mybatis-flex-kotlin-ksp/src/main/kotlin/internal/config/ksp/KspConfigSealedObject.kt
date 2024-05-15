@@ -8,7 +8,6 @@ import com.mybatisflex.kotlin.ksp.internal.gen.cls.ClassGenerator
 import com.mybatisflex.kotlin.ksp.internal.gen.obj.ObjectGenerator
 import com.mybatisflex.kotlin.ksp.internal.util.DEFAULT_SUPPORT_COLUMN_TYPES
 import com.mybatisflex.kotlin.ksp.internal.util.QUERY_COLUMN
-import com.mybatisflex.kotlin.ksp.internal.util.legalProperties
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.plusParameter
@@ -88,18 +87,15 @@ internal object PropertyTypeChecker : KspConfiguration<Boolean> {
 /**
  * 用于指定 KSP 生成的 TableDef 为 class 或 object 。
  *
- * 一般情况下，我们推荐您使用 object 而不是 class 。在以下情况中，你需要使用 class 而不是 object ：
- *
- * 1，你需要使用构造器来获取一个新的实例。尽管我们给 object 提供了 invoke 方法来模拟构造器行为，但这终究并非构造器。
- *
- * 2，你需要完全兼容 Java 代码。生成的 class 能够完全像 apt 生成的 Java 类一样在 Java 调用。
+ * 一般情况下，我们推荐您使用 class 而不是 object 。仅在
+ * 您确实十分需要使用 object 的情况下，才使用 object 。
  *
  * @author CloudPlayer
  */
 internal object GenerateType : KspConfiguration<GenerateTypeEnum> {
     override val key: String = "ksp.generate.type"
 
-    private var _value: GenerateTypeEnum = GenerateTypeEnum.OBJECT
+    private var _value: GenerateTypeEnum = GenerateTypeEnum.CLASS
 
     override val value: GenerateTypeEnum
         get() = _value

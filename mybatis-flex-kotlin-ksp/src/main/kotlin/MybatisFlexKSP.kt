@@ -24,6 +24,7 @@ internal class MybatisFlexKSP : SymbolProcessor {
         initConfigs(flexConfigs)
         if (!Enable.value) return emptyList()
         logger.warn("mybatis flex kotlin symbol processor run start...")
+        checkOverridable(resolver)
         generate(resolver)
         return emptyList()
     }
@@ -45,7 +46,7 @@ internal class MybatisFlexKSP : SymbolProcessor {
 
         if (AllInTablesEnable.value) {  // 生成 Tables 类
             val generator = tableDefVisitor.generator
-            TablesGenerator(generator.instancePropertySpecs, *seq.mapNotNull { it.containingFile }.toList().toTypedArray()).generate()
+            TablesGenerator(generator.instancePropertySpecs, *seq.mapNotNullTo(ArrayList()) { it.containingFile }.toTypedArray()).generate()
         }
 
         if (MapperGenerateEnable.value) {  // 生成 Mapper 接口

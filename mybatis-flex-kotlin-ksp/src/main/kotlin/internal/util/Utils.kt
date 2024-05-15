@@ -180,7 +180,7 @@ val KSClassDeclaration.interfaceName: String
  * @see Table.schema
  * @author CloudPlayer
  */
-val KSClassDeclaration.scheme: String
+val KSClassDeclaration.schema: String
     get() {
         val table = table
         return table.schema

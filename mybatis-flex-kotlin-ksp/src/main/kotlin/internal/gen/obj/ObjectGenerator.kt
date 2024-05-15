@@ -4,6 +4,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.mybatisflex.kotlin.ksp.internal.gen.TableDefGenerator
 import com.mybatisflex.kotlin.ksp.internal.util.*
+import com.mybatisflex.kotlin.ksp.isOverridable
 import com.mybatisflex.kotlin.ksp.kotlinVersion
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.jvm.jvmName
@@ -15,6 +16,7 @@ internal class ObjectGenerator : TableDefGenerator {
     override val instancePropertySpecs: List<PropertySpec>
         get() = _instancePropertySpecs
 
+    @OptIn(DelicateKotlinPoetApi::class)
     override val KSClassDeclaration.typeSpec: TypeSpec
         get() = TypeSpec.objectBuilder(tableClassName).apply {
             if (kotlinVersion.isAtLeast(1, 9)) {
@@ -39,11 +41,11 @@ internal class ObjectGenerator : TableDefGenerator {
                 """.trimIndent()
             )
 
-            // 继承父类并传入 scheme 和 tableName 以调用父构造器
+            // 继承父类并传入 schema 和 tableName 以调用父构造器
             superclass(TABLE_DEF)
             addSuperclassConstructorParameter(
                 """
-                "$scheme", "$tableName"
+                "$schema", "$tableName"
                 """.trimIndent()
             )
 
@@ -84,6 +86,34 @@ internal class ObjectGenerator : TableDefGenerator {
                     .jvmStatic()
                     .build()
             )
+
+            if (isOverridable) {
+                addFunction(
+                    FunSpec.builder("as")
+                        .addModifiers(KModifier.OVERRIDE, KModifier.INFIX)
+                        .addParameter(ParameterSpec("alias", STRING))
+                        .returns(NOTHING)
+                        .addCode(
+                            """throw IllegalArgumentException(
+                                |"单例不允许调用 as 方法。要调用 as 方法，请将 mybatis-flex.config 文件中 ksp.generate.type 的值修改为 class 。"
+                                |)""".trimMargin().replace(
+                                " ",
+                                "·"
+                            )
+                        )
+                        .addAnnotation(
+                            AnnotationSpec.get(
+                                Deprecated(
+                                    "单例不允许调用 as 方法。要调用 as 方法，请将 mybatis-flex.config 文件中 ksp.generate.type 的值修改为 class 。",
+                                    level = DeprecationLevel.ERROR
+                                ),
+                                includeDefaultValues = true
+                            )
+                        )
+                        .build()
+                )
+
+            }
         }.build()
 
     private fun generateProperties(sequence: Sequence<KSPropertyDeclaration>): List<PropertySpec> = sequence.map {
