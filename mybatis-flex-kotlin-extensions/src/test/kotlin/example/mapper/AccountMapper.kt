@@ -8,7 +8,6 @@ import com.mybatisflex.kotlin.extensions.kproperty.`in`
 import com.mybatisflex.kotlin.extensions.mapper.filter
 
 
-@JvmDefaultWithCompatibility
 interface AccountMapper : BaseMapper<Account> {
     fun findByAge(age: Int, vararg ids: Int): List<Account> = filter {
         allAnd(

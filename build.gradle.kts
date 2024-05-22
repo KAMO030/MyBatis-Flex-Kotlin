@@ -1,5 +1,4 @@
 import org.gradle.accessors.dm.LibrariesForLibs
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 // 不要修改或内联此属性，否则 subporjcts 处将无法正常使用。
@@ -37,12 +36,11 @@ subprojects {
         useJUnitPlatform()
     }
 
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs += "-Xjvm-default=all"  // 允许 Java 不重写 Kotlin 接口中非抽象方法
-        }
-    }
-
+//    tasks.withType<KotlinCompile> {
+//        kotlinOptions {
+//            freeCompilerArgs += "-Xjvm-default=all"  // 允许 Java 不重写 Kotlin 接口中非抽象方法
+//        }
+//    }
 
     // Stub secrets to let the project sync and build without the publication values set up
     ext["signing.keyId"] = null
