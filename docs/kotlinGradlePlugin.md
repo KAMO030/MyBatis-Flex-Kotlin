@@ -39,3 +39,41 @@ plugins {
 }
 ```
 
+### Kotlin 官方插件配置:
+
+> 如果不使用本插件, 想使用 Kotlin 官方插件单独自定义配置, 请参考如下配置:
+
+**【Kotlin】**
+
+```kotlin
+plugins {
+  kotlin("plugin.allopen") version "$kotlin_version"
+  kotlin("plugin.noArg") version "$kotlin_version"
+}
+
+noArg {
+  annotation("com.mybatisflex.annotation.Table")
+}
+
+allOpen {
+  annotation("com.mybatisflex.annotation.Table")
+}
+```
+
+**【Groovy】**
+
+```groovy
+plugins {
+  id "org.jetbrains.kotlin.plugin.allopen" version "$kotlin_version"
+  id "org.jetbrains.kotlin.plugin.noArg" version "$kotlin_version"
+}
+
+noArg {
+  annotation("com.mybatisflex.annotation.Table")
+}
+
+allOpen {
+  annotation("com.mybatisflex.annotation.Table")
+}
+```
+
