@@ -75,9 +75,7 @@ infix fun QueryWrapper.and(queryColumn: QueryCondition): QueryWrapper = this.and
 
 infix fun QueryWrapper.or(queryColumn: QueryCondition): QueryWrapper = this.or(queryColumn)
 
-@Deprecated("Use `whereWith` instead.", ReplaceWith("whereWith{ queryCondition }"))
-fun QueryWrapper.where(queryCondition: QueryCondition, consumer: (QueryWrapper) -> Unit): QueryWrapper =
-    and(queryCondition).where(consumer)
+fun QueryWrapper.whereQuery(consumer: (QueryWrapper) -> Unit): QueryWrapper = where(consumer)
 
 inline fun QueryWrapper.whereWith(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
 
