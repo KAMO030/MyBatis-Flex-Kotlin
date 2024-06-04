@@ -3,6 +3,8 @@
 > 它继承了 Mybatis-Flex 轻量的特性，同时拥有 Kotlin 特有的扩展方法、中缀表达式与DSL等语法支持，
 > 使其拥有了更高的灵活性。让我们可以更加轻松的在 Kotlin 中使用 MyBatis-Flex 所带来的开发效率和开发体验。
 
+### [查看最新版本](https://central.sonatype.com/search?q=mybatis-flex-kotlin)
+
 ## 特征
 
 - 轻量：只基于 Mybatis-Flex 核心库 ，只做扩展不做改变
@@ -119,9 +121,9 @@
 ```kotlin
 dependencies {
   //kotlin扩展库
-  implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:1.0.8")
+  implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:$extensionsVersion")
   //核心库
-  implementation("com.mybatis-flex:mybatis-flex-core:$version")
+  implementation("com.mybatis-flex:mybatis-flex-core:$coreVersion")
 }
 ```
 
@@ -133,7 +135,7 @@ dependencies {
   <dependency>
     <groupId>com.mybatis-flex</groupId>
     <artifactId>mybatis-flex-kotlin-extensions</artifactId>
-    <version>1.0.7</version>
+    <version>${mybatis-flex-kotlin-extensions.version}</version>
   </dependency>
   <!--核心库-->
   <dependency>
@@ -166,7 +168,9 @@ data class Account(
 
 > ⚠️ 最好不要写成 data class ，否则没有无参构造某些情况下会报错，例如属性的顺序与数据库字段不一致会导致报错；
 >
-> 如有需要可以安装官方 [noArg](https://kotlinlang.org/docs/no-arg-plugin.html) 插件
+> 如有需要可以安装官方 [noArg](https://kotlinlang.org/docs/no-arg-plugin.html) 插件;
+>
+> 或是使用本框架提供的整合插件 [com.mybatis-flex.kotlin](docs/kotlinGradlePlugin.md)
 
 **第 4 步：开始使用**
 

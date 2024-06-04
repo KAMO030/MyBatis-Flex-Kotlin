@@ -23,11 +23,11 @@ import java.util.*
  */
 
 @Table("tb_account")
-open class Account(
-    @Id var id: Int = -1,
-    var userName: String? = null,
-    var age: Int? = null,
-    var birthday: Date? = null,
+data class Account(
+    @Id var id: Int,
+    var userName: String?,
+    var age: Int?,
+    var birthday: Date?,
 ) : Model<Account>() {
     companion object : AccountMapper by mapper() {
         fun findByAge2(age: Int, vararg ids: Int): List<Account> = query {

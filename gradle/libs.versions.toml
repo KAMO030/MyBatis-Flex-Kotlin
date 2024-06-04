@@ -1,7 +1,8 @@
 [versions]
 kotlin = "1.8.20"
+gradle-plugin-publish = "1.2.1"
 mybatisflex = "1.8.7"
-mybatisflex-kotlin-plugin = "1.0.0"
+mybatisflex-kotlin-plugin = "1.0.1"
 mybatisflex-kotlin-extensions = "1.0.9"
 mybatisflex-kotlin-ksp = "1.0.1"
 mybatisflex-kotlin-codegen = "1.0.0"
@@ -23,7 +24,6 @@ junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engi
 mysql = { group = "com.mysql", name = "mysql-connector-j", version.ref = "mysql" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 spring-test = { group = "org.springframework", name = "spring-test", version.ref = "spring" }
-kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 ksp-api = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp-api" }
 mybatisflex-annotation = { group = "com.mybatis-flex", name = "mybatis-flex-annotation", version.ref = "mybatisflex" }
 kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version.ref = "kotlinpoet" }
@@ -37,5 +37,6 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp-api" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "noarg" }
 allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "allopen" }
-
+gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
+com-mybatis-flex-kotlin = { id = "com.mybatis-flex.kotlin", version.ref = "mybatisflex-kotlin-plugin" }
 [bundles]

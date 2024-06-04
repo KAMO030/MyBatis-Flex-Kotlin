@@ -1,19 +1,24 @@
+@file:Suppress("UnstableApiUsage")
+
 version = libs.versions.mybatisflex.kotlin.plugin.get()
 
-plugins {
-    `java-gradle-plugin`
-}
+apply(plugin = libs.plugins.gradle.plugin.publish.get().pluginId)
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-noarg")
-    implementation("org.jetbrains.kotlin:kotlin-allopen")
+    implementation(kotlin("noarg"))
+    implementation(kotlin("allopen"))
 }
 
 gradlePlugin {
+    website.set("https://github.com/KAMO030/mybatis-flex-kotlin")
+    vcsUrl.set("https://github.com/KAMO030/mybatis-flex-kotlin.git")
     plugins {
-        create("MybatisFlexKotlinPlugin") {
-            id = "com.mybatisflex.kotlin.plugin.mybatisflex"
+        create("mybatisFlexKotlin") {
+            id = "com.mybatis-flex.kotlin"
             implementationClass = "com.mybatisflex.kotlin.plugin.MybatisFlexKotlinPlugin"
+            displayName = "Mybatis Flex Kotlin Plugin"
+            description = "Gradle Kotlin Plugin for Mybatis Flex"
+            tags.set(setOf("mybatis", "mybatis-flex", "kotlin"))
         }
     }
 }

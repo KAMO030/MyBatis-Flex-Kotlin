@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.noarg) apply false
     alias(libs.plugins.allopen) apply false
+    alias(libs.plugins.gradle.plugin.publish) apply false
+    alias(libs.plugins.com.mybatis.flex.kotlin) apply false
     `maven-publish`
     `kotlin-dsl`
     signing
@@ -17,16 +19,17 @@ plugins {
 
 // 在 subprojets 处，不要使用属性 libs ，而是改为在此文件中定义的属性 lib。
 subprojects {
-    apply(plugin = "maven-publish")
-    apply(plugin = "signing")
+
     apply(plugin = lib.plugins.kotlin.jvm.get().pluginId)
     apply(plugin = lib.plugins.dokka.get().pluginId)
+    apply(plugin = "maven-publish")
+    apply(plugin = "signing")
     apply(plugin = "org.gradle.kotlin.kotlin-dsl")
 
     group = providers.gradleProperty("group").get()
 
     dependencies {
-        implementation(lib.kotlin.reflect)
+        implementation(kotlin("reflect"))
         testCompileOnly(lib.junit.jupiter.api)
         testRuntimeOnly(lib.junit.jupiter.engine)
         implementation(lib.dokka)

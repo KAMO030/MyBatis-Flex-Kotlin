@@ -1,5 +1,7 @@
 version = libs.versions.mybatisflex.kotlin.extensions.get()
 
+apply(plugin = libs.plugins.com.mybatis.flex.kotlin.get().pluginId)
+
 dependencies {
     compileOnly(libs.mybatisflex.core)
 
