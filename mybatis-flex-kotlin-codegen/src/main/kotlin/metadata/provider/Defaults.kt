@@ -7,11 +7,13 @@ import com.mybatisflex.kotlin.codegen.metadata.commonQuerySql
 import metadata.ColumnMetadata
 import java.sql.ResultSet
 
-open class DefaultProvider : MetadataProvider {
+open class DefaultMetadataProvider : MetadataProvider {
+    companion object : DefaultMetadataProvider()
+
     open lateinit var dataSource: DataSourceMetadata
 
     override fun provideMetadata(dataSource: DataSourceMetadata): Set<TableMetadata> = buildSet {
-        this@DefaultProvider.dataSource = dataSource
+        this@DefaultMetadataProvider.dataSource = dataSource
         dataSource.tablesResultSet.use {
             while (it.next()) {
                 val metadata = TableMetadata(dataSource.schema, it.tableName, it.tableComment)
@@ -70,7 +72,7 @@ open class DefaultProvider : MetadataProvider {
             databaseMetaData.getPrimaryKeys(connection.catalog, schema, tableName)
         }.use {
             while (it.next()) {
-                primaryKey += it.getString("COLUMN_NAME")
+                _primaryKey += it.getString("COLUMN_NAME")
             }
         }
     }

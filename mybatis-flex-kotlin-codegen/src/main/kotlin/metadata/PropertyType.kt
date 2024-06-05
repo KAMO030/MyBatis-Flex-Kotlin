@@ -14,7 +14,7 @@ sealed interface PropertyType {
 
     @JvmInline
     value class ClassType(val clazz: Class<*>) : PropertyType {
-        override fun asTypeName() = clazz.asTypeName()
+        override fun asTypeName() = clazz.kotlin.asTypeName()
     }
 
     @JvmInline

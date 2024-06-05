@@ -6,15 +6,19 @@ data class TableMetadata(
     val schema: String?,
     val tableName: String,
     val comment: String? = null,
-    val primaryKey: MutableSet<String> = mutableSetOf(),
 ) {
+    internal val _primaryKey: MutableSet<String> = mutableSetOf()
+
+    val primaryKey: Set<String>
+        get() = _primaryKey
+
     private val _columns = mutableSetOf<ColumnMetadata>()
 
     val columns: Set<ColumnMetadata>
         get() = _columns
 
     operator fun plusAssign(column: ColumnMetadata) {
-        if (column.name in primaryKey) {
+        if (column.name in _primaryKey) {
             column.isPrimaryKey = true
         }
         _columns += column
