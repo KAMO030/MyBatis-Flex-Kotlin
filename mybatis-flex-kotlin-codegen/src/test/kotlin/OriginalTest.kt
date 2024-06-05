@@ -1,6 +1,7 @@
 import com.mybatisflex.core.BaseMapper
+import com.mybatisflex.kotlin.codegen.internal.asCamelCase
 import com.mybatisflex.kotlin.codegen.metadata.DataSourceMetadata
-import com.mybatisflex.kotlin.codegen.metadata.provider.DefaultProvider
+import com.mybatisflex.kotlin.codegen.metadata.provider.DefaultMetadataProvider
 import com.mybatisflex.kotlin.scope.runFlex
 import com.mysql.cj.jdbc.MysqlDataSource
 import org.apache.ibatis.io.ResolverUtil
@@ -29,13 +30,19 @@ class OriginalTest {
 
     @Test
     fun testResult() {
-        val res = DefaultProvider().provideMetadata(DataSourceMetadata(dataSource))
+        val res = DefaultMetadataProvider.provideMetadata(DataSourceMetadata(dataSource))
         res.forEach {
             println(it)
         }
-        println("----------------------------------")
-        res.map { it.columns }.forEach {
-            println(it)
-        }
+//        println("----------------------------------")
+//        res.map { it.columns }.forEach {
+//            println(it)
+//        }
+    }
+
+    @Test
+    fun testString() {
+        val str = "aaaaaaa_bbbbbbb_cccccccccc_ddddddddd"
+        println(str.asCamelCase())
     }
 }
