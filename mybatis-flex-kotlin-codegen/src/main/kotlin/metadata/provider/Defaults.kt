@@ -1,10 +1,6 @@
 package com.mybatisflex.kotlin.codegen.metadata.provider
 
-import com.mybatisflex.kotlin.codegen.metadata.DataSourceMetadata
-import com.mybatisflex.kotlin.codegen.metadata.PropertyType
-import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
-import com.mybatisflex.kotlin.codegen.metadata.commonQuerySql
-import metadata.ColumnMetadata
+import com.mybatisflex.kotlin.codegen.metadata.*
 import java.sql.ResultSet
 
 open class DefaultMetadataProvider : MetadataProvider {

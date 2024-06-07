@@ -25,10 +25,10 @@ fun interface BuilderComposer {
             override fun provideFileBuilder(
                 generationMetadata: Sequence<GenerationMetadata>,
             ): Sequence<FileSpec.Builder> = generationMetadata.map {
-                val generateOption = it.generateOption
+                val tableOptions = it.tableOptions
                 val file = FileSpec.builder(
-                    "${generateOption.basePackage}.${generateOption.optionName.replaceFirstChar(Char::lowercaseChar)}",
-                    generateOption.typeName.replaceFirstChar(Char::uppercaseChar)
+                    "${tableOptions.basePackage}.${tableOptions.optionName.replaceFirstChar(Char::lowercaseChar)}",
+                    tableOptions.typeName.replaceFirstChar(Char::uppercaseChar)
                 )
                 transform(it, file)
             }

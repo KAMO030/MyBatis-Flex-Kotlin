@@ -1,8 +1,11 @@
 import com.mybatisflex.annotation.Column
-import com.mybatisflex.kotlin.codegen.config.*
+import com.mybatisflex.kotlin.codegen.config.extensions.*
+import com.mybatisflex.kotlin.codegen.config.generate
 import com.mybatisflex.kotlin.codegen.internal.Table
 import com.mysql.cj.jdbc.MysqlDataSource
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.DelicateKotlinPoetApi
+import com.squareup.kotlinpoet.KModifier
 import org.junit.jupiter.api.Test
 
 class DslTest {

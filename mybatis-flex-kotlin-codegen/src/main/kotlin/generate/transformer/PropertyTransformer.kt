@@ -1,9 +1,9 @@
 package com.mybatisflex.kotlin.codegen.generate.transformer
 
+import com.mybatisflex.kotlin.codegen.metadata.ColumnMetadata
 import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import metadata.ColumnMetadata
 
 class PropertyTransformer(
     private val block: (

@@ -5,7 +5,7 @@ import com.mybatisflex.annotation.SetListener
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.annotation.UpdateListener
 import com.mybatisflex.kotlin.codegen.config.GenerateDispatcher
-import com.mybatisflex.kotlin.codegen.config.TableOption
+import com.mybatisflex.kotlin.codegen.config.TableConfiguration
 import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
 import kotlin.reflect.KClass
 
@@ -27,9 +27,9 @@ fun String.asCamelCase(): String = buildString {
 
 fun String.asClassName(): String = asCamelCase().replaceFirstChar(Char::uppercaseChar)
 
-val TableMetadata.option: TableOption
+val TableMetadata.configuration: TableConfiguration
     get() = with(GenerateDispatcher) {
-        specificOption[tableName] ?: globalOption
+        specificConfiguration[tableName] ?: globalTableConfiguration
     }
 
 fun Table(

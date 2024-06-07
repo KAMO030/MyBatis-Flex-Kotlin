@@ -1,9 +1,9 @@
 package com.mybatisflex.kotlin.codegen.generate.transformer
 
+import com.mybatisflex.kotlin.codegen.metadata.ColumnMetadata
 import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
-import metadata.ColumnMetadata
 
 /**
  * Builder 提供者，可以实现并注册 Provider 以实现自定义逻辑。

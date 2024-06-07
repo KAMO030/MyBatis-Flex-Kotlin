@@ -1,36 +1,37 @@
-package com.mybatisflex.kotlin.codegen.config
+package com.mybatisflex.kotlin.codegen.config.extensions
 
 import com.mybatisflex.annotation.Column
 import com.mybatisflex.annotation.Table
 import com.mybatisflex.kotlin.codegen.annotation.GeneratorDsl
+import com.mybatisflex.kotlin.codegen.config.TableOptions
 import com.mybatisflex.kotlin.codegen.generate.transformer.BuilderTransformer
 import com.mybatisflex.kotlin.codegen.generate.transformer.PropertyTransformer
 import com.mybatisflex.kotlin.codegen.generate.transformer.TypeTransformer
+import com.mybatisflex.kotlin.codegen.metadata.ColumnMetadata
 import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
 import com.squareup.kotlinpoet.*
-import metadata.ColumnMetadata
 
 @GeneratorDsl
-fun GenerateOption.forTables(transform: (seq: Sequence<TableMetadata>) -> Sequence<TableMetadata>) {
+fun TableOptions.forTables(transform: (seq: Sequence<TableMetadata>) -> Sequence<TableMetadata>) {
     tableMetadataTransformer = {
         transform(tableMetadataTransformer())
     }
 }
 
 @GeneratorDsl
-fun GenerateOption.forColumns(transform: (seq: Sequence<ColumnMetadata>) -> Sequence<ColumnMetadata>) {
+fun TableOptions.forColumns(transform: (seq: Sequence<ColumnMetadata>) -> Sequence<ColumnMetadata>) {
     columnMetadataTransformer = {
         transform(columnMetadataTransformer())
     }
 }
 
 @GeneratorDsl
-fun GenerateOption.applyTransformer(builderTransformer: BuilderTransformer) = builderTransformer.also {
+fun TableOptions.applyTransformer(builderTransformer: BuilderTransformer) = builderTransformer.also {
     this.builderTransformer = this.builderTransformer then builderTransformer
 }
 
 @GeneratorDsl
-fun GenerateOption.transformType(
+fun TableOptions.transformType(
     transformer: (
         tableMetadata: TableMetadata,
         builder: TypeSpec.Builder,
@@ -38,7 +39,7 @@ fun GenerateOption.transformType(
 ) = applyTransformer(TypeTransformer(transformer))
 
 @GeneratorDsl
-fun GenerateOption.transformProperty(
+fun TableOptions.transformProperty(
     transformer: (
         columnMetadata: ColumnMetadata,
         builder: PropertySpec.Builder
@@ -46,13 +47,13 @@ fun GenerateOption.transformProperty(
 ) = applyTransformer(PropertyTransformer(transformer))
 
 @GeneratorDsl
-fun GenerateOption.dataclass() = transformType { _, builder ->
+fun TableOptions.dataclass() = transformType { _, builder ->
     builder.addModifiers(KModifier.DATA)
 }
 
 @OptIn(DelicateKotlinPoetApi::class)
 @GeneratorDsl
-fun GenerateOption.tableAnnotation(table: Table? = null) = transformType { tableMetadata, builder ->
+fun TableOptions.tableAnnotation(table: Table? = null) = transformType { tableMetadata, builder ->
     val annotationSpec = if (table != null) {
         AnnotationSpec.get(table)
     } else {
@@ -63,7 +64,7 @@ fun GenerateOption.tableAnnotation(table: Table? = null) = transformType { table
 
 @GeneratorDsl
 @OptIn(DelicateKotlinPoetApi::class)
-fun GenerateOption.columnAnnotation(column: Column? = null) = transformProperty { columnMetadata, builder ->
+fun TableOptions.columnAnnotation(column: Column? = null) = transformProperty { columnMetadata, builder ->
     val annotationSpec = if (column != null) {
         AnnotationSpec.get(column)
     } else {

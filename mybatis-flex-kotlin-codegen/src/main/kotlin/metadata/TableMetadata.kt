@@ -1,7 +1,5 @@
 package com.mybatisflex.kotlin.codegen.metadata
 
-import metadata.ColumnMetadata
-
 data class TableMetadata(
     val schema: String?,
     val tableName: String,

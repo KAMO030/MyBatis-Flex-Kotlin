@@ -1,7 +1,4 @@
-package metadata
-
-import com.mybatisflex.kotlin.codegen.metadata.PropertyType
-import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
+package com.mybatisflex.kotlin.codegen.metadata
 
 /**
  * 数据库表里面的列信息。
