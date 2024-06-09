@@ -35,6 +35,7 @@ import kotlin.reflect.KProperty1
  * @author KAMOsama
  */
 
+// --from
 inline fun QueryWrapper.from(init: QueryScope.() -> Unit = {}): QueryWrapper = this.from(queryScope(init = init))
 
 fun QueryWrapper.from(vararg entities: KClass<*>): QueryWrapper = this.from(*entities.map { it.java }.toTypedArray())
@@ -43,6 +44,38 @@ infix fun QueryWrapper.from(entity: KClass<*>): QueryWrapper = this.from(entity.
 
 inline fun <reified T> QueryWrapper.from(): QueryWrapper = this.from(T::class)
 
+// --join
+inline fun <reified Q : QueryWrapper> QueryWrapper.join(enable: Boolean = true): Joiner<Q> =
+    this.join(Q::class.java, enable)
+
+inline fun <Q : QueryWrapper> QueryWrapper.join(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
+    this.join(queryScope(init = init), enable)
+
+inline fun <reified Q : QueryWrapper> QueryWrapper.innerJoin(enable: Boolean = true): Joiner<Q> =
+    this.innerJoin(Q::class.java, enable)
+
+inline fun <Q : QueryWrapper> QueryWrapper.innerJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
+    this.innerJoin(queryScope(init = init), enable)
+
+inline fun <reified Q : QueryWrapper> QueryWrapper.crossJoin(enable: Boolean = true): Joiner<Q> =
+    this.crossJoin(Q::class.java, enable)
+
+inline fun <Q : QueryWrapper> QueryWrapper.crossJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
+    this.crossJoin(queryScope(init = init), enable)
+
+inline fun <reified Q : QueryWrapper> QueryWrapper.leftJoin(enable: Boolean = true): Joiner<Q> =
+    this.leftJoin(Q::class.java, enable)
+
+inline fun <Q : QueryWrapper> QueryWrapper.leftJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
+    this.leftJoin(queryScope(init = init), enable)
+
+inline fun <reified Q : QueryWrapper> QueryWrapper.rightJoin(enable: Boolean = true): Joiner<Q> =
+    this.rightJoin(Q::class.java, enable)
+
+inline fun <Q : QueryWrapper> QueryWrapper.rightJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
+    this.rightJoin(queryScope(init = init), enable)
+
+// --select
 /**
  * 带范型约束的select，约束只能是某个实体类的属性
  */
@@ -58,9 +91,7 @@ fun QueryWrapper.selectProperties(vararg properties: KProperty<*>): QueryWrapper
 fun QueryWrapper.select(entityType: KClass<*>): QueryWrapper =
     this.select(*entityType.defaultColumns)
 
-val <T : QueryWrapper> T.self: QueryWrapperDevelopEntry<T>
-    get() = QueryWrapperDevelopEntry(this)
-
+// --condition
 inline fun QueryWrapper.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
     if (isEffective) and(predicate()) else this
 
@@ -79,7 +110,6 @@ fun QueryWrapper.whereQuery(consumer: (QueryWrapper) -> Unit): QueryWrapper = wh
 
 inline fun QueryWrapper.whereWith(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
 
-
 @OptIn(ExperimentalContracts::class)
 inline fun QueryWrapper.having(predicate: () -> QueryCondition): QueryWrapper {
     contract {
@@ -88,10 +118,13 @@ inline fun QueryWrapper.having(predicate: () -> QueryCondition): QueryWrapper {
     return having(predicate())
 }
 
+
 fun QueryWrapper.andAll(vararg conditions: QueryCondition): QueryWrapper = this and allAnd(*conditions)
 
 fun QueryWrapper.orAll(vararg conditions: QueryCondition): QueryWrapper = this or allOr(*conditions)
 
+val <T : QueryWrapper> T.self: QueryWrapperDevelopEntry<T>
+    get() = QueryWrapperDevelopEntry(this)
 
 /**
  * wrapper的内部实现的访问，基于官方CPI而编写。其目的用于简化开发时的
