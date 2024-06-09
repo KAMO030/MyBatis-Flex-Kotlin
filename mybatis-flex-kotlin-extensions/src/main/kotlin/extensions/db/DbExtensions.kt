@@ -18,6 +18,8 @@
 package com.mybatisflex.kotlin.extensions.db
 
 import com.mybatisflex.core.BaseMapper
+import com.mybatisflex.core.FlexGlobalConfig
+import com.mybatisflex.core.exception.FlexExceptions
 import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
@@ -42,6 +44,10 @@ import com.mybatisflex.kotlin.scope.UpdateScope
 import com.mybatisflex.kotlin.scope.queryScope
 import com.mybatisflex.kotlin.scope.updateScope
 import java.io.Serializable
+import java.net.URI
+import javax.tools.JavaFileObject
+import javax.tools.SimpleJavaFileObject
+import javax.tools.ToolProvider
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
@@ -59,19 +65,58 @@ import kotlin.reflect.full.isSubclassOf
  */
 inline fun <reified M> mapper(): M = Mappers.ofMapperClass(M::class.java)
 
+inline fun <reified E : Any> mapperOfEntity(): BaseMapper<E> = E::class.baseMapper
+
 /**
  * 把泛型类型当作实体类型拿到mapper实例
  * @author KAMOsama
  */
+@OptIn(InternalMybatisFlexApi::class)
 val <E : Any> KClass<E>.baseMapper: BaseMapper<E>
-    get() = Mappers.ofEntityClass(java)
+    get() = runCatching { Mappers.ofEntityClass(this.java) }
+        .recoverCatching { e ->
+            createAndLoadDynamicMapper(this)?.let {
+                FlexGlobalConfig.getDefaultConfig().configuration.addMapper(it)
+                Mappers.ofMapperClass(it) as BaseMapper<E>
+            } ?: throw FlexExceptions.wrap(e, "create dynamic mapper failed")
+        }.getOrThrow()
 
 val <E : Any> KClass<E>.baseMapperOrNull: BaseMapper<E>?
-    get() = try {
-        Mappers.ofEntityClass(java)
-    } catch (_: Exception) {
-        null
-    }
+    get() = runCatching { baseMapper }.getOrNull()
+
+@InternalMybatisFlexApi
+fun createAndLoadDynamicMapper(kClass: KClass<*>): Class<*>? {
+    val simpleName = kClass.simpleName
+    val className = simpleName + "Mapper"
+    val packageName = kClass.java.`package`.name
+    val fullName = "$packageName.$className"
+    return runCatching {
+        kClass.java.classLoader.loadClass(fullName)
+    }.recoverCatching {
+        val compiler = ToolProvider.getSystemJavaCompiler()
+        val code = """
+                package $packageName;
+                import com.mybatisflex.core.BaseMapper;
+                public interface $className extends BaseMapper<$simpleName>{
+                
+                }
+            """.trimIndent()
+        val optList = kClass.java.classLoader.getResource("")?.let { listOf("-d", it.path) }
+        val fileManager = compiler.getStandardFileManager(null, null, null)
+        fileManager.use {
+            val file = object : SimpleJavaFileObject(
+                URI.create(
+                    "string:///${fullName.replace('.', '/')}${JavaFileObject.Kind.SOURCE.extension}"
+                ), JavaFileObject.Kind.SOURCE
+            ) {
+                override fun getCharContent(ignoreEncodingErrors: Boolean): CharSequence = code
+            }
+            compiler.getTask(null, fileManager, null, optList, null, listOf(file))
+                .call()
+            kClass.java.classLoader.loadClass(fullName)
+        }
+    }.getOrNull()
+}
 
 val <E : Any> KClass<E>.tableInfo: TableInfo
     get() = requireNotNull(tableInfoOrNull) {
@@ -433,7 +478,6 @@ inline fun <reified E : Any, reified R : Any> paginateAs(
     totalRow: Number = -1L,
     init: QueryScope.() -> Unit
 ): Page<R> = paginateAs<E, R>(Page(pageNumber, pageSize, totalRow), init)
-
 
 
 //    update----------

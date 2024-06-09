@@ -5,6 +5,7 @@ import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapper
+import com.mybatisflex.kotlin.annotation.InternalMybatisFlexApi
 import com.mybatisflex.kotlin.example.entity.Account
 import com.mybatisflex.kotlin.example.mapper.AccountMapper
 import com.mybatisflex.kotlin.extensions.condition.allAnd
@@ -45,7 +46,7 @@ class KotlinExample {
 //            此方法体 it 是 MybatisFlexBootstrap 实例
 //            配置Mapper
 //            1.通过+（重写自增）的方式
-            +AccountMapper::class
+//            +AccountMapper::class
 //            2.通过原始的方式
 //            it.addMapper(AccountMapper::class.java)
 //            3.通过扫描包路径自动注册
@@ -357,5 +358,12 @@ class KotlinExample {
         }.also { println(it) }
     }
 
+    @OptIn(InternalMybatisFlexApi::class)
+    @Test
+    fun testDynamicMapper() {
+        with(Account::class) {
+            println(createAndLoadDynamicMapper(this))
+        }
+    }
 
 }

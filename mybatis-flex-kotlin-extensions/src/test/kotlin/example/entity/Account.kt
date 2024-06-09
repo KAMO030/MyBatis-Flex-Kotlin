@@ -2,13 +2,14 @@ package com.mybatisflex.kotlin.example.entity
 
 import com.mybatisflex.annotation.Id
 import com.mybatisflex.annotation.Table
+import com.mybatisflex.core.BaseMapper
 import com.mybatisflex.core.activerecord.Model
-import com.mybatisflex.kotlin.example.mapper.AccountMapper
 import com.mybatisflex.kotlin.extensions.condition.allAnd
-import com.mybatisflex.kotlin.extensions.db.mapper
+import com.mybatisflex.kotlin.extensions.db.mapperOfEntity
 import com.mybatisflex.kotlin.extensions.db.query
 import com.mybatisflex.kotlin.extensions.kproperty.eq
 import com.mybatisflex.kotlin.extensions.kproperty.`in`
+import com.mybatisflex.kotlin.extensions.mapper.filter
 import com.mybatisflex.kotlin.extensions.wrapper.whereWith
 import java.util.*
 
@@ -29,7 +30,13 @@ data class Account(
     var age: Int?,
     var birthday: Date?,
 ) : Model<Account>() {
-    companion object : AccountMapper by mapper() {
+    companion object : BaseMapper<Account> by mapperOfEntity() {
+        fun findByAge(age: Int, vararg ids: Int): List<Account> = filter {
+            allAnd(
+                Account::age eq age,
+                (Account::id `in` ids.asList()).`when`(ids.isNotEmpty())
+            )
+        }
         fun findByAge2(age: Int, vararg ids: Int): List<Account> = query {
             whereWith {
                 allAnd(
@@ -39,9 +46,15 @@ data class Account(
             }
         }
     }
-
-    override fun toString(): String {
-        return "Account(id=$id, userName=$userName, age=$age, birthday=$birthday)"
-    }
+//    companion object : AccountMapper by mapper() {
+//        fun findByAge2(age: Int, vararg ids: Int): List<Account> = query {
+//            whereWith {
+//                allAnd(
+//                    Account::age eq age,
+//                    (Account::id `in` ids.asList()).`when`(ids.isNotEmpty())
+//                )
+//            }
+//        }
+//    }
 }
 
