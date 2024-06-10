@@ -1,10 +1,10 @@
 package com.mybatisflex.kotlin.codegen.config.extensions
 
-import com.mybatisflex.kotlin.codegen.config.ScopeTableOptions
-import com.mybatisflex.kotlin.codegen.config.ThreeTierScope
+import com.mybatisflex.kotlin.codegen.config.ClassOptionScope
+import com.mybatisflex.kotlin.codegen.config.ScopedTableOptions
 import com.squareup.kotlinpoet.KModifier
 
-fun ScopeTableOptions<ThreeTierScope.Entity>.dataclass() {
+fun ScopedTableOptions<ClassOptionScope>.dataclass() {
     transformType { _, builder ->
         builder.addModifiers(KModifier.DATA)
     }
