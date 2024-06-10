@@ -34,8 +34,9 @@ inline fun GenerateDispatcher.withAllTable(
 inline fun GenerateDispatcher.transformMetadata(
     crossinline sequenceTransformer: Sequence<TableMetadata>.() -> Sequence<TableMetadata>
 ) {
+    val prev = metadataTransformer
     metadataTransformer = {
-        metadataTransformer().sequenceTransformer()
+        prev().sequenceTransformer()
     }
 }
 
