@@ -9,6 +9,8 @@ import com.squareup.kotlinpoet.KModifier
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
+import java.sql.DatabaseMetaData
+import java.util.*
 import javax.sql.DataSource
 
 class DslTest {
@@ -43,6 +45,26 @@ class DslTest {
         res.forEach {
             println(it.build())
             println("---------------------------------------")
+        }
+    }
+
+    @Test
+    fun testGetColumns() {
+        dataSource2.connection.use { connection ->
+            connection.metaData.getColumns(null, null, "tb_account".uppercase(Locale.getDefault()), null)
+                .use { columns ->
+                    while (columns.next()) {
+                        val columnName: String = columns.getString("COLUMN_NAME").orEmpty()
+                        val dataType: String = columns.getString("TYPE_NAME").orEmpty()
+                        val columnSize: Int = columns.getInt("COLUMN_SIZE")
+                        val nullable: Int = columns.getInt("NULLABLE")
+                        val isNullable = if (nullable == DatabaseMetaData.columnNullable) "YES" else "NO"
+                        val isAutoIncrement: String = columns.getString("IS_AUTOINCREMENT").orEmpty()
+                        println(
+                            "Column Name: $columnName , Data Type: $dataType, Column Size: $columnSize, Is Nullable: $isNullable, Is Auto Increment:  $isAutoIncrement",
+                        )
+                    }
+                }
         }
     }
 
