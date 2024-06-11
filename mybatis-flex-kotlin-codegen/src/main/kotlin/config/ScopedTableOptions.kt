@@ -1,6 +1,9 @@
 package com.mybatisflex.kotlin.codegen.config
 
-data class ScopedTableOptions<out T : OptionScope>(val scope: T, val option: TableOptions) : TableOptions by option {
+data class ScopedTableOptions<out T : OptionScope>(
+    val scope: T,
+    val option: TableOptions
+) : TableOptions by option {
     constructor(
         scope: T,
         optionName: String,
