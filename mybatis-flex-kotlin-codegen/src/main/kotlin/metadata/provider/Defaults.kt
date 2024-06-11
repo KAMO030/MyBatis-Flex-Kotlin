@@ -2,6 +2,7 @@ package com.mybatisflex.kotlin.codegen.metadata.provider
 
 import com.mybatisflex.kotlin.codegen.metadata.*
 import java.sql.ResultSet
+import java.sql.ResultSetMetaData
 
 open class DefaultMetadataProvider : MetadataProvider {
     companion object : DefaultMetadataProvider()
@@ -12,7 +13,7 @@ open class DefaultMetadataProvider : MetadataProvider {
         this@DefaultMetadataProvider.dataSource = dataSource
         dataSource.tablesResultSet.use {
             while (it.next()) {
-                val metadata = TableMetadata(it.schema, it.tableName, it.tableComment)
+                val metadata = TableMetadata(dataSource.schema, it.tableName, it.tableComment)
                 metadata.initPrimaryKey()
                 provideColumnMetadata(metadata).forEach { columnMetadata ->
                     metadata += columnMetadata
@@ -28,21 +29,28 @@ open class DefaultMetadataProvider : MetadataProvider {
             it.executeQuery(tableMetadata.querySql).use { rs ->
                 val column = rs.metaData
                 for (i in 1..column.columnCount) {
-                    val res = ColumnMetadata(
-                        name = column.getColumnName(i),
-                        propertyType = PropertyType.of(column.getColumnClassName(i)),
-                        rawType = column.getColumnClassName(i),
-                        table = tableMetadata,
-                        comment = commentMap[column.getColumnName(i)],
-                        nullable = column.isNullable(i) == 1,
-                        autoIncrement = column.isAutoIncrement(i),
-                        rawLength = column.getColumnDisplaySize(i)
-                    )
+                    val res = buildColumnMetadata(tableMetadata, column, i, commentMap)
                     yield(res)
                 }
             }
         }
     }
+
+    protected open fun buildColumnMetadata(
+        table: TableMetadata,
+        column: ResultSetMetaData,
+        columnIndex: Int,
+        commentMap: Map<String, String> = emptyMap()
+    ): ColumnMetadata = ColumnMetadata(
+        name = column.getColumnName(columnIndex),
+        propertyType = PropertyType.of(column.getColumnClassName(columnIndex)),
+        rawType = column.getColumnClassName(columnIndex),
+        table = table,
+        comment = commentMap[column.getColumnName(columnIndex)],
+        nullable = column.isNullable(columnIndex) == 1,
+        autoIncrement = column.isAutoIncrement(columnIndex),
+        rawLength = column.getColumnDisplaySize(columnIndex)
+    )
 
     protected open fun getColumnComment(tableMetadata: TableMetadata): Map<String, String> = buildMap {
         with(dataSource) {
@@ -56,10 +64,6 @@ open class DefaultMetadataProvider : MetadataProvider {
 
     protected open val TableMetadata.querySql: String
         get() = commonQuerySql
-
-    protected open val ResultSet.schema: String
-        // 就是少了个a,字段名没错
-        get() = getString("TABLE_SCHEM")
 
     protected open val ResultSet.tableName: String
         get() = getString("TABLE_NAME")
