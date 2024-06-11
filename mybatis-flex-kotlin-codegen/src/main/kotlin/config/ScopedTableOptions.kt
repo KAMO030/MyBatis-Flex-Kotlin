@@ -1,5 +1,7 @@
 package com.mybatisflex.kotlin.codegen.config
 
+import com.squareup.kotlinpoet.TypeSpec
+
 data class ScopedTableOptions<out T : OptionScope>(
     val scope: T,
     val option: TableOptions
@@ -9,7 +11,18 @@ data class ScopedTableOptions<out T : OptionScope>(
         optionName: String,
         rootSourceDir: String,
         basePackage: String = "",
-    ) : this(scope, TableOptionsImpl(optionName, rootSourceDir, basePackage))
+    ) : this(
+        scope = scope,
+        TableOptionsImpl(
+            optionName = optionName,
+            rootSourceDir = rootSourceDir,
+            basePackage = basePackage,
+            kind = when (scope) {
+                is InterfaceOptionScope -> TypeSpec.Kind.INTERFACE
+                else -> TypeSpec.Kind.CLASS
+            }
+        )
+    )
 }
 
 infix fun <T : OptionScope> TableOptions.withScope(scope: T): ScopedTableOptions<T> {

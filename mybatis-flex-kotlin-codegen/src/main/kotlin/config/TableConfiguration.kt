@@ -44,7 +44,7 @@ inline fun TableConfiguration.getOrRegister(
 
 inline fun <T : OptionScope> TableConfiguration.getOrRegisterScopedOption(
     scope: T,
-    configure: (ScopedTableOptions<T>) -> Unit = {}
+    configure: ScopedTableOptions<T>.() -> Unit = {}
 ) {
     getOrRegister(scope.scopeName) {
         ScopedTableOptions(scope, it, rootSourceDir).apply(configure)

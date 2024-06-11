@@ -8,6 +8,8 @@ import com.mybatisflex.kotlin.codegen.metadata.ColumnMetadata
 import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeSpec.Builder
+import com.squareup.kotlinpoet.TypeSpec.Kind
 
 /**
  * 产物使用的配置。可以单独配置产物。
@@ -17,6 +19,7 @@ open class TableOptionsImpl(
     override val optionName: String,
     override var rootSourceDir: String,
     override var basePackage: String = "",
+    val kind: Kind = Kind.CLASS,
     // TODO: 支持转换器
     override var builderTransformer: BuilderTransformer = BuilderTransformer,
     // 列名映射
@@ -46,13 +49,12 @@ open class TableOptionsImpl(
 
     override lateinit var typeName: String
 
-    private var _typeSpecBuilder: ((TableMetadata) -> TypeSpec.Builder)? = null
-
-    override var typeSpecBuilder: (TableMetadata) -> TypeSpec.Builder
-        get() = (_typeSpecBuilder ?: {
-            TypeSpec.classBuilder(tableNameMapper(it))
-        }).also { _typeSpecBuilder = it }
-        set(value) {
-            _typeSpecBuilder = value
+    override var typeSpecBuilder: (TableMetadata) -> Builder = {
+        when (kind) {
+            Kind.CLASS -> TypeSpec.classBuilder(tableNameMapper(it))
+            Kind.INTERFACE -> TypeSpec.interfaceBuilder(tableNameMapper(it))
+            Kind.OBJECT -> TypeSpec.objectBuilder(tableNameMapper(it))
         }
+        }
+
 }
