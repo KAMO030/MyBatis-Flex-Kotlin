@@ -4,6 +4,7 @@ import com.mybatisflex.kotlin.codegen.annotation.GeneratorDsl
 import com.mybatisflex.kotlin.codegen.config.GenerateDispatcher
 import com.mybatisflex.kotlin.codegen.config.TableConfiguration
 import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
+import java.util.*
 
 @GeneratorDsl
 fun GenerateDispatcher.useTestSource() {
@@ -16,7 +17,7 @@ inline fun GenerateDispatcher.withTables(
     tableConfigBlock: TableConfiguration.() -> Unit
 ) {
     val tableConfiguration = TableConfiguration().apply(tableConfigBlock)
-    specificConfiguration[table] = tableConfiguration
+    specificConfiguration[table.uppercase(Locale.getDefault())] = tableConfiguration
     tables.forEach {
         specificConfiguration[it] = tableConfiguration
     }

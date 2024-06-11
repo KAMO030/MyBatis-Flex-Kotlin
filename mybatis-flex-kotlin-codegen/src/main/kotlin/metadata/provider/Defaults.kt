@@ -12,7 +12,7 @@ open class DefaultMetadataProvider : MetadataProvider {
         this@DefaultMetadataProvider.dataSource = dataSource
         dataSource.tablesResultSet.use {
             while (it.next()) {
-                val metadata = TableMetadata(dataSource.schema, it.tableName, it.tableComment)
+                val metadata = TableMetadata(it.schema, it.tableName, it.tableComment)
                 metadata.initPrimaryKey()
                 provideColumnMetadata(metadata).forEach { columnMetadata ->
                     metadata += columnMetadata
@@ -49,7 +49,7 @@ open class DefaultMetadataProvider : MetadataProvider {
             databaseMetaData.getColumns(connection.catalog, schema, tableMetadata.tableName, null)
         }.use {
             while (it.next()) {
-                this[it.getString("COLUMN_NAME")] = it.getString("REMARKS")
+                this[it.getString("COLUMN_NAME")] = it.getString("REMARKS").orEmpty() // 可能没有注释
             }
         }
     }
@@ -57,11 +57,16 @@ open class DefaultMetadataProvider : MetadataProvider {
     protected open val TableMetadata.querySql: String
         get() = commonQuerySql
 
+    protected open val ResultSet.schema: String
+        // 就是少了个a,字段名没错
+        get() = getString("TABLE_SCHEM")
+
     protected open val ResultSet.tableName: String
         get() = getString("TABLE_NAME")
 
     protected open val ResultSet.tableComment: String
-        get() = getString("REMARKS")
+        // 可能没有注释
+        get() = getString("REMARKS").orEmpty()
 
     protected open fun TableMetadata.initPrimaryKey() {
         with(dataSource) {
