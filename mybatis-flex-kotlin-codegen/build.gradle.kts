@@ -4,9 +4,11 @@ dependencies {
     implementation(libs.mybatisflex.codegen)
     implementation(libs.mybatisflex.core)
     // https://mvnrepository.com/artifact/com.squareup/kotlinpoet-jvm
-    implementation("com.squareup:kotlinpoet:1.17.0")
+    implementation(libs.kotlinpoet)
 
+    testImplementation(libs.h2)
     testImplementation(libs.mysql)
+    testImplementation(libs.mybatisflex.spring)
 
     testImplementation(project(":mybatis-flex-kotlin-extensions"))
 }

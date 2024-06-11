@@ -9,10 +9,10 @@ mysql = "8.0.33"
 h2 = "2.1.214"
 spring = "5.3.27"
 ksp-api = "1.8.20-1.0.11"
-kotlinpoet = "1.12.0"
 dokka = "1.8.20"
 noarg = "1.8.20"
 allopen = "1.8.20"
+kotlinpoet = "1.17.0"
 
 [libraries]
 mybatisflex-core = { group = "com.mybatis-flex", name = "mybatis-flex-core", version.ref = "mybatisflex" }

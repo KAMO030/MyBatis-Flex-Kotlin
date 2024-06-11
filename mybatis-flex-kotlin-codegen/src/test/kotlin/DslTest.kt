@@ -7,18 +7,28 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.KModifier
 import org.junit.jupiter.api.Test
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
+import javax.sql.DataSource
 
 class DslTest {
+
     private val dataSource = MysqlDataSource().apply {
         setUrl("jdbc:mysql://localhost:3306/homo")
         user = "root"
         password = "123456"
     }
+    private val dataSource2: DataSource = EmbeddedDatabaseBuilder().run {
+        setType(EmbeddedDatabaseType.H2)
+        addScript("schema.sql")
+        addScript("data-kt.sql")
+        build()
+    }
 
     @Test
     fun test() {
         // 单独为表 tb_account 生成实体类，要求为数据类，且拥有 Table 注解和 Column 注解
-        val res = generate(dataSource) {
+        val res = generate(dataSource2) {
             // 单独为表 tb_account 生成代码
             withTables("tb_account") {
                 generateDefault()  // 生成所有默认产物，这些产物会使用各自的默认配置
