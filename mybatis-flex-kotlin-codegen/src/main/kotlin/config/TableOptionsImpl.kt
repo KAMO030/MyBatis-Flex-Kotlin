@@ -27,7 +27,7 @@ open class TableOptionsImpl(
         it.name.asCamelCase()
     },
     override var propertySpecBuilder: (ColumnMetadata) -> PropertySpec.Builder = {
-        PropertySpec.builder(it.name, it.propertyType.asTypeName())
+        PropertySpec.builder(columnNameMapper(it), it.propertyType.asTypeName())
     },
     override var tableMetadataTransformer: Sequence<TableMetadata>.() -> Sequence<TableMetadata> = { this },
     override var columnMetadataTransformer: Sequence<ColumnMetadata>.() -> Sequence<ColumnMetadata> = { this },
@@ -55,6 +55,6 @@ open class TableOptionsImpl(
             Kind.INTERFACE -> TypeSpec.interfaceBuilder(tableNameMapper(it))
             Kind.OBJECT -> TypeSpec.objectBuilder(tableNameMapper(it))
         }
-        }
+    }
 
 }

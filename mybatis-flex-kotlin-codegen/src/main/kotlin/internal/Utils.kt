@@ -27,7 +27,7 @@ fun String.asCamelCase(): String = buildString {
         if (prevChar == '_') {
             append(it.uppercaseChar())
         } else {
-            append(it)
+            append(it.lowercaseChar())
         }
         prevChar = it
     }
