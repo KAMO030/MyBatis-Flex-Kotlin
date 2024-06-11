@@ -35,7 +35,7 @@ object GenerateDispatcher {
         filterNot { it.tableName in excluded }.run {
             if (generateForAll) this
             else filter {
-                specificConfiguration[it.tableName] != null
+                it.configuration !== globalTableConfiguration
             }
         }
     }

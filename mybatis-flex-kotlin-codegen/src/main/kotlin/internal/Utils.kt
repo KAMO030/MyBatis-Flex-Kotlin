@@ -12,6 +12,9 @@ import com.squareup.kotlinpoet.*
 import org.apache.ibatis.type.JdbcType
 import org.apache.ibatis.type.TypeHandler
 import org.apache.ibatis.type.UnknownTypeHandler
+import java.sql.ResultSet
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.createType
@@ -37,7 +40,8 @@ fun String.asClassName(): String = asCamelCase().replaceFirstChar(Char::uppercas
 
 val TableMetadata.configuration: TableConfiguration
     get() = with(GenerateDispatcher) {
-        specificConfiguration[tableName] ?: globalTableConfiguration
+        specificConfiguration[tableName.uppercase()] ?:
+        globalTableConfiguration
     }
 
 fun Table(
@@ -87,6 +91,17 @@ fun Column(
     typeHandler = typeHandler,
     comment = comment
 )
+
+internal fun ResultSet.toDebugMessageList(): List<String> = buildList {
+    val rs = this@toDebugMessageList
+    val count = rs.metaData.columnCount
+    while (rs.next()) {
+        for (i in 1..count) {
+            this += (rs.metaData.getColumnName(i) to rs.getObject(i)).toString()
+        }
+        this += "-------------------------------------------"
+    }
+}
 
 
 fun replaceTypeName(type: TypeName, oldType: TypeName, newType: TypeName): TypeName {
