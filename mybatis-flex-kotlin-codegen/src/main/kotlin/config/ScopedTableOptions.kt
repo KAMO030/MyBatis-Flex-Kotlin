@@ -16,7 +16,7 @@ data class ScopedTableOptions<out T : OptionScope>(
         TableOptionsImpl(
             optionName = optionName,
             rootSourceDir = rootSourceDir,
-            basePackage = basePackage,
+            packageName = basePackage,
             kind = when (scope) {
                 is InterfaceOptionScope -> TypeSpec.Kind.INTERFACE
                 else -> TypeSpec.Kind.CLASS
@@ -26,9 +26,12 @@ data class ScopedTableOptions<out T : OptionScope>(
 }
 
 infix fun <T : OptionScope> TableOptions.withScope(scope: T): ScopedTableOptions<T> {
+    if (this is ScopedTableOptions<*>) {
+        return ScopedTableOptions(scope, option)
+    }
     return ScopedTableOptions(scope, this)
 }
 
 inline fun <T : OptionScope> TableOptions.withScope(scope: T, init: ScopedTableOptions<T>.() -> Unit): ScopedTableOptions<T> {
-    return ScopedTableOptions(scope, this).also(init)
+    return withScope(scope).also(init)
 }

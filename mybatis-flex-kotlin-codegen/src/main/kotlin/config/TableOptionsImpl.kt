@@ -5,6 +5,7 @@ import com.mybatisflex.kotlin.codegen.generate.transformer.BuilderTransformer
 import com.mybatisflex.kotlin.codegen.internal.asCamelCase
 import com.mybatisflex.kotlin.codegen.internal.asClassName
 import com.mybatisflex.kotlin.codegen.metadata.ColumnMetadata
+import com.mybatisflex.kotlin.codegen.metadata.GenerationMetadata
 import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
@@ -18,7 +19,7 @@ import com.squareup.kotlinpoet.TypeSpec.Kind
 open class TableOptionsImpl(
     override val optionName: String,
     override var rootSourceDir: String,
-    override var basePackage: String = "",
+    override var packageName: String = optionName,
     val kind: Kind = Kind.CLASS,
     // TODO: 支持转换器
     override var builderTransformer: BuilderTransformer = BuilderTransformer,
@@ -29,8 +30,15 @@ open class TableOptionsImpl(
     override var propertySpecBuilder: (ColumnMetadata) -> PropertySpec.Builder = {
         PropertySpec.builder(columnNameMapper(it), it.propertyType.asTypeName())
     },
-    override var tableMetadataTransformer: Sequence<TableMetadata>.() -> Sequence<TableMetadata> = { this },
     override var columnMetadataTransformer: Sequence<ColumnMetadata>.() -> Sequence<ColumnMetadata> = { this },
+    override var typeSpecComposer: (GenerationMetadata) -> TypeSpec = {
+        val typeSpec = it.type
+        val properties = it.properties
+        properties.forEach { propBuilder ->
+            typeSpec.propertySpecs += propBuilder.build()
+        }
+        typeSpec.build()
+    },
 ) : TableOptions {
     // 表名映射
     private var _tableNameMapper: ((TableMetadata) -> String)? = null
