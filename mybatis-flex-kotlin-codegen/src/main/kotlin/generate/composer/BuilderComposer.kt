@@ -1,7 +1,8 @@
 package com.mybatisflex.kotlin.codegen.generate.composer
 
-import com.mybatisflex.kotlin.codegen.metadata.GenerationMetadata
+import com.mybatisflex.kotlin.codegen.config.TableOptions
 import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.TypeSpec
 
 /**
  * 用于将 Type 和 Property 组合成文件
@@ -11,33 +12,26 @@ fun interface BuilderComposer {
         @JvmField
         val Default = object : BuilderComposer {
             override fun transform(
-                generationMetadata: GenerationMetadata,
-                fileBuilder: FileSpec.Builder
-            ): FileSpec.Builder = fileBuilder.apply {
-                val properties = generationMetadata.properties
-                val type = generationMetadata.type
-                for (property in properties) {
-                    type.addProperty(property.build())
-                }
-                addType(type.build())
-            }
+                options: TableOptions,
+                file: FileSpec.Builder
+            ): FileSpec.Builder = file
 
             override fun provideFileBuilder(
-                generationMetadata: Sequence<GenerationMetadata>,
-            ): Sequence<FileSpec.Builder> = generationMetadata.map {
-                val generateOption = it.tableOptions
+                files: Sequence<Pair<TableOptions, TypeSpec>>,
+            ): Sequence<FileSpec.Builder> = files.map { (options, typeSpec) ->
                 val file = FileSpec.builder(
-                    "${generateOption.basePackage}.${generateOption.optionName.replaceFirstChar(Char::lowercaseChar)}",
-                    generateOption.typeName.replaceFirstChar(Char::uppercaseChar)
+                    options.packageName,
+                    options.typeName.replaceFirstChar(Char::uppercaseChar)
                 )
-                transform(it, file)
+                file.addType(typeSpec)
+                transform(options, file)
             }
         }
     }
 
-    fun transform(generationMetadata: GenerationMetadata, fileBuilder: FileSpec.Builder): FileSpec.Builder
+    fun transform(options: TableOptions, file: FileSpec.Builder): FileSpec.Builder
 
     fun provideFileBuilder(
-        generationMetadata: Sequence<GenerationMetadata>,
-    ): Sequence<FileSpec.Builder> = Default.provideFileBuilder(generationMetadata)
+        files: Sequence<Pair<TableOptions, TypeSpec>>
+    ): Sequence<FileSpec.Builder> = Default.provideFileBuilder(files)
 }
