@@ -106,7 +106,7 @@ internal fun ResultSet.toDebugMessageList(): List<String> = buildList {
 
 fun replaceTypeName(type: TypeName, oldType: TypeName, newType: TypeName): TypeName {
     return when (type) {
-        is ClassName -> {  // 说明就是 Nothing 类型，直接返回
+        is ClassName -> {
             if (type == oldType) {
                 return newType
             } else {
@@ -172,7 +172,7 @@ val UNDEFINED = ClassName("com.mybatisflex.kotlin.codegen.internal", "Undefined"
  * 后面把 Void 换成 Nothing 是平台类型映射，由于 kotlinpoet 通过 KClass<Nothing> 将其解析为 java.lang.Void，所以此处需要映射回 Nothing
  * 最后再把 Undefined 替换为指定的自身类型。
  */
-fun KType.replaceWithItselfToTypeName(typeName: String): TypeName =
+fun KType.replaceNothingToTypeName(typeName: String): TypeName =
     replaceNothing<Undefined>()
         .asTypeName()
         .replaceTypeName(VOID, NOTHING)
