@@ -11,13 +11,6 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
 @GeneratorDsl
-fun TableOptions.forTables(transform: (seq: Sequence<TableMetadata>) -> Sequence<TableMetadata>) {
-    tableMetadataTransformer = {
-        transform(tableMetadataTransformer())
-    }
-}
-
-@GeneratorDsl
 fun TableOptions.forColumns(transform: (seq: Sequence<ColumnMetadata>) -> Sequence<ColumnMetadata>) {
     columnMetadataTransformer = {
         transform(columnMetadataTransformer())
