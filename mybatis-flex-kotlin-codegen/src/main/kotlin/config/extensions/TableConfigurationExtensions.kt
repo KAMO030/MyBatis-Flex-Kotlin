@@ -22,14 +22,20 @@ inline fun TableConfiguration.onServiceImpl(
 inline fun TableConfiguration.onService(
     configure: ScopedTableOptions<ServiceScope>.() -> Unit = {}
 ) {
-    getOrRegisterScopedOption(ServiceScope, configure)
+    getOrRegisterScopedOption(ServiceScope) {
+        configure()
+        columnMetadataTransformer = { emptySequence() }
+    }
 }
 
 @GeneratorDsl
 inline fun TableConfiguration.onMapper(
     configure: ScopedTableOptions<MapperScope>.() -> Unit = {}
 ) {
-    getOrRegisterScopedOption(MapperScope, configure)
+    getOrRegisterScopedOption(MapperScope) {
+        configure()
+        columnMetadataTransformer = { emptySequence() }
+    }
 }
 
 @GeneratorDsl
@@ -59,6 +65,11 @@ fun TableConfiguration.generateDefault() {
     onTableDef()
     onMapper()
     onController()
-    onService()
-    onServiceImpl()
+    onService {
+        default(this@generateDefault)
+    }
+
+    onServiceImpl {
+        default(this@generateDefault)
+    }
 }

@@ -89,7 +89,10 @@ inline fun generate(dataSource: DataSource, schema: String? = null, block: Gener
                 yield(GenerationMetadata(op, type, prop))
             }
         }
-        builderComposer.provideFileBuilder(metadataSequence)
+        val specSequence = metadataSequence.map {
+            it.tableOptions to it.tableOptions.typeSpecComposer(it)
+        }
+        builderComposer.provideFileBuilder(specSequence)
     }
 
 @GeneratorDsl

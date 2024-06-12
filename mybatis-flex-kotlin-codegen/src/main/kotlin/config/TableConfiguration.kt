@@ -36,17 +36,23 @@ class TableConfiguration {
     }
 }
 
-inline fun <T : TableOptions> TableConfiguration.getOrRegister(
+inline fun TableConfiguration.getOrRegister(
     optionName: String,
-    register: (String) -> T = { TableOptionsImpl(it, rootSourceDir) as T }
-): T = optionsMap.getOrPut(optionName) { register(optionName) } as T
+    register: (String) -> TableOptions = {
+        TableOptionsImpl(it, rootSourceDir, "$basePackage.${optionName.replaceFirstChar(Char::lowercaseChar)}") }
+): TableOptions = optionsMap.getOrPut(optionName) { register(optionName) }
 
 
-inline fun <T : OptionScope> TableConfiguration.getOrRegisterScopedOption(
+inline fun <reified T : OptionScope> TableConfiguration.getOrRegisterScopedOption(
     scope: T,
     configure: ScopedTableOptions<T>.() -> Unit = {}
-) {
-    getOrRegister(scope.scopeName) {
-        ScopedTableOptions(scope, it, rootSourceDir)
+): ScopedTableOptions<T> {
+    val op = optionsMap[scope.scopeName]
+    val res = if (op == null) {
+        ScopedTableOptions(scope, scope.scopeName, rootSourceDir, "$basePackage.${scope.scopeName.replaceFirstChar(Char::lowercaseChar)}")
+    } else {
+        op withScope scope
     }.apply(configure)
+    optionsMap[scope.scopeName] = res
+    return res
 }
