@@ -36,10 +36,10 @@ class TableConfiguration {
     }
 }
 
-inline fun TableConfiguration.getOrRegister(
+inline fun <T : TableOptions> TableConfiguration.getOrRegister(
     optionName: String,
-    register: (String) -> TableOptions = { TableOptionsImpl(it, rootSourceDir) }
-): TableOptions = optionsMap.getOrPut(optionName) { register(optionName) }
+    register: (String) -> T = { TableOptionsImpl(it, rootSourceDir) as T }
+): T = optionsMap.getOrPut(optionName) { register(optionName) } as T
 
 
 inline fun <T : OptionScope> TableConfiguration.getOrRegisterScopedOption(
@@ -47,6 +47,6 @@ inline fun <T : OptionScope> TableConfiguration.getOrRegisterScopedOption(
     configure: ScopedTableOptions<T>.() -> Unit = {}
 ) {
     getOrRegister(scope.scopeName) {
-        ScopedTableOptions(scope, it, rootSourceDir).apply(configure)
-    }
+        ScopedTableOptions(scope, it, rootSourceDir)
+    }.apply(configure)
 }

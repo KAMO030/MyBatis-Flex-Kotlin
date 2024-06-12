@@ -30,7 +30,7 @@ class DslTest {
     @Test
     fun test() {
         // 单独为表 tb_account 生成实体类，要求为数据类，且拥有 Table 注解和 Column 注解
-        val res = generate(dataSource2) {
+        val res = generate(dataSource2, "PUBLIC") {
             // 单独为表 tb_account 生成代码
             withTables("tb_account") {
                 generateDefault()  // 生成所有默认产物，这些产物会使用各自的默认配置
