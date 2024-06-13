@@ -36,6 +36,9 @@ class DslTest {
                 generateDefault()  // 生成所有默认产物，这些产物会使用各自的默认配置
                 // 手动配置实体类生成
                 onEntity {
+                    tableNameMapper = {
+                        "ItTableName"
+                    }
                     dataclass()  // 数据类
                     tableAnnotation()  // 类上新增 Table 注解
                     columnAnnotation()  // 每个属性新增 Column 注解

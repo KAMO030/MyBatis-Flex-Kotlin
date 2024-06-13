@@ -5,8 +5,24 @@ import com.mybatisflex.annotation.Table
 import com.mybatisflex.kotlin.codegen.annotation.GeneratorDsl
 import com.mybatisflex.kotlin.codegen.config.EntityScope
 import com.mybatisflex.kotlin.codegen.config.ScopedTableOptions
+import com.mybatisflex.kotlin.codegen.config.TableConfiguration
+import com.mybatisflex.kotlin.codegen.internal.asClassName
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.DelicateKotlinPoetApi
+
+
+fun ScopedTableOptions<EntityScope>.default() {
+    dataclass()
+    tableAnnotation()
+    columnAnnotation()
+}
+
+inline fun TableConfiguration.dispatcher(
+    crossinline configure: ScopedTableOptions<EntityScope>.() -> Unit
+): ScopedTableOptions<EntityScope>.() -> Unit = {
+    tableNameMapper = { it.tableName.asClassName() }
+    configure()
+}
 
 @OptIn(DelicateKotlinPoetApi::class)
 @GeneratorDsl

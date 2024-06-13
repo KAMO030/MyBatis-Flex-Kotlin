@@ -10,10 +10,19 @@ import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.typeNameOf
 
-fun ScopedTableOptions<ServiceScope>.default(configuration: TableConfiguration) {
-    val tableOptions = configuration.optionsMap[EntityScope.scopeName] ?: return
-    transformType { tm, builder ->
-        val reified = ClassName(tableOptions.packageName, tableOptions.tableNameMapper(tm))
-        builder.addSuperinterface(typeNameOf<IService<Any>>().replaceTypeName(ANY, reified))
+fun ScopedTableOptions<ServiceScope>.default() {
+
+}
+
+inline fun TableConfiguration.dispatcher(
+    crossinline configure: ScopedTableOptions<ServiceScope>.() -> Unit
+): ScopedTableOptions<ServiceScope>.() -> Unit = {
+    this@dispatcher.optionsMap[EntityScope.scopeName]?.let { entityOptions ->
+        transformType { tm, builder ->
+            val reified = ClassName(entityOptions.packageName, entityOptions.tableNameMapper(tm))
+            builder.addSuperinterface(typeNameOf<IService<Any>>().replaceTypeName(ANY, reified))
+        }
     }
+    configure()
+    columnMetadataTransformer = { emptySequence() }
 }

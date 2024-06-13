@@ -20,17 +20,34 @@ open class TableOptionsImpl(
     override val optionName: String,
     override var rootSourceDir: String,
     override var packageName: String = optionName,
-    val kind: Kind = Kind.CLASS,
+    override val kind: Kind = Kind.CLASS,
+) : TableOptions {
+
+    constructor(
+        optionName: String,
+        configuration: TableConfiguration,
+        kind: Kind = Kind.CLASS,
+    ) : this(
+        optionName,
+        configuration.rootSourceDir,
+        "${configuration.basePackage}.${optionName.replaceFirstChar(Char::lowercaseChar)}",
+        kind
+    )
+
     // TODO: 支持转换器
-    override var builderTransformer: BuilderTransformer = BuilderTransformer,
+    override var builderTransformer: BuilderTransformer = BuilderTransformer
+
     // 列名映射
     override var columnNameMapper: (ColumnMetadata) -> String = {
         it.name.asCamelCase()
-    },
+    }
+
     override var propertySpecBuilder: (ColumnMetadata) -> PropertySpec.Builder = {
         PropertySpec.builder(columnNameMapper(it), it.propertyType.asTypeName())
-    },
-    override var columnMetadataTransformer: Sequence<ColumnMetadata>.() -> Sequence<ColumnMetadata> = { this },
+    }
+
+    override var columnMetadataTransformer: Sequence<ColumnMetadata>.() -> Sequence<ColumnMetadata> = { this }
+
     override var typeSpecComposer: (GenerationMetadata) -> TypeSpec = {
         val typeSpec = it.type
         val properties = it.properties
@@ -38,8 +55,8 @@ open class TableOptionsImpl(
             typeSpec.propertySpecs += propBuilder.build()
         }
         typeSpec.build()
-    },
-) : TableOptions {
+    }
+
     // 表名映射
     private var _tableNameMapper: ((TableMetadata) -> String)? = null
 
@@ -58,11 +75,7 @@ open class TableOptionsImpl(
     override lateinit var typeName: String
 
     override var typeSpecBuilder: (TableMetadata) -> Builder = {
-        when (kind) {
-            Kind.CLASS -> TypeSpec.classBuilder(tableNameMapper(it))
-            Kind.INTERFACE -> TypeSpec.interfaceBuilder(tableNameMapper(it))
-            Kind.OBJECT -> TypeSpec.objectBuilder(tableNameMapper(it))
-        }
+        builderByKind(kind, tableNameMapper(it))
     }
 
 }
