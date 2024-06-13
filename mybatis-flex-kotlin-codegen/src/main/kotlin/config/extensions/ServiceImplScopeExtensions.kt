@@ -10,7 +10,8 @@ fun ScopedTableOptions<ServiceImplScope>.default() {
 
 }
 
-inline fun TableConfiguration.dispatcher(
+@PublishedApi
+internal inline fun TableConfiguration.dispatcher(
     crossinline configure: ScopedTableOptions<ServiceImplScope>.() -> Unit
 ): ScopedTableOptions<ServiceImplScope>.() -> Unit = {
     optionsMap[ServiceScope.scopeName]?.let { serviceOptions ->

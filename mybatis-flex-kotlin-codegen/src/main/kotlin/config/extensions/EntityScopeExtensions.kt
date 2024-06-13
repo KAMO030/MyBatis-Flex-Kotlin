@@ -17,7 +17,8 @@ fun ScopedTableOptions<EntityScope>.default() {
     columnAnnotation()
 }
 
-inline fun TableConfiguration.dispatcher(
+@PublishedApi
+internal inline fun TableConfiguration.dispatcher(
     crossinline configure: ScopedTableOptions<EntityScope>.() -> Unit
 ): ScopedTableOptions<EntityScope>.() -> Unit = {
     tableNameMapper = { it.tableName.asClassName() }

@@ -14,7 +14,8 @@ fun ScopedTableOptions<ServiceScope>.default() {
 
 }
 
-inline fun TableConfiguration.dispatcher(
+@PublishedApi
+internal inline fun TableConfiguration.dispatcher(
     crossinline configure: ScopedTableOptions<ServiceScope>.() -> Unit
 ): ScopedTableOptions<ServiceScope>.() -> Unit = {
     this@dispatcher.optionsMap[EntityScope.scopeName]?.let { entityOptions ->
