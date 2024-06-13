@@ -10,6 +10,17 @@ import com.mybatisflex.kotlin.codegen.metadata.TableMetadata
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 
+/**
+ * 重置默认的 builderTransformer
+ * 并对于可以覆盖的配置,配合`TableOptions#registerTransformerCall`进行延迟修饰达到覆盖效果
+ */
+@GeneratorDsl
+fun TableOptions.builderTransformer(call: () -> Unit) {
+    builderTransformer = BuilderTransformer
+    call()
+    applyTransformerCallBacks()
+}
+
 @GeneratorDsl
 fun TableOptions.forColumns(transform: (seq: Sequence<ColumnMetadata>) -> Sequence<ColumnMetadata>) {
     columnMetadataTransformer = {

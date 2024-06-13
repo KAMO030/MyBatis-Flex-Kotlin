@@ -34,10 +34,12 @@ internal inline fun <T : OptionScope> TableConfiguration.scopedOption(
         TableOptionsImpl(scopeName, this, kind)
     },
     noinline configure: ScopedTableOptions<T>.() -> Unit = {}
-) = getOrRegister(scope.scopeName) { scopeName ->
+) {
     val kind = when (scope) {
         is InterfaceOptionScope -> TypeSpec.Kind.INTERFACE
         else -> TypeSpec.Kind.CLASS
     }
-    creator(scopeName, kind)
-}.withScope(configure)
+    creator(scope.scopeName, kind)
+        .also { this.optionsMap[it.optionName] = it }
+        .withScope(configure)
+}

@@ -10,37 +10,46 @@ import com.squareup.kotlinpoet.*
 import kotlin.reflect.typeOf
 
 @GeneratorDsl
-fun ScopedTableOptions<ClassOptionScope>.dataclass() {
-    transformProperty { columnMetadata, builder ->
-        builder.initializer(columnNameMapper(columnMetadata))
-    }
-    transformType { _, builder ->
-        builder.modifiers += KModifier.DATA
-    }
-    val prev = typeSpecComposer
-    typeSpecComposer = { generation ->
-        val typeSpec = generation.type
-        val properties = generation.properties
-        val constructorBuilder = FunSpec.constructorBuilder()
-        properties.map {
-            it.build()
-        }.map {
-            ParameterSpec.builder(it.name, it.type).build()
-        }.forEach {
-            constructorBuilder.parameters += it
+var ScopedTableOptions<ClassOptionScope>.dataclass: Boolean
+    get() = transformerCallBacks.contains("dataclass")
+    set(value) {
+        if (value.not()) {
+            transformerCallBacks.remove("dataclass")
+        } else {
+            transformerCallBacks["dataclass"] = {
+                transformProperty { columnMetadata, builder ->
+                    builder.initializer(columnNameMapper(columnMetadata))
+                }
+                transformType { _, builder ->
+                    builder.modifiers += KModifier.DATA
+                }
+                val prev = typeSpecComposer
+                typeSpecComposer = { generation ->
+                    val typeSpec = generation.type
+                    val properties = generation.properties
+                    val constructorBuilder = FunSpec.constructorBuilder()
+                    properties.map {
+                        it.build()
+                    }.map {
+                        ParameterSpec.builder(it.name, it.type).build()
+                    }.forEach {
+                        constructorBuilder.parameters += it
+                    }
+                    typeSpec.primaryConstructor(constructorBuilder.build())
+                    prev(generation)
+                }
+            }
         }
-        typeSpec.primaryConstructor(constructorBuilder.build())
-        prev(generation)
     }
-}
 
 @GeneratorDsl
-inline fun <reified T : Any> ScopedTableOptions<ClassOptionScope>.superclass(replaceNothing: Boolean = false) {
-    transformType { _, builder ->
-        if (replaceNothing) {
-            builder.superclass(typeOf<T>().replaceNothingToTypeName(typeName))
-        } else {
-            builder.superclass(typeNameOf<T>().replaceTypeName(VOID, NOTHING))
+inline fun <reified T : Any> ScopedTableOptions<ClassOptionScope>.superclass(replaceNothing: Boolean = false) =
+    registerTransformerCallBacks("superclass") {
+        transformType { _, builder ->
+            if (replaceNothing) {
+                builder.superclass(typeOf<T>().replaceNothingToTypeName(typeName))
+            } else {
+                builder.superclass(typeNameOf<T>().replaceTypeName(VOID, NOTHING))
+            }
         }
     }
-}

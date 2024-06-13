@@ -18,12 +18,14 @@ inline fun ScopedTableOptions<ServiceScope>.default() {
 internal inline fun TableConfiguration.dispatcher(
     crossinline configure: ScopedTableOptions<ServiceScope>.() -> Unit
 ): ScopedTableOptions<ServiceScope>.() -> Unit = {
-    this@dispatcher.optionsMap[EntityScope.scopeName]?.let { entityOptions ->
-        transformType { tm, builder ->
-            val reified = ClassName(entityOptions.packageName, entityOptions.tableNameMapper(tm))
-            builder.addSuperinterface(typeNameOf<IService<Any>>().replaceTypeName(ANY, reified))
+    builderTransformer {
+        this@dispatcher.optionsMap[EntityScope.scopeName]?.let { entityOptions ->
+            transformType { tm, builder ->
+                val reified = ClassName(entityOptions.packageName, entityOptions.tableNameMapper(tm))
+                builder.addSuperinterface(typeNameOf<IService<Any>>().replaceTypeName(ANY, reified))
+            }
         }
+        configure()
+        columnMetadataTransformer = { emptySequence() }
     }
-    configure()
-    columnMetadataTransformer = { emptySequence() }
 }

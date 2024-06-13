@@ -12,5 +12,7 @@ inline fun ScopedTableOptions<TableDefScope>.default() {
 internal inline fun TableConfiguration.dispatcher(
     crossinline configure: ScopedTableOptions<TableDefScope>.() -> Unit
 ): ScopedTableOptions<TableDefScope>.() -> Unit = {
-    configure()
+    builderTransformer {
+        configure()
+    }
 }

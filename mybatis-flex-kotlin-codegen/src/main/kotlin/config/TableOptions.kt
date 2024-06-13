@@ -16,6 +16,7 @@ interface TableOptions {
     var builderTransformer: BuilderTransformer
     var typeName: String
     val kind: Kind
+
     // 表名映射
     var tableNameMapper: (TableMetadata) -> String
     var columnNameMapper: (ColumnMetadata) -> String
@@ -25,6 +26,13 @@ interface TableOptions {
 
     var columnMetadataTransformer: Sequence<ColumnMetadata>.() -> Sequence<ColumnMetadata>
     var typeSpecComposer: (GenerationMetadata) -> TypeSpec
+
+    var transformerCallBacks: MutableMap<String, () -> Unit>
+
+    fun registerTransformerCallBacks(id: String, callBack: () -> Unit)
+
+    fun applyTransformerCallBacks()
+
 }
 
 internal fun builderByKind(

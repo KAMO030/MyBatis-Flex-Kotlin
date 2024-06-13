@@ -12,7 +12,7 @@ import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 
 
 inline fun ScopedTableOptions<EntityScope>.default() {
-    dataclass()
+    dataclass = true
     tableAnnotation()
     columnAnnotation()
 }
@@ -21,29 +21,36 @@ inline fun ScopedTableOptions<EntityScope>.default() {
 internal inline fun TableConfiguration.dispatcher(
     crossinline configure: ScopedTableOptions<EntityScope>.() -> Unit
 ): ScopedTableOptions<EntityScope>.() -> Unit = {
-    tableNameMapper = { it.tableName.asClassName() }
-    configure()
+    builderTransformer {
+        tableNameMapper = { it.tableName.asClassName() }
+        configure()
+    }
 }
 
 @OptIn(DelicateKotlinPoetApi::class)
 @GeneratorDsl
-fun ScopedTableOptions<EntityScope>.tableAnnotation(table: Table? = null) = transformType { tableMetadata, builder ->
-    val annotationSpec = if (table != null) {
-        AnnotationSpec.get(table)
-    } else {
-        AnnotationSpec.builder(Table::class).addMember("%S", tableMetadata.tableName).build()
+fun ScopedTableOptions<EntityScope>.tableAnnotation(table: Table? = null) =
+    registerTransformerCallBacks("tableAnnotation") {
+        transformType { tableMetadata, builder ->
+            val annotationSpec = if (table != null) {
+                AnnotationSpec.get(table)
+            } else {
+                AnnotationSpec.builder(Table::class).addMember("%S", tableMetadata.tableName).build()
+            }
+            builder.addAnnotation(annotationSpec)
+        }
     }
-    builder.addAnnotation(annotationSpec)
-}
 
 @GeneratorDsl
 @OptIn(DelicateKotlinPoetApi::class)
 fun ScopedTableOptions<EntityScope>.columnAnnotation(column: Column? = null) =
-    transformProperty { columnMetadata, builder ->
-        val annotationSpec = if (column != null) {
-            AnnotationSpec.get(column)
-        } else {
-            AnnotationSpec.builder(Column::class).addMember("%S", columnMetadata.name).build()
+    registerTransformerCallBacks("columnAnnotation") {
+        transformProperty { columnMetadata, builder ->
+            val annotationSpec = if (column != null) {
+                AnnotationSpec.get(column)
+            } else {
+                AnnotationSpec.builder(Column::class).addMember("%S", columnMetadata.name).build()
+            }
+            builder.addAnnotation(annotationSpec)
         }
-        builder.addAnnotation(annotationSpec)
     }

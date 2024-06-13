@@ -12,6 +12,8 @@ inline fun ScopedTableOptions<MapperScope>.default() {
 internal inline fun TableConfiguration.dispatcher(
     crossinline configure: ScopedTableOptions<MapperScope>.() -> Unit
 ): ScopedTableOptions<MapperScope>.() -> Unit = {
-    configure()
-    columnMetadataTransformer = { emptySequence() }
+    builderTransformer {
+        configure()
+        columnMetadataTransformer = { emptySequence() }
+    }
 }

@@ -78,4 +78,15 @@ open class TableOptionsImpl(
         builderByKind(kind, tableNameMapper(it))
     }
 
+    override var transformerCallBacks = mutableMapOf<String, () -> Unit>()
+
+    override fun registerTransformerCallBacks(id: String, callBack: () -> Unit) {
+        transformerCallBacks[id] = callBack
+    }
+
+    override fun applyTransformerCallBacks() {
+        transformerCallBacks.values.forEach { it() }
+        transformerCallBacks.clear()
+    }
+
 }
