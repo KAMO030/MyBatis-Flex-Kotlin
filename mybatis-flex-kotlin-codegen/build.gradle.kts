@@ -8,7 +8,6 @@ dependencies {
     testImplementation(libs.h2)
     testImplementation(libs.mysql)
     testImplementation(libs.mybatisflex.spring)
-
     testImplementation(libs.mybatisflex.codegen)
     testImplementation(project(":mybatis-flex-kotlin-extensions"))
 }
