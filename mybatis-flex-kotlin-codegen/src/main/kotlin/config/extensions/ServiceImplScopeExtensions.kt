@@ -6,7 +6,7 @@ import com.mybatisflex.kotlin.codegen.config.ServiceScope
 import com.mybatisflex.kotlin.codegen.config.TableConfiguration
 import com.squareup.kotlinpoet.ClassName
 
-fun ScopedTableOptions<ServiceImplScope>.default() {
+inline fun ScopedTableOptions<ServiceImplScope>.default() {
 
 }
 

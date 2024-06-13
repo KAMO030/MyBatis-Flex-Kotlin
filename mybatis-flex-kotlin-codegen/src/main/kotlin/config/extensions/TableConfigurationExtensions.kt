@@ -5,52 +5,56 @@ import com.mybatisflex.kotlin.codegen.config.*
 
 @GeneratorDsl
 inline fun TableConfiguration.onController(
-    configure: ScopedTableOptions<ControllerScope>.() -> Unit = {}
-) = scopedOption(ControllerScope, configure)
+    crossinline configure: ScopedTableOptions<ControllerScope>.() -> Unit = { default() }
+) = scopedOption(
+    scope = ControllerScope,
+    configure = dispatcher(configure)
+)
 
 
 @GeneratorDsl
 inline fun TableConfiguration.onServiceImpl(
     crossinline configure: ScopedTableOptions<ServiceImplScope>.() -> Unit = { default() }
-) = scopedOption(ServiceImplScope, dispatcher(configure))
+) = scopedOption(
+    scope = ServiceImplScope,
+    configure = dispatcher(configure)
+)
 
 
 @GeneratorDsl
 inline fun TableConfiguration.onService(
     crossinline configure: ScopedTableOptions<ServiceScope>.() -> Unit = { default() }
-) = scopedOption(ServiceScope, dispatcher(configure))
+) = scopedOption(
+    scope = ServiceScope,
+    configure = dispatcher(configure)
+)
 
 
 @GeneratorDsl
 inline fun TableConfiguration.onMapper(
-    configure: ScopedTableOptions<MapperScope>.() -> Unit = {}
-) = scopedOption(MapperScope) {
-    configure()
-    columnMetadataTransformer = { emptySequence() }
-}
-
+    crossinline configure: ScopedTableOptions<MapperScope>.() -> Unit = { default() }
+) = scopedOption(
+    scope = MapperScope,
+    configure = dispatcher(configure)
+)
 
 @GeneratorDsl
 inline fun TableConfiguration.onEntity(
     crossinline configure: ScopedTableOptions<EntityScope>.() -> Unit = { default() }
-) = scopedOption(EntityScope, dispatcher(configure))
+) = scopedOption(
+    scope = EntityScope,
+    configure = dispatcher(configure)
+)
 
 
 @GeneratorDsl
 inline fun TableConfiguration.onTableDef(
-    configure: ScopedTableOptions<TableDefScope>.() -> Unit = {}
-) = scopedOption(TableDefScope, configure)
+    crossinline configure: ScopedTableOptions<TableDefScope>.() -> Unit = { default() }
+) = scopedOption(
+    scope = TableDefScope,
+    configure = dispatcher(configure)
+)
 
-
-inline fun <reified T : OptionScope> TableConfiguration.scopedOption(
-    scope: T,
-    configure: ScopedTableOptions<T>.() -> Unit = {}
-) {
-    val op = getOrRegister(scope.scopeName)
-    registerOption(op withScope scope) {
-        configure()
-    }
-}
 
 @GeneratorDsl
 fun TableConfiguration.generateDefault() {

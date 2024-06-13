@@ -33,8 +33,8 @@ class TableConfiguration {
 
     inline fun TableConfiguration.getOrRegister(
         optionName: String,
-        register: (String) -> TableOptions = { TableOptionsImpl(it, this) }
-    ): TableOptions = optionsMap.getOrPut(optionName) { register(optionName) }
+        creator: (String) -> TableOptions = { TableOptionsImpl(it, this) }
+    ): TableOptions = optionsMap.getOrPut(optionName) { creator(optionName) }
 
     fun clearCache() {
         optionsMap.clear()

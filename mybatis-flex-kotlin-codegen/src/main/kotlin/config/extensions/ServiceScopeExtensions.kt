@@ -10,7 +10,7 @@ import com.squareup.kotlinpoet.ANY
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.typeNameOf
 
-fun ScopedTableOptions<ServiceScope>.default() {
+inline fun ScopedTableOptions<ServiceScope>.default() {
 
 }
 

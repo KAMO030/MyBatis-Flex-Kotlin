@@ -11,7 +11,7 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 
 
-fun ScopedTableOptions<EntityScope>.default() {
+inline fun ScopedTableOptions<EntityScope>.default() {
     dataclass()
     tableAnnotation()
     columnAnnotation()
