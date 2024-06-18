@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.8.20"
 gradle-plugin-publish = "1.2.1"
-mybatisflex = "1.8.7"
+mybatisflex = "1.9.3"
 mybatisflex-kotlin-extensions = "1.0.9"
 mybatisflex-kotlin-plugin = "1.0.1"
 mybatisflex-kotlin-ksp = "1.0.1"
