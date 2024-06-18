@@ -91,6 +91,22 @@ fun QueryWrapper.selectProperties(vararg properties: KProperty<*>): QueryWrapper
 fun QueryWrapper.select(entityType: KClass<*>): QueryWrapper =
     this.select(*entityType.defaultColumns)
 
+//as
+infix fun QueryWrapper.`as`(alias: String?): QueryWrapper = this.`as`(alias)
+
+// orderBy
+infix fun QueryWrapper.orderBy(orderBys: Collection<QueryOrderBy?>): QueryWrapper =
+    this.orderBy(*orderBys.toTypedArray())
+
+infix fun QueryWrapper.orderBy(orderBy: QueryOrderBy): QueryWrapper = this.orderBy(orderBy)
+
+// limit
+infix fun QueryWrapper.limit(rows: Number): QueryWrapper = this.limit(rows)
+
+infix fun QueryWrapper.limit(pair: Pair<Number?, Number?>): QueryWrapper = this.limit(pair.first, pair.second)
+
+infix fun QueryWrapper.limit(range: IntRange): QueryWrapper = this.limit(range.first, range.last)
+
 // --condition
 inline fun QueryWrapper.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryWrapper =
     if (isEffective) and(predicate()) else this

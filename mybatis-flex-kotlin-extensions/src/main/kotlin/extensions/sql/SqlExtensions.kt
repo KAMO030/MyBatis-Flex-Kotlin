@@ -100,9 +100,6 @@ infix fun <C : QueryColumn, A : Any> Pair<Pair<C, C>, C>.inTriple(others: Iterab
     others.map { this.first.first.eq(it.first.first) and this.first.second.eq(it.first.second) and this.second.eq(it.second) }
         .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
-//as
-infix fun QueryWrapper.`as`(alias: String?): QueryWrapper = this.`as`(alias)
-
 //join
 @Deprecated(
     "核心库已废除 Joiner.as 方法。详情请看官方库描述。",
@@ -117,22 +114,9 @@ infix fun <W : QueryWrapper> Joiner<W>.on(on: QueryCondition?): W = this.on(on)
 
 infix fun <W : QueryWrapper> Joiner<W>.on(consumer: Consumer<QueryWrapper?>): W = this.on(consumer)
 
-// orderBy
-infix fun QueryWrapper.orderBy(orderBys: Collection<QueryOrderBy?>): QueryWrapper =
-    this.orderBy(*orderBys.toTypedArray())
-
-infix fun QueryWrapper.orderBy(orderBy: QueryOrderBy): QueryWrapper = this.orderBy(orderBy)
-
 operator fun QueryColumn.unaryPlus(): QueryOrderBy = this.asc()
 
 operator fun QueryColumn.unaryMinus(): QueryOrderBy = this.desc()
-
-// limit
-infix fun QueryWrapper.limit(rows: Number): QueryWrapper = this.limit(rows)
-
-infix fun QueryWrapper.limit(pair: Pair<Number?, Number?>): QueryWrapper = this.limit(pair.first, pair.second)
-
-infix fun QueryWrapper.limit(range: IntRange): QueryWrapper = this.limit(range.first, range.last)
 
 // operator
 operator fun QueryColumn.plus(other: QueryColumn): QueryColumn = add(other)
