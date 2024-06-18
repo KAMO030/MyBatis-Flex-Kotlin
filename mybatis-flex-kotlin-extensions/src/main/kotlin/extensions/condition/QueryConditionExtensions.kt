@@ -23,23 +23,23 @@ import com.mybatisflex.core.query.QueryCondition
  * @author KAMOsama
  */
 
-inline fun QueryCondition.and(isEffective: Boolean, predicate: () -> QueryCondition): QueryCondition =
-    if (isEffective) and(predicate()) else this
+inline fun QueryCondition.and(isEffective: Boolean, condition: () -> QueryCondition): QueryCondition =
+    if (isEffective) this.and(condition()) else this
 
 
-inline fun QueryCondition.or(isEffective: Boolean, predicate: () -> QueryCondition): QueryCondition =
-    if (isEffective) this.or(predicate()) else this
+inline fun QueryCondition.or(isEffective: Boolean, condition: () -> QueryCondition): QueryCondition =
+    if (isEffective) this.or(condition()) else this
 
-inline infix fun QueryCondition.and(predicate: () -> QueryCondition): QueryCondition = this.and(predicate())
+inline infix fun QueryCondition.and(condition: () -> QueryCondition): QueryCondition = this.and(condition())
 
-inline infix fun QueryCondition.or(predicate: () -> QueryCondition): QueryCondition = this.or(predicate())
+inline infix fun QueryCondition.or(condition: () -> QueryCondition): QueryCondition = this.or(condition())
 
 infix fun QueryCondition.and(other: QueryCondition): QueryCondition = this.and(other)
 
 infix fun QueryCondition.or(other: QueryCondition): QueryCondition = this.or(other)
 
 inline fun `if`(test: Boolean, block: () -> QueryCondition): QueryCondition =
-    if (test) block() else QueryCondition.createEmpty()
+    if (test) block() else emptyCondition()
 
 fun QueryCondition.andAll(vararg conditions: QueryCondition): QueryCondition = this and allAnd(*conditions)
 
@@ -49,4 +49,7 @@ fun allAnd(vararg conditions: QueryCondition): QueryCondition = conditions.reduc
 
 fun allOr(vararg conditions: QueryCondition): QueryCondition = conditions.reduce(QueryCondition::or)
 
+/**
+ * 创建一个空的QueryCondition
+ */
 fun emptyCondition(): QueryCondition = QueryCondition.createEmpty()
