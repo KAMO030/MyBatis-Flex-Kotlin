@@ -367,9 +367,13 @@ class KotlinExample {
         }
     }
 
+    /**
+     * 两个表起别名后关联查询与in子查询条件演示
+     * @since 1.1.0
+     */
     @Test
     fun relatedQueries() {
-        queryScope{
+        val sql = queryScope{
             val aT = Account::class.queryTable.`as`("a")
             val bT = Account::class.queryTable.`as`("b")
             select(aT["*"], bT[Account::userName])
@@ -381,7 +385,13 @@ class KotlinExample {
                     from(Account::class)
                 }
             )
-        }.let { println(it.toSQL()) }
+        }.toSQL()
+        println(sql)
+        assert(
+            """
+            SELECT `a`.*, `b`.`user_name` FROM `tb_account` AS `a` LEFT JOIN `tb_account` AS `b` ON `b`.`age` = `a`.`age` WHERE `b`.`user_name` LIKE '%zs%' AND `a`.`age` IN (SELECT `age` FROM `tb_account`)
+            """.trimIndent() == sql
+        )
     }
 
 
