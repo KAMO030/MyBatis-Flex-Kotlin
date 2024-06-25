@@ -24,13 +24,10 @@ import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
-import com.mybatisflex.core.query.QueryTable
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Db.selectListByQuery
 import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
-import com.mybatisflex.core.table.TableInfo
-import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.annotation.InternalMybatisFlexApi
 import com.mybatisflex.kotlin.extensions.kproperty.allColumns
 import com.mybatisflex.kotlin.extensions.kproperty.column
@@ -51,7 +48,6 @@ import javax.tools.ToolProvider
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.isSubclassOf
 
 
 /*
@@ -118,24 +114,6 @@ fun createAndLoadDynamicMapper(kClass: KClass<*>): Class<*>? {
     }.getOrNull()
 }
 
-val <E : Any> KClass<E>.tableInfo: TableInfo
-    get() = requireNotNull(tableInfoOrNull) {
-        "The class TableInfo cannot be found through $this" +
-                " because the entity class corresponding to the generic used by this interface to inherit from BaseMapper cannot be found."
-    }
-
-val <E : Any> KClass<E>.queryTable: QueryTable
-    get() {
-        val info = tableInfo
-        return QueryTable(info.schema, info.tableName)
-    }
-
-val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
-    get() = if (isSubclassOf(BaseMapper::class)) {
-        TableInfoFactory.ofMapperClass(java)
-    } else {
-        TableInfoFactory.ofEntityClass(java)
-    }
 
 //    query-----------
 /**

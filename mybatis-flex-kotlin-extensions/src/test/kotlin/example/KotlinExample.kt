@@ -17,7 +17,10 @@ import com.mybatisflex.kotlin.extensions.mapper.*
 import com.mybatisflex.kotlin.extensions.model.batchDeleteById
 import com.mybatisflex.kotlin.extensions.model.batchInsert
 import com.mybatisflex.kotlin.extensions.model.batchUpdateById
+import com.mybatisflex.kotlin.extensions.sql.`in`
+import com.mybatisflex.kotlin.extensions.sql.like
 import com.mybatisflex.kotlin.extensions.wrapper.*
+import com.mybatisflex.kotlin.scope.queryScope
 import com.mybatisflex.kotlin.scope.runFlex
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
@@ -26,7 +29,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
 import javax.sql.DataSource
-import kotlin.streams.toList
 
 class KotlinExample {
 
@@ -364,5 +366,23 @@ class KotlinExample {
             println(createAndLoadDynamicMapper(this))
         }
     }
+
+    @Test
+    fun relatedQueries() {
+        queryScope{
+            val aT = Account::class.queryTable.`as`("a")
+            val bT = Account::class.queryTable.`as`("b")
+            select(aT["*"], bT[Account::userName])
+            from(aT).leftJoin(bT).on(Account::age,Account::age)
+            andAll(
+                bT[Account::userName] like "zs",
+                aT[Account::age].`in`{
+                    select(Account::age)
+                    from(Account::class)
+                }
+            )
+        }.let { println(it.toSQL()) }
+    }
+
 
 }
