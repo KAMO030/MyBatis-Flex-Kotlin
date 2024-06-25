@@ -246,17 +246,13 @@ infix fun KProperty<String?>.notLikeRight(other: Any): QueryCondition = column.n
 /**
  * @since 1.1.0
  */
-infix fun <T : Comparable<T>> KProperty<T?>.notIn(value: Collection<Any?>): QueryCondition = column.notIn(value)
+infix fun <T : Comparable<T>> KProperty<T?>.notIn(value: Collection<T?>): QueryCondition = column.notIn(value)
+
 
 /**
  * @since 1.1.0
  */
-infix fun <T : Comparable<T>> KProperty<T?>.notIn(values: Array<Any?>): QueryCondition = column.notIn(values)
-
-/**
- * @since 1.1.0
- */
-fun <T : Comparable<T>> KProperty<T?>.notIn(vararg values:Any): QueryCondition = column.notIn(values)
+fun <T : Comparable<T>> KProperty<T?>.notIn(vararg values:T): QueryCondition = column.notIn(values)
 
 /**
  * @since 1.1.0
