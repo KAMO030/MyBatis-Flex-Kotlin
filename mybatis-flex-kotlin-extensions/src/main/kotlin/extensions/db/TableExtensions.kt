@@ -33,10 +33,14 @@ val <E : Any> KClass<E>.tableInfo: TableInfo
     }
 
 val <E : Any> KClass<E>.queryTable: QueryTable
-    get() {
-        val info = tableInfo
-        return QueryTable(info.schema, info.tableName)
-    }
+    get() = tableInfo.queryTable
+
+/**
+ * @since 1.1.0
+ */
+val TableInfo.queryTable: QueryTable
+    get() = QueryTable(schema, tableName)
+
 
 val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
     get() = if (isSubclassOf(BaseMapper::class)) {
