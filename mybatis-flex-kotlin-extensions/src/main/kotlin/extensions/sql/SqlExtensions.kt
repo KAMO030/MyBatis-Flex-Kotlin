@@ -19,7 +19,10 @@ package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.query.*
 import com.mybatisflex.kotlin.extensions.condition.and
+import com.mybatisflex.kotlin.extensions.condition.emptyCondition
 import com.mybatisflex.kotlin.extensions.kproperty.column
+import com.mybatisflex.kotlin.scope.QueryScope
+import com.mybatisflex.kotlin.scope.queryScope
 import com.mybatisflex.kotlin.vec.Order
 import java.util.function.Consumer
 import kotlin.reflect.KProperty
@@ -80,12 +83,51 @@ infix fun QueryColumn.notIn(value: Collection<Any?>): QueryCondition = this.notI
 
 infix fun QueryColumn.notIn(values: Array<Any?>): QueryCondition = this.notIn(values)
 
+/**
+ * @since 1.1.0
+ */
+inline fun QueryColumn.notIn(scope:QueryScope.()->Unit): QueryCondition = this.notIn(queryScope(init = scope))
+
 infix fun QueryColumn.`in`(value: Collection<Any?>): QueryCondition = this.`in`(value)
 
 infix fun QueryColumn.`in`(values: Array<Any?>): QueryCondition = this.`in`(values.toList())
 
 infix fun QueryColumn.`in`(range: IntRange): QueryCondition = this.`in`(range.toList())
 
+/**
+ * @since 1.1.0
+ */
+infix fun QueryColumn.inList(other: Collection<Comparable<*>>): QueryCondition {
+    if (other.isEmpty()) {
+        return emptyCondition()
+    }
+    return if (other.size == 1) this.eq(other.first()) else this.`in`(other)
+}
+
+/**
+ * @since 1.1.0
+ */
+infix fun QueryColumn.inArray(other: Array<out Comparable<*>>): QueryCondition {
+    if (other.isEmpty()) {
+        return emptyCondition()
+    }
+    return if (other.size == 1) this.eq(other[0]) else this.`in`(other)
+}
+
+/**
+ * @since 1.1.0
+ */
+infix fun  QueryColumn.inRange(other: ClosedRange<out Comparable<*>>): QueryCondition =
+    if (other.endInclusive == other.start) this.eq(other.start) else this.between(
+        other.start,
+        other.endInclusive
+    )
+
+
+/**
+ * @since 1.1.0
+ */
+inline fun QueryColumn.`in`(scope:QueryScope.()->Unit): QueryCondition = this.`in`(queryScope(init = scope))
 fun <C : QueryColumn, A : Any> Pair<C, C>.inPair(vararg others: Pair<A, A>): QueryCondition =
     this inPair others.toList()
 
