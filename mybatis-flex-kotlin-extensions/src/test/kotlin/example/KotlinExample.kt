@@ -387,10 +387,10 @@ class KotlinExample {
             )
         }.toSQL()
         println(sql)
-        assert(
-            """
-            SELECT `a`.*, `b`.`user_name` FROM `tb_account` AS `a` LEFT JOIN `tb_account` AS `b` ON `b`.`age` = `a`.`age` WHERE `b`.`user_name` LIKE '%zs%' AND `a`.`age` IN (SELECT `age` FROM `tb_account`)
-            """.trimIndent() == sql
+        assert("SELECT `a`.*, `b`.`user_name` " +
+                "FROM `tb_account` AS `a` LEFT JOIN `tb_account` AS `b` ON `b`.`age` = `a`.`age` " +
+                "WHERE `b`.`user_name` LIKE '%zs%' AND `a`.`age` IN (SELECT `age` FROM `tb_account`)"
+                == sql
         )
     }
 
