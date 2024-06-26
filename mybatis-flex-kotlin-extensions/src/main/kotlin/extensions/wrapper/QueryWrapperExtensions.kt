@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.extensions.wrapper
 
 import com.mybatisflex.core.query.*
@@ -122,7 +123,7 @@ infix fun QueryWrapper.and(queryColumn: QueryCondition): QueryWrapper = this.and
 
 infix fun QueryWrapper.or(queryColumn: QueryCondition): QueryWrapper = this.or(queryColumn)
 
-fun QueryWrapper.whereQuery(consumer: (QueryWrapper) -> Unit): QueryWrapper = where(consumer)
+fun QueryWrapper.whereBy(consumer: (QueryWrapper) -> Unit): QueryWrapper = where(consumer)
 
 inline fun QueryWrapper.whereWith(queryCondition: () -> QueryCondition): QueryWrapper = where(queryCondition())
 

@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.query.*
@@ -52,7 +53,7 @@ class QueryScope : QueryWrapperAdapter<QueryScope>() {
 
     @Deprecated(
         "", level = DeprecationLevel.WARNING,
-        replaceWith = ReplaceWith("whereQuery(consumer)", "com.mybatisflex.kotlin.extensions.wrapper.whereQuery")
+        replaceWith = ReplaceWith("whereBy(consumer)", "com.mybatisflex.kotlin.extensions.wrapper.whereBy")
     )
     override fun where(consumer: Consumer<QueryWrapper>): QueryScope = super.where(consumer)
 
