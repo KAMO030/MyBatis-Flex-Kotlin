@@ -5,7 +5,6 @@ import com.mybatisflex.core.audit.AuditManager
 import com.mybatisflex.core.audit.ConsoleMessageCollector
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryWrapper
-import com.mybatisflex.kotlin.annotation.InternalMybatisFlexApi
 import com.mybatisflex.kotlin.example.entity.Account
 import com.mybatisflex.kotlin.example.mapper.AccountMapper
 import com.mybatisflex.kotlin.extensions.condition.allAnd
@@ -29,6 +28,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import java.time.Instant
 import java.util.*
 import javax.sql.DataSource
+import kotlin.streams.toList
 
 class KotlinExample {
 
@@ -357,14 +357,6 @@ class KotlinExample {
 //            )
 
         }.also { println(it) }
-    }
-
-    @OptIn(InternalMybatisFlexApi::class)
-    @Test
-    fun testDynamicMapper() {
-        with(Account::class) {
-            println(createAndLoadDynamicMapper(this))
-        }
     }
 
     /**
