@@ -221,8 +221,10 @@ Account(id=2, userName="李四", birthday="2021-03-21 00:00:00.0", age=19)
 ## 更多使用
 
 - 功能 1：[Bootstrap简化配置](docs/bootstrapExt.md)
-- 功能 2：[简单查询与扩展](docs/extensions.md)
+- 功能
+  2：[简单查询与扩展](docs/extensions.md)、[演示示例](mybatis-flex-kotlin-extensions/src/test/kotlin/example/KotlinExample.kt)
 - 功能 3：[向量查询](docs/vecSimple.md) (实验性)
 - 功能 4：[KSP](docs/ksp.md)
+- 功能 5：[KotlinGradle 插件](docs/kotlinGradlePlugin.md)
 
 [comment]: <> (###### TODO ...)
