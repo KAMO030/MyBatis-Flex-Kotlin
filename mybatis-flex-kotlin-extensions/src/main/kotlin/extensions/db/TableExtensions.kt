@@ -62,3 +62,10 @@ operator fun QueryTable.get(columnName: String): QueryColumn = QueryColumn(this,
  * @since 1.1.0
  */
 operator fun QueryTable.get(property: KProperty<*>): QueryColumn = QueryColumn(this,property.column.name)
+
+/**
+ * 给QueryTable对象添加别名
+ * @param alias 别名
+ * @since 1.1.0
+ */
+infix fun QueryTable.`as`(alias: String): QueryTable = `as`(alias)

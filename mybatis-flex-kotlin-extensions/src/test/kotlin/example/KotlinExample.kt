@@ -366,8 +366,8 @@ class KotlinExample {
     @Test
     fun relatedQueries() {
         val sql = queryScope{
-            val aT = Account::class.queryTable.`as`("a")
-            val bT = Account::class.queryTable.`as`("b")
+            val aT = Account::class.queryTable `as` "a"
+            val bT = Account::class.queryTable `as` "b"
             select(aT["*"], bT[Account::userName])
             from(aT).leftJoin(bT).on(Account::age,Account::age)
             andAll(
@@ -385,6 +385,5 @@ class KotlinExample {
                 == sql
         )
     }
-
 
 }
