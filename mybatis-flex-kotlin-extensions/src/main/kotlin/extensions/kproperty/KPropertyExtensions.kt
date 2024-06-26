@@ -20,10 +20,10 @@ import com.mybatisflex.annotation.Column
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.extensions.condition.and
-import com.mybatisflex.kotlin.extensions.condition.emptyCondition
 import com.mybatisflex.kotlin.extensions.db.queryTable
 import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.sql.*
+import com.mybatisflex.kotlin.scope.*
 import com.mybatisflex.kotlin.vec.Order
 import org.apache.ibatis.type.UnknownTypeHandler
 import java.lang.reflect.Field
@@ -242,13 +242,35 @@ infix fun KProperty<String?>.notLikeLeft(other: Any): QueryCondition = column.no
 infix fun KProperty<String?>.notLikeRight(other: Any): QueryCondition = column.notLikeRight(other)
 
 // in
-infix fun <T> KProperty<T?>.`in`(other: QueryWrapper): QueryCondition = column.`in`(other)
 
-infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: ClosedRange<T>): QueryCondition = this inRange other
+/**
+ * @since 1.1.0
+ */
+infix fun <T : Comparable<T>> KProperty<T?>.notIn(value: Collection<T?>): QueryCondition = column.notIn(value)
 
-infix fun <T : Comparable<T>> KProperty<T?>.`in`(other: Collection<T>): QueryCondition = this inList other
 
-fun <T : Comparable<T>> KProperty<T?>.`in`(vararg other: T): QueryCondition = this inArray other
+/**
+ * @since 1.1.0
+ */
+fun <T : Comparable<T>> KProperty<T?>.notIn(vararg values:T): QueryCondition = column.notIn(values)
+
+/**
+ * @since 1.1.0
+ */
+inline fun <T : Comparable<T>> KProperty<T?>.notIn(scope: QueryScope.()->Unit): QueryCondition = column.notIn(queryScope(init = scope))
+
+infix fun <T : Comparable<T>> KProperty<T?>.`in`(queryWrapper: QueryWrapper): QueryCondition = column.`in`(queryWrapper)
+
+infix fun <T : Comparable<T>> KProperty<T?>.`in`(values: ClosedRange<T>): QueryCondition = this inRange values
+
+infix fun <T : Comparable<T>> KProperty<T?>.`in`(values: Collection<T>): QueryCondition = this inList values
+
+fun <T : Comparable<T>> KProperty<T?>.`in`(vararg values: T): QueryCondition = this inArray values
+
+/**
+ * @since 1.1.0
+ */
+inline fun <T> KProperty<T?>.`in`(scope: QueryScope.()->Unit): QueryCondition = column.`in`(queryScope(init = scope))
 
 fun <T : Comparable<T>, E : Comparable<E>> Pair<KProperty<T?>, KProperty<E?>>.inPair(vararg others: Pair<T, E>): QueryCondition =
     this inPair others.toList()
@@ -268,29 +290,20 @@ infix fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KP
     others.map { this.first.first.eq(it.first.first) and this.first.second.eq(it.first.second) and this.second.eq(it.second) }
         .reduceIndexed { i, c1, c2 -> (if (i == 1) Brackets(c1) else c1).or(c2) }
 
-infix fun <T : Comparable<T>> KProperty<T?>.inList(other: Collection<T>): QueryCondition {
-    if (other.isEmpty()) {
-        return emptyCondition()
-    }
-    val queryColumn = column
-    return if (other.size == 1) queryColumn.eq(other.first()) else queryColumn.`in`(other)
-}
+/**
+ * @since 1.1.0
+ */
+infix fun <T : Comparable<T>> KProperty<T?>.inList(other: Collection<T>): QueryCondition = column.inList(other)
 
-infix fun <T : Comparable<T>> KProperty<T?>.inArray(other: Array<out T>): QueryCondition {
-    if (other.isEmpty()) {
-        return emptyCondition()
-    }
-    val queryColumn = column
-    return if (other.size == 1) queryColumn.eq(other[0]) else queryColumn.`in`(other)
-}
+/**
+ * @since 1.1.0
+ */
+infix fun <T : Comparable<T>> KProperty<T?>.inArray(other: Array<out T>): QueryCondition  = column.inArray(other)
 
-infix fun <T : Comparable<T>> KProperty<T?>.inRange(other: ClosedRange<out T>): QueryCondition {
-    val queryColumn = column
-    return if (other.endInclusive == other.start) queryColumn.eq(other.start) else queryColumn.between(
-        other.start,
-        other.endInclusive
-    )
-}
+/**
+ * @since 1.1.0
+ */
+infix fun <T : Comparable<T>> KProperty<T?>.inRange(other: ClosedRange<out T>): QueryCondition  = column.inRange(other)
 
 // as
 infix fun <T> KProperty<T?>.alias(other: String): QueryColumn = column.`as`(other)

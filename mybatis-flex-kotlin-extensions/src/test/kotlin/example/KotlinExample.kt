@@ -16,8 +16,10 @@ import com.mybatisflex.kotlin.extensions.mapper.*
 import com.mybatisflex.kotlin.extensions.model.batchDeleteById
 import com.mybatisflex.kotlin.extensions.model.batchInsert
 import com.mybatisflex.kotlin.extensions.model.batchUpdateById
-import com.mybatisflex.kotlin.extensions.sql.orderBy
+import com.mybatisflex.kotlin.extensions.sql.`in`
+import com.mybatisflex.kotlin.extensions.sql.like
 import com.mybatisflex.kotlin.extensions.wrapper.*
+import com.mybatisflex.kotlin.scope.queryScope
 import com.mybatisflex.kotlin.scope.runFlex
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
@@ -357,5 +359,31 @@ class KotlinExample {
         }.also { println(it) }
     }
 
+    /**
+     * 两个表起别名后关联查询与in子查询条件演示
+     * @since 1.1.0
+     */
+    @Test
+    fun relatedQueries() {
+        val sql = queryScope{
+            val aT = Account::class.queryTable `as` "a"
+            val bT = Account::class.queryTable `as` "b"
+            select(aT["*"], bT[Account::userName])
+            from(aT).leftJoin(bT).on(Account::age,Account::age)
+            andAll(
+                bT[Account::userName] like "zs",
+                aT[Account::age].`in`{
+                    select(Account::age)
+                    from(Account::class)
+                }
+            )
+        }.toSQL()
+        println(sql)
+        assert("SELECT `a`.*, `b`.`user_name` " +
+                "FROM `tb_account` AS `a` LEFT JOIN `tb_account` AS `b` ON `b`.`age` = `a`.`age` " +
+                "WHERE `b`.`user_name` LIKE '%zs%' AND `a`.`age` IN (SELECT `age` FROM `tb_account`)"
+                == sql
+        )
+    }
 
 }

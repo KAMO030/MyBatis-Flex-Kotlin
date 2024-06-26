@@ -14,7 +14,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType
 import javax.sql.DataSource
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @MapperScan("com.mybatisflex.kotlin.example.mapper")
 open class AppConfig {
 

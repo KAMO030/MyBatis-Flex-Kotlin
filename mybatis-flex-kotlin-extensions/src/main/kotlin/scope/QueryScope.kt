@@ -13,13 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+@file:Suppress("unused")
 package com.mybatisflex.kotlin.scope
 
-import com.mybatisflex.core.query.QueryColumn
-import com.mybatisflex.core.query.QueryWrapperAdapter
+import com.mybatisflex.core.query.*
 import com.mybatisflex.core.util.LambdaGetter
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.wrapper.selectProperties
+import java.util.function.Consumer
 import kotlin.reflect.KProperty
 
 /**
@@ -33,22 +34,35 @@ class QueryScope : QueryWrapperAdapter<QueryScope>() {
 
     operator fun String.unaryMinus(): QueryColumn = QueryColumn(this)
 
-    fun select(vararg properties: KProperty<*>): QueryScope =
-        this.apply { selectProperties(*properties) }
-
-    @Deprecated("", level = DeprecationLevel.HIDDEN)
-    override fun <T : Any?> select(vararg lambdaGetters: LambdaGetter<T>?): QueryScope {
-        return super.select(*lambdaGetters)
-    }
-
     fun hasSelect(): Boolean = this.selectColumns != null && this.selectColumns.isNotEmpty()
 
     @Deprecated("", level = DeprecationLevel.HIDDEN)
-    override fun <T : Any?> groupBy(column: LambdaGetter<T>?): QueryScope {
-        return super.groupBy(column)
-    }
+    override fun <T : Any?> select(vararg lambdaGetters: LambdaGetter<T>?): QueryScope = super.select(*lambdaGetters)
+
+    fun select(vararg properties: KProperty<*>): QueryScope = this.apply { selectProperties(*properties) }
+
+    @Deprecated("", level = DeprecationLevel.HIDDEN)
+    override fun <T : Any?> groupBy(column: LambdaGetter<T>?): QueryScope = super.groupBy(column)
 
     fun <T : Any?> groupBy(column: KProperty<T>): QueryScope = groupBy(column.column)
+
+    @Deprecated("", level = DeprecationLevel.HIDDEN)
+    override fun <T : Any?> where(fn: LambdaGetter<T>?): QueryConditionBuilder<QueryScope> = super.where(fn)
+
+    fun <T : Any?> where(column: KProperty<T>): QueryScope = where(column.column.name)
+
+    @Deprecated(
+        "", level = DeprecationLevel.WARNING,
+        replaceWith = ReplaceWith("whereBy(consumer)", "com.mybatisflex.kotlin.extensions.wrapper.whereBy")
+    )
+    override fun where(consumer: Consumer<QueryWrapper>): QueryScope = super.where(consumer)
+
+    @Deprecated(
+        "", level = DeprecationLevel.WARNING,
+        replaceWith = ReplaceWith("whereWith(consumer)", "com.mybatisflex.kotlin.extensions.wrapper.whereWith")
+    )
+    fun where(consumer: () -> QueryCondition): QueryScope = super.where(consumer())
+
 }
 
 

@@ -22,13 +22,10 @@ import com.mybatisflex.core.mybatis.Mappers
 import com.mybatisflex.core.paginate.Page
 import com.mybatisflex.core.query.QueryColumn
 import com.mybatisflex.core.query.QueryCondition
-import com.mybatisflex.core.query.QueryTable
 import com.mybatisflex.core.row.Db
 import com.mybatisflex.core.row.Db.selectListByQuery
 import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
-import com.mybatisflex.core.table.TableInfo
-import com.mybatisflex.core.table.TableInfoFactory
 import com.mybatisflex.kotlin.annotation.InternalMybatisFlexApi
 import com.mybatisflex.kotlin.extensions.kproperty.allColumns
 import com.mybatisflex.kotlin.extensions.kproperty.column
@@ -45,7 +42,6 @@ import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.isSubclassOf
 
 
 /*
@@ -60,37 +56,21 @@ import kotlin.reflect.full.isSubclassOf
 inline fun <reified M> mapper(): M = Mappers.ofMapperClass(M::class.java)
 
 /**
+ * 把Entity类型当作泛型拿到baseMapper对应实体类泛型的实例
+ * @author KAMOsama
+ * @since 1.1.0
+ */
+inline fun <reified E : Any> mapperOfEntity(): BaseMapper<E> = E::class.baseMapper
+
+/**
  * 把泛型类型当作实体类型拿到mapper实例
  * @author KAMOsama
  */
 val <E : Any> KClass<E>.baseMapper: BaseMapper<E>
-    get() = Mappers.ofEntityClass(java)
+    get() = Mappers.ofEntityClass(this.java)
 
 val <E : Any> KClass<E>.baseMapperOrNull: BaseMapper<E>?
-    get() = try {
-        Mappers.ofEntityClass(java)
-    } catch (_: Exception) {
-        null
-    }
-
-val <E : Any> KClass<E>.tableInfo: TableInfo
-    get() = requireNotNull(tableInfoOrNull) {
-        "The class TableInfo cannot be found through $this" +
-                " because the entity class corresponding to the generic used by this interface to inherit from BaseMapper cannot be found."
-    }
-
-val <E : Any> KClass<E>.queryTable: QueryTable
-    get() {
-        val info = tableInfo
-        return QueryTable(info.schema, info.tableName)
-    }
-
-val <E : Any> KClass<E>.tableInfoOrNull: TableInfo?
-    get() = if (isSubclassOf(BaseMapper::class)) {
-        TableInfoFactory.ofMapperClass(java)
-    } else {
-        TableInfoFactory.ofEntityClass(java)
-    }
+    get() = runCatching { baseMapper }.getOrNull()
 
 //    query-----------
 /**
@@ -433,7 +413,6 @@ inline fun <reified E : Any, reified R : Any> paginateAs(
     totalRow: Number = -1L,
     init: QueryScope.() -> Unit
 ): Page<R> = paginateAs<E, R>(Page(pageNumber, pageSize, totalRow), init)
-
 
 
 //    update----------
