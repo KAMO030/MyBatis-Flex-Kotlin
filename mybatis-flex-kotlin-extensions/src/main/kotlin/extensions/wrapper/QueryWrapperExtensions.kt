@@ -83,6 +83,13 @@ inline fun <Q : QueryWrapper> QueryWrapper.rightJoin(enable: Boolean = true, ini
 inline fun <reified T> QueryWrapper.selectFrom(vararg properties: KProperty1<T, *>): QueryWrapper =
     this.select(*properties.toQueryColumns()).from<T>()
 
+/**
+ * 将子查询作为select的字段
+ * @since 1.1.0
+ */
+val QueryWrapper.selectColumn: QueryColumn
+    get() = SelectQueryColumn(this)
+
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
     this.select(*properties().toQueryColumns())
 
