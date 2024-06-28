@@ -126,6 +126,11 @@ infix fun  QueryColumn.inRange(other: ClosedRange<out Comparable<*>>): QueryCond
 /**
  * @since 1.1.0
  */
+infix fun QueryColumn.`as`(alias: String): QueryColumn = this.`as`(alias)
+
+/**
+ * @since 1.1.0
+ */
 inline fun QueryColumn.`in`(scope:QueryScope.()->Unit): QueryCondition = this.`in`(queryScope(init = scope))
 
 fun <C : QueryColumn, A : Any> Pair<C, C>.inPair(vararg others: Pair<A, A>): QueryCondition =
