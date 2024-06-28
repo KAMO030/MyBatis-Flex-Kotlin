@@ -80,13 +80,13 @@ val <E : Any> KClass<E>.all: List<E>
     get() = baseMapper.selectAll()
 
 //    save-----------
-inline fun <reified E : MapperModel<E>> save(build: E.() -> Unit): Boolean =
+inline fun <reified E : MapperModel<in E>> save(build: E.() -> Unit): Boolean =
     ClassUtil.newInstance(E::class.java).apply(build).run { save() }
 
 //    update-----------
-inline fun <reified E : MapperModel<E>> E.update(conditionBlock: (E) -> QueryCondition): Int =
+inline fun <reified E : MapperModel<in E>> E.update(conditionBlock: (E) -> QueryCondition): Int =
     baseMapper().updateByCondition(this, conditionBlock(this))
 
 //    delete-----------
-inline fun <reified E : MapperModel<E>> E.remove(conditionBlock: (E) -> QueryCondition): Int =
+inline fun <reified E : MapperModel<in E>> E.remove(conditionBlock: (E) -> QueryCondition): Int =
     baseMapper().deleteByCondition(conditionBlock(this))
