@@ -1,5 +1,7 @@
 # 基于 Kotlin 扩展 Mybatis-Flex
+
 **MyBatis-Flex-Kotlin 基于 [Mybatis-Flex](https://mybatis-flex.com) 的 Kotlin 扩展模块，方便 Kotlin 开发者使用 MyBatis-Flex 进行开发**
+
 > 它继承了 Mybatis-Flex 轻量的特性，同时拥有 Kotlin 特有的扩展方法、中缀表达式与DSL等语法支持，
 > 使其拥有了更高的灵活性。让我们可以更加轻松的在 Kotlin 中使用 MyBatis-Flex 所带来的开发效率和开发体验。
 
@@ -14,16 +16,19 @@
 ## 亮点
 
 - 快速构建启动：通过DSL➕重载运算符，快速配置 MybatisFlexBootstrap 实例并启动：
-    ```kotlin
-    runFlex {
-        // 配置数据源 相当于 setDataSource(dataSource)
-        +dataSource
-        // 配置Mapper 相当于 addMapper(AccountMapper::class.java)
-        +AccountMapper::class
-        // 配置日志输出 相当于 setLogImpl(StdOutImpl::class.java)
-        logImpl = StdOutImpl::class
-      }
-    ```
+  > ⚠️
+  SpringBoot环境中无需通过此方式配置,请参考[mybatis-flex-spring-boot](https://mybatis-flex.com/zh/base/configuration.html)
+  进行配置
+  ```kotlin
+      runFlex {
+          // 配置数据源 相当于 setDataSource(dataSource)
+          +dataSource
+          // 配置Mapper 相当于 addMapper(AccountMapper::class.java)
+          +AccountMapper::class
+          // 配置日志输出 相当于 setLogImpl(StdOutImpl::class.java)
+          logImpl = StdOutImpl::class
+        }
+  ```
 - 快速查询数据：通过DSL➕泛型快速编写查询语句并查询:  (快速查询提供三个函数：all, filter 和 query )
   >- `all<实体类>()` 查泛型对应的表的所有数据
   >- `filter<实体类>(vararg KProperty<*>, ()->QueryCondition)` 按条件查泛型对应的表的数据
@@ -122,7 +127,7 @@
 dependencies {
   //kotlin扩展库
   implementation("com.mybatis-flex:mybatis-flex-kotlin-extensions:$extensionsVersion")
-  //核心库
+  //核心库(或mybatis-flex-spring-boot-starter等库)
   implementation("com.mybatis-flex:mybatis-flex-core:$coreVersion")
 }
 ```
@@ -137,7 +142,7 @@ dependencies {
     <artifactId>mybatis-flex-kotlin-extensions</artifactId>
     <version>${mybatis-flex-kotlin-extensions.version}</version>
   </dependency>
-  <!--核心库-->
+  <!--核心库(或mybatis-flex-spring-boot-starter等库)-->
   <dependency>
     <groupId>com.mybatis-flex</groupId>
     <artifactId>mybatis-flex-core</artifactId>
@@ -166,11 +171,9 @@ data class Account(
 - 使用 `@Table("tb_account")` 设置实体类与表名的映射关系
 - 使用 `@Id` 标识主键
 
-> ⚠️ 最好不要写成 data class ，否则没有无参构造某些情况下会报错，例如属性的顺序与数据库字段不一致会导致报错；
+> ⚠️ 实体类为`data class`时，需要注意实体类没有无参构造和没有打开继承某些情况下会报错，例如属性的顺序与数据库字段不一致会导致报错；
 >
-> 如有需要可以安装官方 [noArg](https://kotlinlang.org/docs/no-arg-plugin.html) 插件;
->
-> 或是使用本框架提供的整合插件 [com.mybatis-flex.kotlin](docs/kotlinGradlePlugin.md)
+> 具体原因与解决方式详见: [Mybatis-Flex-Kotlin-Plugin](docs/kotlinGradlePlugin.md)
 
 **第 4 步：开始使用**
 
