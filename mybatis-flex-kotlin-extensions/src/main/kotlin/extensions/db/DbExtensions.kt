@@ -81,14 +81,19 @@ val <E : Any> KClass<E>.baseMapperOrNull: BaseMapper<E>?
 inline fun <reified E : Any> queryOne(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
-): E? = E::class.baseMapperOrNull?.selectOneByQuery(queryScope(columns = columns, init = init))
-    ?: E::class.tableInfo.let {
-        queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
-            init()
-            // 如果未调用select方法，则默认查询所有列
-            if (this.hasSelect().not()) select(E::class.allColumns)
-        }?.toEntity(E::class.java)
-    }
+): E? {
+    val baseMapper = E::class.baseMapperOrNull
+    return if (baseMapper != null)
+        baseMapper.selectOneByQuery(queryScope(columns = columns, init = init))
+    else
+        E::class.tableInfo.let {
+            queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
+                init()
+                // 如果未调用select方法，则默认查询所有列
+                if (this.hasSelect().not()) select(E::class.allColumns)
+            }?.toEntity(E::class.java)
+        }
+}
 
 /**
  * 通过条件查询一条数据,并转换成指定类型
@@ -99,14 +104,20 @@ inline fun <reified E : Any> queryOne(
 inline fun <reified E : Any, reified T : Any> queryOneAs(
     vararg columns: QueryColumn,
     init: QueryScope.() -> Unit
-): T? = E::class.baseMapperOrNull?.selectOneByQueryAs(queryScope(columns = columns, init = init), T::class.java)
-    ?: E::class.tableInfo.let {
-        queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
-            init()
-            // 如果未调用select方法，则默认查询所有列
-            if (this.hasSelect().not()) select(T::class.allColumns)
-        }?.toEntity(T::class.java)
+): T? {
+    val baseMapper = E::class.baseMapperOrNull
+    return if (baseMapper != null) {
+        baseMapper.selectOneByQueryAs(queryScope(columns = columns, init = init), T::class.java)
+    } else {
+        E::class.tableInfo.let {
+            queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
+                init()
+                // 如果未调用select方法，则默认查询所有列
+                if (this.hasSelect().not()) select(T::class.allColumns)
+            }?.toEntity(T::class.java)
+        }
     }
+}
 
 /**
  * 通过条件查询多条数据
