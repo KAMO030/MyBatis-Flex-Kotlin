@@ -69,8 +69,9 @@ class QueryScope : QueryWrapperAdapter<QueryScope>() {
 
 
 inline fun queryScope(vararg columns: QueryColumn, init: QueryScope.() -> Unit = {}): QueryScope =
-    QueryScope().apply(init).apply { if (columns.isNotEmpty() && !hasSelect()) select(*columns) }
-
+    QueryScope().apply(init).apply {
+        if (columns.isNotEmpty() && !hasSelect()) select(*columns)
+    }
 
 /**
  * 构建子查询作为select的字段

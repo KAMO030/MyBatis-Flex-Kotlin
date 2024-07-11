@@ -30,6 +30,7 @@ class UpdateScope<T>(entryClass: Class<T>) : QueryWrapperAdapter<UpdateScope<T>>
     /**
      * 设置字段对应原生值
      * @param value 类型可以是String, QueryWrapper(QueryScope), QueryColumn(KProperty), QueryCondition
+     * @since 1.1.1
      */
     infix fun KProperty1<T, *>.setRaw(value: Any) {
         value.let {
