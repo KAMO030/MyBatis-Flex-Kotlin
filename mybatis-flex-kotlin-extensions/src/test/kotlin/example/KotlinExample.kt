@@ -138,7 +138,7 @@ class KotlinExample {
 
     @Test
     fun testUpdate() {
-        // 通过条件查询到后更新
+        // 通过条件查询到后更新(此时会执行两次sql)
         filterOne<Account> { Account::id eq 2 }?.apply { age = 20 }?.update {
             Account::userName eq it.userName and (Account::age le 18)
         }
@@ -150,44 +150,29 @@ class KotlinExample {
     @Test
     fun testUpdate2() {
         println("更新前: ${all<Account>().first()}")
-        filterOne<Account>(Account::age) {
-            Account::age `in` (19..20)
-        }
         update<Account> {
-            Account::id set 5
+            Account::id set Account::id + 2
+            Account::birthday setRaw Account::birthday
 //            Account::age setRaw {
 //                select(Account::age)
 //                from(Account::class)
-//                this.and(Account::age `in` (19..20))
-//                limit(1)
+//                where(Account::age `in` (19..20))
 //            }
-//            或者写成:
+//           或者写成:
             Account::age.setRaw(Account::age) {
-                from(Account::class)
-                and(Account::age `in` (19..20))
+                where(Account::age `in` (19..20))
             }
-//            或者写成:
-//            Account::age set queryScope(Account::age.column){
-//                from(Account::class)
-//                and(Account::age `in` (19..20))
-//                limit(1)
-//            }
-//            或者写成 (此时会执行两次sql):
-//            Account::age set filterOne<Account>(Account::age){
-//                Account::age `in` (19..20)
-//            }?.age
             whereWith { Account::id eq 1 and (Account::userName eq "张三") }
         }
-//        val account = Account(
-//            id = 5,
-//            // 此时会执行一次sql
-//            age = filterOne<Account>(Account::age) {
-//                Account::age `in` (19..20)
-//            }?.age
-//        )
-//        Account::class.baseMapper.updateByCondition(account){
-//            Account::age `in` (19..20)
-//        }
+//      SQL:
+//      UPDATE `tb_account`
+//      SET `id` = `id` + 2 ,
+//          `birthday` = `birthday`
+//          `age` = (
+//              SELECT `age` FROM `tb_account`
+//              WHERE `age` BETWEEN  19 AND 20  LIMIT 1
+//          )
+//      WHERE `id` = 1 AND `user_name` = '张三'
         println("更新后: ${all<Account>().first()}")
     }
 
