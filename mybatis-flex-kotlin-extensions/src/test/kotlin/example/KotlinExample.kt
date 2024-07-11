@@ -21,6 +21,7 @@ import com.mybatisflex.kotlin.extensions.sql.like
 import com.mybatisflex.kotlin.extensions.wrapper.*
 import com.mybatisflex.kotlin.scope.queryScope
 import com.mybatisflex.kotlin.scope.runFlex
+import com.mybatisflex.kotlin.scope.selectQueryColumn
 import org.apache.ibatis.logging.stdout.StdOutImpl
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
@@ -384,6 +385,25 @@ class KotlinExample {
                 "WHERE `b`.`user_name` LIKE '%zs%' AND `a`.`age` IN (SELECT `age` FROM `tb_account`)"
                 == sql
         )
+    }
+
+    /**
+     * 子查询扩展方法演示
+     * @since 1.1.0
+     */
+    @Test
+    fun testSubQuery() {
+        val sql = queryScope {
+            select(
+                selectQueryColumn("id") {
+                    select(Account::id)
+                    from(Account::class)
+                }
+            )
+            from(Account::class)
+        }.toSQL()
+        assert(sql == "SELECT (SELECT `id` FROM `tb_account`) AS `id` FROM `tb_account`")
+        println(sql)
     }
 
 }

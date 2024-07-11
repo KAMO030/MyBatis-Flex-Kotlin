@@ -14,11 +14,13 @@
  *  limitations under the License.
  */
 @file:Suppress("unused")
+
 package com.mybatisflex.kotlin.scope
 
 import com.mybatisflex.core.query.*
 import com.mybatisflex.core.util.LambdaGetter
 import com.mybatisflex.kotlin.extensions.kproperty.column
+import com.mybatisflex.kotlin.extensions.sql.`as`
 import com.mybatisflex.kotlin.extensions.wrapper.selectProperties
 import java.util.function.Consumer
 import kotlin.reflect.KProperty
@@ -70,4 +72,12 @@ inline fun queryScope(vararg columns: QueryColumn, init: QueryScope.() -> Unit =
     QueryScope().apply(init).apply { if (columns.isNotEmpty() && !hasSelect()) select(*columns) }
 
 
-
+/**
+ * 构建子查询作为select的字段
+ * @param alias 别名
+ * @since 1.1.1
+ */
+fun selectQueryColumn(alias: String? = null, subQuery: QueryScope.() -> Unit): QueryColumn =
+    SelectQueryColumn(queryScope(init = subQuery)).run {
+        alias?.let { this `as` it } ?: this
+    }

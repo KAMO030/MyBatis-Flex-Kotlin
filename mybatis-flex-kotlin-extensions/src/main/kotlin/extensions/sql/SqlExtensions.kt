@@ -124,7 +124,7 @@ infix fun  QueryColumn.inRange(other: ClosedRange<out Comparable<*>>): QueryCond
     )
 
 /**
- * @since 1.1.0
+ * @since 1.1.1
  */
 infix fun QueryColumn.`as`(alias: String): QueryColumn = this.`as`(alias)
 
