@@ -34,40 +34,40 @@ import kotlin.reflect.KProperty
  */
 
 //like------
-infix fun QueryColumn.like(value: Any): QueryCondition = this.like(value)
+infix fun QueryColumn.like(other: Any?): QueryCondition = this.like(other)
 
-infix fun QueryColumn.likeRaw(value: Any): QueryCondition = this.likeRaw(value)
+infix fun QueryColumn.likeRaw(other: Any?): QueryCondition = this.likeRaw(other)
 
-infix fun QueryColumn.likeLeft(value: Any): QueryCondition = this.likeLeft(value)
+infix fun QueryColumn.likeLeft(other: Any?): QueryCondition = this.likeLeft(other)
 
-infix fun QueryColumn.likeRight(value: Any): QueryCondition = this.likeRight(value)
+infix fun QueryColumn.likeRight(other: Any?): QueryCondition = this.likeRight(other)
 
-infix fun QueryColumn.notLike(other: Any): QueryCondition = this.notLike(other)
+infix fun QueryColumn.notLike(other: Any?): QueryCondition = this.notLike(other)
 
-infix fun QueryColumn.notLikeRaw(other: Any): QueryCondition = this.notLikeRaw(other)
+infix fun QueryColumn.notLikeRaw(other: Any?): QueryCondition = this.notLikeRaw(other)
 
-infix fun QueryColumn.notLikeLeft(other: Any): QueryCondition = this.notLikeLeft(other)
+infix fun QueryColumn.notLikeLeft(other: Any?): QueryCondition = this.notLikeLeft(other)
 
-infix fun QueryColumn.notLikeRight(other: Any): QueryCondition = this.notLikeRight(other)
+infix fun QueryColumn.notLikeRight(other: Any?): QueryCondition = this.notLikeRight(other)
 
 //comparable
-infix fun QueryColumn.eq(value: Any?): QueryCondition = this.eq(value)
+infix fun QueryColumn.eq(other: Any?): QueryCondition = this.eq(other)
 
 @Deprecated("使用 eq 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
-infix fun QueryColumn.eq(value: Nothing?): QueryCondition = this.eq(value)
+infix fun QueryColumn.eq(other: Nothing?): QueryCondition = this.eq(other)
 
-infix fun QueryColumn.ne(value: Any?): QueryCondition = this.ne(value)
+infix fun QueryColumn.ne(other: Any?): QueryCondition = this.ne(other)
 
 @Deprecated("使用 ne 和 null 进行比较可能是个错误。", ReplaceWith("this.isNull"))
-infix fun QueryColumn.ne(value: Nothing?): QueryCondition = this.ne(value)
+infix fun QueryColumn.ne(other: Nothing?): QueryCondition = this.ne(other)
 
-infix fun QueryColumn.gt(value: Any?): QueryCondition = this.gt(value)
+infix fun QueryColumn.gt(other: Any?): QueryCondition = this.gt(other)
 
-infix fun QueryColumn.ge(value: Any?): QueryCondition = this.ge(value)
+infix fun QueryColumn.ge(other: Any?): QueryCondition = this.ge(other)
 
-infix fun QueryColumn.le(value: Any?): QueryCondition = this.le(value)
+infix fun QueryColumn.le(other: Any?): QueryCondition = this.le(other)
 
-infix fun QueryColumn.lt(value: Any?): QueryCondition = this.lt(value)
+infix fun QueryColumn.lt(other: Any?): QueryCondition = this.lt(other)
 
 //range
 infix fun QueryColumn.between(pair: Pair<Any?, Any?>): QueryCondition = this.between(pair.first, pair.second)
@@ -79,48 +79,48 @@ infix fun QueryColumn.notBetween(pair: Pair<Any?, Any?>): QueryCondition = this.
 infix fun QueryColumn.notBetween(range: ClosedRange<*>): QueryCondition =
     this.notBetween(range.start, range.endInclusive)
 
-infix fun QueryColumn.notIn(value: Collection<Any?>): QueryCondition = this.notIn(value)
+infix fun QueryColumn.notIn(others: Collection<Any?>): QueryCondition = this.notIn(others)
 
-infix fun QueryColumn.notIn(values: Array<Any?>): QueryCondition = this.notIn(values)
+infix fun QueryColumn.notIn(others: Array<Any?>): QueryCondition = this.notIn(others)
 
 /**
  * @since 1.1.0
  */
-inline fun QueryColumn.notIn(scope:QueryScope.()->Unit): QueryCondition = this.notIn(queryScope(init = scope))
+inline fun QueryColumn.notIn(scope: QueryScope.() -> Unit): QueryCondition = this.notIn(queryScope(init = scope))
 
-infix fun QueryColumn.`in`(value: Collection<Any?>): QueryCondition = this.`in`(value)
+infix fun QueryColumn.`in`(others: Collection<Any?>): QueryCondition = this.`in`(others)
 
-infix fun QueryColumn.`in`(values: Array<Any?>): QueryCondition = this.`in`(values.toList())
+infix fun QueryColumn.`in`(others: Array<Any?>): QueryCondition = this.`in`(others.toList())
 
 infix fun QueryColumn.`in`(range: IntRange): QueryCondition = this.`in`(range.toList())
 
 /**
  * @since 1.1.0
  */
-infix fun QueryColumn.inList(other: Collection<Comparable<*>>): QueryCondition {
-    if (other.isEmpty()) {
+infix fun QueryColumn.inList(others: Collection<Comparable<*>>): QueryCondition {
+    if (others.isEmpty()) {
         return emptyCondition()
     }
-    return if (other.size == 1) this.eq(other.first()) else this.`in`(other)
+    return if (others.size == 1) this.eq(others.first()) else this.`in`(others)
 }
 
 /**
  * @since 1.1.0
  */
-infix fun QueryColumn.inArray(other: Array<out Comparable<*>>): QueryCondition {
-    if (other.isEmpty()) {
+infix fun QueryColumn.inArray(others: Array<out Comparable<*>>): QueryCondition {
+    if (others.isEmpty()) {
         return emptyCondition()
     }
-    return if (other.size == 1) this.eq(other[0]) else this.`in`(other)
+    return if (others.size == 1) this.eq(others[0]) else this.`in`(others)
 }
 
 /**
  * @since 1.1.0
  */
-infix fun  QueryColumn.inRange(other: ClosedRange<out Comparable<*>>): QueryCondition =
-    if (other.endInclusive == other.start) this.eq(other.start) else this.between(
-        other.start,
-        other.endInclusive
+infix fun QueryColumn.inRange(others: ClosedRange<out Comparable<*>>): QueryCondition =
+    if (others.endInclusive == others.start) this.eq(others.start) else this.between(
+        others.start,
+        others.endInclusive
     )
 
 /**
@@ -131,7 +131,7 @@ infix fun QueryColumn.`as`(alias: String): QueryColumn = this.`as`(alias)
 /**
  * @since 1.1.0
  */
-inline fun QueryColumn.`in`(scope:QueryScope.()->Unit): QueryCondition = this.`in`(queryScope(init = scope))
+inline fun QueryColumn.`in`(scope: QueryScope.() -> Unit): QueryCondition = this.`in`(queryScope(init = scope))
 
 fun <C : QueryColumn, A : Any> Pair<C, C>.inPair(vararg others: Pair<A, A>): QueryCondition =
     this inPair others.toList()

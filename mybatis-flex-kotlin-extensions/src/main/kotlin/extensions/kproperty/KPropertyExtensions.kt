@@ -23,7 +23,8 @@ import com.mybatisflex.kotlin.extensions.condition.and
 import com.mybatisflex.kotlin.extensions.db.queryTable
 import com.mybatisflex.kotlin.extensions.db.tableInfo
 import com.mybatisflex.kotlin.extensions.sql.*
-import com.mybatisflex.kotlin.scope.*
+import com.mybatisflex.kotlin.scope.QueryScope
+import com.mybatisflex.kotlin.scope.queryScope
 import com.mybatisflex.kotlin.vec.Order
 import org.apache.ibatis.type.UnknownTypeHandler
 import java.lang.reflect.Field
@@ -219,27 +220,27 @@ infix fun <T : Comparable<T>> KProperty<T?>.notBetween(other: Pair<T, T>): Query
     column.notBetween(other)
 
 // like
-infix fun KProperty<String?>.like(other: Any): QueryCondition = column.like(other)
+infix fun KProperty<String?>.like(other: Any?): QueryCondition = column.like(other)
 
-infix fun KProperty<String?>.likeRaw(other: Any): QueryCondition = column.likeRaw(other)
+infix fun KProperty<String?>.likeRaw(other: Any?): QueryCondition = column.likeRaw(other)
 
-infix fun KProperty<String?>.likeLeft(other: Any): QueryCondition = column.likeLeft(other)
+infix fun KProperty<String?>.likeLeft(other: Any?): QueryCondition = column.likeLeft(other)
 
-infix fun KProperty<String?>.likeRight(other: Any): QueryCondition = column.likeRight(other)
+infix fun KProperty<String?>.likeRight(other: Any?): QueryCondition = column.likeRight(other)
 
-infix fun KProperty<String?>.contains(other: Any): QueryCondition = column.like(other)
+infix fun KProperty<String?>.contains(other: Any?): QueryCondition = column.like(other)
 
-infix fun KProperty<String?>.startsWith(other: Any): QueryCondition = column.likeLeft(other)
+infix fun KProperty<String?>.startsWith(other: Any?): QueryCondition = column.likeLeft(other)
 
-infix fun KProperty<String?>.endsWith(other: Any): QueryCondition = column.likeRight(other)
+infix fun KProperty<String?>.endsWith(other: Any?): QueryCondition = column.likeRight(other)
 
-infix fun KProperty<String?>.notLike(other: Any): QueryCondition = column.notLike(other)
+infix fun KProperty<String?>.notLike(other: Any?): QueryCondition = column.notLike(other)
 
-infix fun KProperty<String?>.notLikeRaw(other: Any): QueryCondition = column.notLikeRaw(other)
+infix fun KProperty<String?>.notLikeRaw(other: Any?): QueryCondition = column.notLikeRaw(other)
 
-infix fun KProperty<String?>.notLikeLeft(other: Any): QueryCondition = column.notLikeLeft(other)
+infix fun KProperty<String?>.notLikeLeft(other: Any?): QueryCondition = column.notLikeLeft(other)
 
-infix fun KProperty<String?>.notLikeRight(other: Any): QueryCondition = column.notLikeRight(other)
+infix fun KProperty<String?>.notLikeRight(other: Any?): QueryCondition = column.notLikeRight(other)
 
 // in
 
@@ -293,17 +294,17 @@ infix fun <A : Comparable<A>, B : Comparable<B>, C : Comparable<C>> Pair<Pair<KP
 /**
  * @since 1.1.0
  */
-infix fun <T : Comparable<T>> KProperty<T?>.inList(other: Collection<T>): QueryCondition = column.inList(other)
+infix fun <T : Comparable<T>> KProperty<T?>.inList(others: Collection<T>): QueryCondition = column.inList(others)
 
 /**
  * @since 1.1.0
  */
-infix fun <T : Comparable<T>> KProperty<T?>.inArray(other: Array<out T>): QueryCondition  = column.inArray(other)
+infix fun <T : Comparable<T>> KProperty<T?>.inArray(others: Array<out T>): QueryCondition = column.inArray(others)
 
 /**
  * @since 1.1.0
  */
-infix fun <T : Comparable<T>> KProperty<T?>.inRange(other: ClosedRange<out T>): QueryCondition  = column.inRange(other)
+infix fun <T : Comparable<T>> KProperty<T?>.inRange(others: ClosedRange<out T>): QueryCondition = column.inRange(others)
 
 // as
 infix fun <T> KProperty<T?>.alias(other: String): QueryColumn = column.`as`(other)
