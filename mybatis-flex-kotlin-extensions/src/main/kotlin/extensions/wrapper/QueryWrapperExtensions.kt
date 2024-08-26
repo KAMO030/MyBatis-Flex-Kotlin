@@ -43,35 +43,35 @@ fun QueryWrapper.from(vararg entities: KClass<*>): QueryWrapper = this.from(*ent
 
 infix fun QueryWrapper.from(entity: KClass<*>): QueryWrapper = this.from(entity.java)
 
-inline fun <reified T> QueryWrapper.from(): QueryWrapper = this.from(T::class)
+inline fun <reified E> QueryWrapper.from(): QueryWrapper = this.from(E::class)
 
 // --join
-inline fun <reified Q : QueryWrapper> QueryWrapper.join(enable: Boolean = true): Joiner<Q> =
-    this.join(Q::class.java, enable)
+inline fun <reified E> QueryWrapper.join(enable: Boolean = true): Joiner<QueryWrapper> =
+    this.join(E::class.java, enable)
 
 inline fun <Q : QueryWrapper> QueryWrapper.join(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
     this.join(queryScope(init = init), enable)
 
-inline fun <reified Q : QueryWrapper> QueryWrapper.innerJoin(enable: Boolean = true): Joiner<Q> =
-    this.innerJoin(Q::class.java, enable)
+inline fun <reified E> QueryWrapper.innerJoin(enable: Boolean = true): Joiner<QueryWrapper> =
+    this.innerJoin(E::class.java, enable)
 
 inline fun <Q : QueryWrapper> QueryWrapper.innerJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
     this.innerJoin(queryScope(init = init), enable)
 
-inline fun <reified Q : QueryWrapper> QueryWrapper.crossJoin(enable: Boolean = true): Joiner<Q> =
-    this.crossJoin(Q::class.java, enable)
+inline fun <reified E> QueryWrapper.crossJoin(enable: Boolean = true): Joiner<QueryWrapper> =
+    this.crossJoin(E::class.java, enable)
 
 inline fun <Q : QueryWrapper> QueryWrapper.crossJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
     this.crossJoin(queryScope(init = init), enable)
 
-inline fun <reified Q : QueryWrapper> QueryWrapper.leftJoin(enable: Boolean = true): Joiner<Q> =
-    this.leftJoin(Q::class.java, enable)
+inline fun <reified E> QueryWrapper.leftJoin(enable: Boolean = true): Joiner<QueryWrapper> =
+    this.leftJoin(E::class.java, enable)
 
 inline fun <Q : QueryWrapper> QueryWrapper.leftJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
     this.leftJoin(queryScope(init = init), enable)
 
-inline fun <reified Q : QueryWrapper> QueryWrapper.rightJoin(enable: Boolean = true): Joiner<Q> =
-    this.rightJoin(Q::class.java, enable)
+inline fun <reified E> QueryWrapper.rightJoin(enable: Boolean = true): Joiner<QueryWrapper> =
+    this.rightJoin(E::class.java, enable)
 
 inline fun <Q : QueryWrapper> QueryWrapper.rightJoin(enable: Boolean = true, init: QueryScope.() -> Unit): Joiner<Q> =
     this.rightJoin(queryScope(init = init), enable)
@@ -80,8 +80,8 @@ inline fun <Q : QueryWrapper> QueryWrapper.rightJoin(enable: Boolean = true, ini
 /**
  * 带范型约束的select，约束只能是某个实体类的属性
  */
-inline fun <reified T> QueryWrapper.selectFrom(vararg properties: KProperty1<T, *>): QueryWrapper =
-    this.select(*properties.toQueryColumns()).from<T>()
+inline fun <reified E> QueryWrapper.selectFrom(vararg properties: KProperty1<E, *>): QueryWrapper =
+    this.select(*properties.toQueryColumns()).from<E>()
 
 inline fun QueryWrapper.select(properties: () -> Iterable<KProperty<*>>): QueryWrapper =
     this.select(*properties().toQueryColumns())
