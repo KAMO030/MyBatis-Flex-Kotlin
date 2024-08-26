@@ -351,24 +351,25 @@ class KotlinExample {
      */
     @Test
     fun relatedQueries() {
-        val sql = queryScope{
+        val sql = queryScope {
             val aT = Account::class.queryTable `as` "a"
             val bT = Account::class.queryTable `as` "b"
             select(aT["*"], bT[Account::userName])
-            from(aT).leftJoin(bT).on(Account::age,Account::age)
+            from(aT).leftJoin(bT).on(Account::age, Account::age)
             andAll(
                 bT[Account::userName] like "zs",
-                aT[Account::age].`in`{
+                aT[Account::age].`in` {
                     select(Account::age)
                     from(Account::class)
                 }
             )
         }.toSQL()
         println(sql)
-        assert("SELECT `a`.*, `b`.`user_name` " +
-                "FROM `tb_account` AS `a` LEFT JOIN `tb_account` AS `b` ON `b`.`age` = `a`.`age` " +
-                "WHERE `b`.`user_name` LIKE '%zs%' AND `a`.`age` IN (SELECT `age` FROM `tb_account`)"
-                == sql
+        assert(
+            "SELECT `a`.*, `b`.`user_name` " +
+                    "FROM `tb_account` AS `a` LEFT JOIN `tb_account` AS `b` ON `b`.`age` = `a`.`age` " +
+                    "WHERE `b`.`user_name` LIKE '%zs%' AND `a`.`age` IN (SELECT `age` FROM `tb_account`)"
+                    == sql
         )
     }
 

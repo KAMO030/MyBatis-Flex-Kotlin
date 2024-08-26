@@ -27,7 +27,6 @@ import com.mybatisflex.core.row.Db.selectListByQuery
 import com.mybatisflex.core.row.Db.selectOneByQuery
 import com.mybatisflex.core.row.Row
 import com.mybatisflex.kotlin.annotation.InternalMybatisFlexApi
-import com.mybatisflex.kotlin.extensions.kproperty.allColumns
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.extensions.kproperty.defaultColumns
 import com.mybatisflex.kotlin.extensions.kproperty.toQueryColumns
@@ -62,6 +61,13 @@ inline fun <reified M> mapper(): M = Mappers.ofMapperClass(M::class.java)
  */
 inline fun <reified E : Any> mapperOfEntity(): BaseMapper<E> = E::class.baseMapper
 
+@InternalMybatisFlexApi
+inline fun <reified E : Any> (QueryScope.() -> Unit).selectDefaultColumns(): QueryScope.() -> Unit = {
+    this@selectDefaultColumns()
+    // 如果未调用select方法，则默认查询所有列
+    if (this.hasSelect().not()) select(*E::class.defaultColumns)
+}
+
 /**
  * 把泛型类型当作实体类型拿到mapper实例
  * @author KAMOsama
@@ -78,20 +84,22 @@ val <E : Any> KClass<E>.baseMapperOrNull: BaseMapper<E>?
  * @param columns 查询的列
  * @param init 查询作用域初始化函数
  */
+@OptIn(InternalMybatisFlexApi::class)
 inline fun <reified E : Any> queryOne(
     vararg columns: QueryColumn,
-    init: QueryScope.() -> Unit
+    noinline init: QueryScope.() -> Unit,
 ): E? {
     val baseMapper = E::class.baseMapperOrNull
     return if (baseMapper != null)
         baseMapper.selectOneByQuery(queryScope(columns = columns, init = init))
     else
         E::class.tableInfo.let {
-            queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
-                init()
-                // 如果未调用select方法，则默认查询所有列
-                if (this.hasSelect().not()) select(E::class.allColumns)
-            }?.toEntity(E::class.java)
+            queryRow(
+                schema = it.schema,
+                tableName = it.tableName,
+                columns = columns,
+                init = init.selectDefaultColumns<E>()
+            )?.toEntity(E::class.java)
         }
 }
 
@@ -101,20 +109,22 @@ inline fun <reified E : Any> queryOne(
  * @param init 查询作用域初始化函数
  * @since 1.0.9
  */
+@OptIn(InternalMybatisFlexApi::class)
 inline fun <reified E : Any, reified T : Any> queryOneAs(
     vararg columns: QueryColumn,
-    init: QueryScope.() -> Unit
+    noinline init: QueryScope.() -> Unit,
 ): T? {
     val baseMapper = E::class.baseMapperOrNull
     return if (baseMapper != null) {
         baseMapper.selectOneByQueryAs(queryScope(columns = columns, init = init), T::class.java)
     } else {
         E::class.tableInfo.let {
-            queryRow(schema = it.schema, tableName = it.tableName, columns = columns) {
-                init()
-                // 如果未调用select方法，则默认查询所有列
-                if (this.hasSelect().not()) select(T::class.allColumns)
-            }?.toEntity(T::class.java)
+            queryRow(
+                schema = it.schema,
+                tableName = it.tableName,
+                columns = columns,
+                init = init.selectDefaultColumns<E>()
+            )?.toEntity(T::class.java)
         }
     }
 }
@@ -124,16 +134,18 @@ inline fun <reified E : Any, reified T : Any> queryOneAs(
  * @param columns 查询的列
  * @param init 查询作用域初始化函数
  */
+@OptIn(InternalMybatisFlexApi::class)
 inline fun <reified E : Any> query(
     vararg columns: QueryColumn,
-    init: QueryScope.() -> Unit
+    noinline init: QueryScope.() -> Unit,
 ): List<E> = E::class.baseMapperOrNull?.selectListByQuery(queryScope(columns = columns, init = init))
     ?: E::class.tableInfo.run {
-        queryRows(schema = schema, tableName = tableName, columns = columns) {
-            init()
-            // 如果未调用select方法，则默认查询所有列
-            if (this.hasSelect().not()) select(*E::class.defaultColumns)
-        }.toEntities()
+        queryRows(
+            schema = schema,
+            tableName = tableName,
+            columns = columns,
+            init = init.selectDefaultColumns<E>()
+        ).toEntities()
     }
 
 /**
@@ -142,16 +154,18 @@ inline fun <reified E : Any> query(
  * @param init 查询作用域初始化函数
  * @since 1.0.9
  */
+@OptIn(InternalMybatisFlexApi::class)
 inline fun <reified E : Any, reified T : Any> queryAs(
     vararg columns: QueryColumn,
-    init: QueryScope.() -> Unit
+    noinline init: QueryScope.() -> Unit,
 ): List<T> = E::class.baseMapperOrNull?.selectListByQueryAs(queryScope(columns = columns, init = init), T::class.java)
     ?: E::class.tableInfo.run {
-        queryRows(schema = schema, tableName = tableName, columns = columns) {
-            init()
-            // 如果未调用select方法，则默认查询所有列
-            if (this.hasSelect().not()) select(*T::class.defaultColumns)
-        }.toEntities()
+        queryRows(
+            schema = schema,
+            tableName = tableName,
+            columns = columns,
+            init = init.selectDefaultColumns<E>()
+        ).toEntities()
     }
 
 /**
@@ -235,7 +249,7 @@ inline fun <reified E : Any, reified T : Any> filterColumnAs(
  */
 inline fun <reified E : Any> filterOne(
     vararg columns: KProperty<*> = emptyArray(),
-    condition: () -> QueryCondition
+    crossinline condition: () -> QueryCondition,
 ): E? = queryOne {
     takeIf { columns.isNotEmpty() }?.select(*columns)
     and(condition())
@@ -249,7 +263,7 @@ inline fun <reified E : Any> filterOne(
  */
 inline fun <reified E : Any, reified T : Any> filterOneAs(
     vararg columns: KProperty<*> = emptyArray(),
-    condition: () -> QueryCondition
+    crossinline condition: () -> QueryCondition,
 ): T? = queryOneAs<E, T> {
     takeIf { columns.isNotEmpty() }?.select(*columns)
     and(condition())
@@ -263,7 +277,7 @@ inline fun <reified E : Any, reified T : Any> filterOneAs(
  */
 inline fun <reified E : Any> filterOneColumn(
     vararg columns: QueryColumn = E::class.defaultColumns,
-    condition: () -> QueryCondition
+    crossinline condition: () -> QueryCondition,
 ): E? = queryOne { select(*columns).and(condition()) }
 
 /**
@@ -274,7 +288,7 @@ inline fun <reified E : Any> filterOneColumn(
  */
 inline fun <reified E : Any, reified T : Any> filterOneColumnAs(
     vararg columns: QueryColumn = E::class.defaultColumns,
-    condition: () -> QueryCondition
+    crossinline condition: () -> QueryCondition,
 ): T? = queryOneAs<E, T> { select(*columns).and(condition()) }
 
 /**
