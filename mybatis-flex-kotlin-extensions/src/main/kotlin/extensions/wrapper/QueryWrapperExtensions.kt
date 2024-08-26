@@ -136,9 +136,9 @@ inline fun QueryWrapper.having(predicate: () -> QueryCondition): QueryWrapper {
 }
 
 
-fun QueryWrapper.andAll(vararg conditions: QueryCondition): QueryWrapper = this and allAnd(*conditions)
+fun QueryWrapper.andAll(vararg conditions: QueryCondition?): QueryWrapper = this and allAnd(*conditions)
 
-fun QueryWrapper.orAll(vararg conditions: QueryCondition): QueryWrapper = this or allOr(*conditions)
+fun QueryWrapper.orAll(vararg conditions: QueryCondition?): QueryWrapper = this or allOr(*conditions)
 
 val <T : QueryWrapper> T.self: QueryWrapperDevelopEntry<T>
     get() = QueryWrapperDevelopEntry(this)

@@ -41,13 +41,15 @@ infix fun QueryCondition.or(other: QueryCondition): QueryCondition = this.or(oth
 inline fun `if`(test: Boolean, block: () -> QueryCondition): QueryCondition =
     if (test) block() else emptyCondition()
 
-fun QueryCondition.andAll(vararg conditions: QueryCondition): QueryCondition = this and allAnd(*conditions)
+fun QueryCondition.andAll(vararg conditions: QueryCondition?): QueryCondition = this and allAnd(*conditions)
 
-fun QueryCondition.orAll(vararg conditions: QueryCondition): QueryCondition = this or allOr(*conditions)
+fun QueryCondition.orAll(vararg conditions: QueryCondition?): QueryCondition = this or allOr(*conditions)
 
-fun allAnd(vararg conditions: QueryCondition): QueryCondition = conditions.reduce(QueryCondition::and)
+fun allAnd(vararg conditions: QueryCondition?): QueryCondition =
+    conditions.asSequence().filterNotNull().reduce(QueryCondition::and)
 
-fun allOr(vararg conditions: QueryCondition): QueryCondition = conditions.reduce(QueryCondition::or)
+fun allOr(vararg conditions: QueryCondition?): QueryCondition =
+    conditions.asSequence().filterNotNull().reduce(QueryCondition::or)
 
 /**
  * 创建一个空的QueryCondition
