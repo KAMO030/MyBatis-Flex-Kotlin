@@ -19,7 +19,6 @@ package com.mybatisflex.kotlin.extensions.sql
 
 import com.mybatisflex.core.query.*
 import com.mybatisflex.kotlin.extensions.condition.and
-import com.mybatisflex.kotlin.extensions.condition.emptyCondition
 import com.mybatisflex.kotlin.extensions.kproperty.column
 import com.mybatisflex.kotlin.scope.QueryScope
 import com.mybatisflex.kotlin.scope.queryScope
@@ -97,22 +96,15 @@ infix fun QueryColumn.`in`(range: IntRange): QueryCondition = this.`in`(range.to
 /**
  * @since 1.1.0
  */
-infix fun QueryColumn.inList(others: Collection<Comparable<*>>): QueryCondition {
-    if (others.isEmpty()) {
-        return emptyCondition()
-    }
-    return if (others.size == 1) this.eq(others.first()) else this.`in`(others)
-}
+infix fun QueryColumn.inList(others: Collection<Comparable<*>>): QueryCondition =
+    if (others.size == 1) this.eq(others.first()) else this.`in`(others)
 
 /**
  * @since 1.1.0
  */
-infix fun QueryColumn.inArray(others: Array<out Comparable<*>>): QueryCondition {
-    if (others.isEmpty()) {
-        return emptyCondition()
-    }
-    return if (others.size == 1) this.eq(others[0]) else this.`in`(others)
-}
+infix fun QueryColumn.inArray(others: Array<out Comparable<*>>): QueryCondition =
+    if (others.size == 1) this.eq(others[0]) else this.`in`(others)
+
 
 /**
  * @since 1.1.0
